@@ -1,6 +1,3 @@
-from ipywidgets import widgets
-from IPython.display import display
-
 
 class Configuration( object ):
     course_ids = [ ]
@@ -14,6 +11,21 @@ class Configuration( object ):
     def add_canvas_token( cls, token ):
         cls.canvas_token = token
 
+    @classmethod
+    def reset_course_ids( cls ):
+        cls.course_ids = [ ]
+        print("List of course ids is empty")
+
+    @classmethod
+    def reset_canvas_token( cls ):
+        cls.canvas_token = False
+        print("Canvas token reset to empty")
+
+    @classmethod
+    def reset_config( cls ):
+        cls.reset_canvas_token()
+        cls.reset_course_ids()
+
 
 class InteractiveConfiguration( Configuration ):
     def __init__( self ):
@@ -25,16 +37,5 @@ class InteractiveConfiguration( Configuration ):
             v = event[ 'new' ]
             cls.add_canvas_token( v )
 
-    @classmethod
-    def reset_course_ids( cls ):
-        cls.course_ids = [ ]
 
 
-def make_text_input( indic ):
-    text = widgets.Text( description=indic[ 'label' ] )
-    display( text )
-    text.observe( indic[ 'handler' ] )
-
-
-def handle_sub( v ):
-    print( v )
