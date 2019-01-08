@@ -1,1 +1,3 @@
 # CanvasCorrections
+
+Presently a work in progress. Don't try using it, yet....
