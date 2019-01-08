@@ -20,7 +20,7 @@ URL = 'https://github.com/AdamSwenson/CanvasCorrectionsh'
 EMAIL = 'adam.swenson@csun.edu'
 AUTHOR = 'adam swenson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = 'None'
+VERSION = '0.0.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -98,7 +98,7 @@ setup(
     version=about['__version__'],
     description=DESCRIPTION,
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    # long_description_content_type='text/markdown',
     author=AUTHOR,
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
