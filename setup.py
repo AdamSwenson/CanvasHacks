@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Borrowed from https://github.com/kennethreitz/setup.py
+# To upload to pypi: python setup.py upload
 
 import io
 import os
@@ -11,13 +12,13 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'CanvasCorrections'
-DESCRIPTION = 'Tools for mitigating the user-unfriendliness of canvas.'
-URL = 'https://github.com/AdamSwenson/CanvasCorrectionsh'
+NAME = 'CanvasHacks'
+DESCRIPTION = "Tools for mitigating the user-unfriendliness of canvas."
+URL = 'https://github.com/AdamSwenson/CanvasHacks'
 EMAIL = 'adam.swenson@csun.edu'
 AUTHOR = 'adam swenson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.4'
+VERSION = '0.0.6'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
