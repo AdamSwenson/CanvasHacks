@@ -7,9 +7,11 @@ import os, sys
 
 
 class Configuration( object ):
+    archive_folder = False
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
+    log_folder = False
 
     @classmethod
     def add_course_id( cls, course_id ):
@@ -64,10 +66,10 @@ class FileBasedConfiguration(Configuration):
             # The file path could've been customized by instantiating the class
             # If that didn't happen, we go with the default
             # The folder containing the assets folder
-            PROJ_BASE = os.path.abspath( os.path.dirname( os.path.dirname( __file__ )) )
+            cls.proj_base = os.path.abspath( os.path.dirname( os.path.dirname( __file__ )) )
             # All login credentials are defined in files here.
             # THIS CONTENTS OF THIS FOLDER MUST NOT BE COMMITTED TO VERSION CONTROL!
-            CREDENTIALS_FOLDER_PATH = "%s/private" % PROJ_BASE
+            CREDENTIALS_FOLDER_PATH = "%s/private" % cls.proj_base
             cls.file_path = "%s/canvas-credentials.ini" % CREDENTIALS_FOLDER_PATH
 
         cls.configuration = configparser.ConfigParser()
@@ -79,6 +81,14 @@ class FileBasedConfiguration(Configuration):
         cls.read_config_file()
         cls.load_token()
         cls.load_url_base()
+        cls.load_local_filepaths()
+
+    @classmethod
+    def load_local_filepaths( cls ):
+        root = os.getenv( "HOME" )
+        cls.archive_folder = "%s/%s" % (root, cls.configuration[ 'folders' ].get( 'STUDENT_WORK_ARCHIVE_FOLDER' ))
+        cls.log_folder = "%s/%s" % (root, cls.configuration[ 'folders' ].get( 'LOG_FOLDER' ))
+        cls.data_folder = '%s/data' % cls.proj_base
 
     @classmethod
     def load_token( cls ):
