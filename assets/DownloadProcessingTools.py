@@ -95,7 +95,7 @@ def get_journal_filename(response):
 
 def make_journal_filename( response ):
     """Creates the standardized filename for saving"""
-    return "%s-%s" % (response[ 'user_id' ], get_journal_filename(response)) #response[ 'attachments' ][ 0 ][ 'filename' ])
+    return "%s-%s" % (response[ 'user_id' ], get_journal_filename(response))
 
 
 def getDocxText( filename ):
@@ -144,7 +144,7 @@ def getBody( filepath ):
         return PICTURE_PLACEHOLDER
 
 
-def process_response_without_saving_files( response_json, journal_folder ):
+def process_response_without_saving_files( response_json ):
     """Takes the response and pulls out submissions which used the text box, then downloads
     submitted files and processes out their text content
     """
@@ -160,17 +160,12 @@ def process_response_without_saving_files( response_json, journal_folder ):
             # The student submitted the journal as a separate document
             if 'attachments' in j.keys() and len( j[ 'attachments' ] ) > 0:
                 url = j[ 'attachments' ][ 0 ][ 'url' ]
-                filename = get_journal_filename(j)
-
                 # download the submitted file
-                fpath = "%s/%s" % (journal_folder, filename)
                 response = requests.get( url, headers=make_request_header() )
                 content = response.content
 
-                # download_submitted_file( url, fpath )
-
                 # open the file and extract text
-                result[ 'body' ] = getBody( fpath )
+                result[ 'body' ] = getBody( content )
 
             else:
                 # NB., if a student never submitted (workflow_state = 'unsubmitted'),
