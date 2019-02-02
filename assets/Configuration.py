@@ -82,6 +82,15 @@ class FileBasedConfiguration(Configuration):
         cls.load_token()
         cls.load_url_base()
         cls.load_local_filepaths()
+        cls.load_section_ids()
+
+    @classmethod
+    def load_section_ids( cls ):
+        try:
+            for v in cls.configuration['sections'].values():
+                cls.add_course_id(v)
+        except:
+            pass
 
     @classmethod
     def load_local_filepaths( cls ):

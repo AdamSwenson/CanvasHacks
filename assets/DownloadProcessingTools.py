@@ -2,13 +2,17 @@
 Created by adam on 1/29/19
 """
 import json
-import requests
-import docx
+import io
 import PyPDF2
+import docx
+import requests
+
 from assets.RequestTools import make_request_header
 from assets.UrlTools import make_url
 
 __author__ = 'adam'
+
+PICTURE_PLACEHOLDER = 'picture-uploaded picture-uploaded picture-uploaded picture-uploaded picture-uploaded '
 
 
 def download_journals( url, destination ):
@@ -35,7 +39,7 @@ def get_submissions( course_id, assignment_id, per_page=42 ):
         assignment_id = 288480
         response2 = get_submissions(course_id, assignment_id)
     """
-    responses = []
+    responses = [ ]
     url = make_url( course_id, 'assignments' )
     url = "%s/%s/submissions?per_page=%s" % (url, assignment_id, per_page)
     try:
@@ -43,7 +47,7 @@ def get_submissions( course_id, assignment_id, per_page=42 ):
             print( url )
             response = requests.get( url, headers=make_request_header() )
             responses += response.json()
-            url = response.links['next']['url']
+            url = response.links[ 'next' ][ 'url' ]
     except KeyError:
         return responses
 
@@ -88,18 +92,23 @@ def save_submission_json( submissions, folder, json_name='all-submissions' ):
         json.dump( submissions, fpp )
 
 
-def get_journal_filename(response):
+def get_journal_filename( response ):
     """Extracts the name of the file submitted from the response"""
     return response[ 'attachments' ][ 0 ][ 'filename' ]
 
 
 def make_journal_filename( response ):
     """Creates the standardized filename for saving"""
-    return "%s-%s" % (response[ 'user_id' ], get_journal_filename(response))
+    return "%s-%s" % (response[ 'user_id' ], get_journal_filename( response ))
 
 
-def getDocxText( filename ):
-    doc = docx.Document( filename )
+# -------------- Document processing handlers
+
+def docx_handler( filename ):
+    if type(filename) is bytes:
+        doc = docx.Document(io.BytesIO(filename))
+    else:
+        doc = docx.Document( filename )
     fullText = [ ]
     for para in doc.paragraphs:
         fullText.append( para.text )
@@ -107,41 +116,80 @@ def getDocxText( filename ):
     return '\n'.join( fullText )
 
 
-def getPdfText( filepath ):
-    pdfFileObj = open( filepath, 'rb' )
-    pdfReader = PyPDF2.PdfFileReader( pdfFileObj )
+def pdf_handler( filepath ):
+    """Extracts the text from a pdf file"""
+    if type(filepath) is bytes:
+        pdfReader = PyPDF2.PdfFileReader( io.BytesIO(filepath))
+    else:
+        pdfReader = open( filepath, 'rb' )
+    # pdfReader = PyPDF2.PdfFileReader( pdfFileObj )
     pageObj = pdfReader.getPage( 0 )
     return pageObj.extractText()
 
 
+def picture_handler( v=None ):
+    return PICTURE_PLACEHOLDER
+
+
+def unknown_handler( v=None ):
+    return 'u'
+    # print( 'unknown', v)
+    return None
+
+
+handlers = {
+    '.docx': docx_handler,
+    '.doc': unknown_handler,
+    '.pdf': pdf_handler,
+    '.jpg': picture_handler,
+    '.png': picture_handler,
+    '.xml': picture_handler,
+    '.pages': picture_handler,
+    '.odt': picture_handler
+}
+
+
+def chooseHandler( url ):
+    """Checks the end of the file download url to determine
+    whether it matches any of the file types we have handlers
+    registered for. Returns the relevant handler"""
+    url = url.strip()
+    lengths = [len(a) for a in handlers.keys()]
+    for i in range( min(lengths), max(lengths) + 1):
+        if url[ -i: ] in handlers.keys():
+            return handlers.get( url[ -i: ])
+
+    return unknown_handler
+
+
 def getBody( filepath ):
     """Extracts the text from a saved file"""
-    PICTURE_PLACEHOLDER = 'picture-uploaded picture-uploaded picture-uploaded picture-uploaded picture-uploaded'
+    PICTURE_PLACEHOLDER = 'picture-uploaded picture-uploaded picture-uploaded picture-uploaded picture-uploaded '
     filepath = filepath.strip()
 
     if filepath[ -5: ] == '.docx':
-        return getDocxText( filepath )
+        return docx_handler( filepath )
 
     if filepath[ -4: ] == '.pdf':
-        return getPdfText( filepath )
+        return pdf_handler( filepath )
 
     elif filepath[ -4: ] == '.jpg':
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath[ -4: ]
 
     elif filepath[ -4: ] == '.png':
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath[ -4: ]
 
     elif filepath[ -4: ] == '.xml':
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath[ -4: ]
 
     elif filepath[ -6: ] == '.pages':
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath[ -6: ]
 
     elif filepath[ -4: ] == '.odt':
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath[ -4: ]
 
     else:
-        return PICTURE_PLACEHOLDER
+        return PICTURE_PLACEHOLDER + filepath
 
 
 def process_response_without_saving_files( response_json ):
@@ -161,11 +209,17 @@ def process_response_without_saving_files( response_json ):
             if 'attachments' in j.keys() and len( j[ 'attachments' ] ) > 0:
                 url = j[ 'attachments' ][ 0 ][ 'url' ]
                 # download the submitted file
+                # print( "Downloading: ", url )
                 response = requests.get( url, headers=make_request_header() )
                 content = response.content
 
+                # determine the appropriate handler to use
+                filename = response.headers['content-disposition'].split('filename=')[1]
+                filename = filename.replace('"', '')
+                handler = chooseHandler(filename)
+
                 # open the file and extract text
-                result[ 'body' ] = getBody( content )
+                result[ 'body' ] = handler( content )
 
             else:
                 # NB., if a student never submitted (workflow_state = 'unsubmitted'),

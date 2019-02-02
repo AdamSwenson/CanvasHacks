@@ -9,18 +9,19 @@ import requests
 
 from assets.UrlTools import make_url
 from assets.RequestTools import make_request_header
+from assets.DataManagement import DataStore
 
 
-def upload_students_receiving_credit(course_id, assignment_id, students):
+def upload_students_receiving_credit( store: DataStore ):
     """Makes the requests to the server to assign each of the students credit
     for the assignment
     """
     data = {'submission' : {'posted_grade' : 'pass'}}
 
-    url = make_url(course_id, 'assignments')
-    url = "%s/%s/submissions" % (url, assignment_id)
+    url = make_url(store.course_id, 'assignments')
+    url = "%s/%s/submissions" % (url, store.assignment_id)
 
-    for s in students:
+    for s in store.credit:
         surl = "%s/%s" % (url, s)
         print('credit', surl)
         requests.put(surl, headers=make_request_header(), json=data)
