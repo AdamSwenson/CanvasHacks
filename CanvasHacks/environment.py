@@ -4,7 +4,7 @@ Created by adam on 9/14/18
 __author__ = 'adam'
 
 import os
-from assets.Configuration import FileBasedConfiguration, InteractiveConfiguration
+from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration
 
 ROOT = os.getenv( "HOME" )
 

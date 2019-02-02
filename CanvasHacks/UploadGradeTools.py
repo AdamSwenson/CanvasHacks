@@ -7,9 +7,9 @@ __author__ = 'adam'
 
 import requests
 
-from assets.UrlTools import make_url
-from assets.RequestTools import make_request_header
-from assets.DataManagement import DataStore
+from CanvasHacks.UrlTools import make_url
+from CanvasHacks.RequestTools import make_request_header
+from CanvasHacks.DataManagement import DataStore
 
 
 def upload_students_receiving_credit( store: DataStore ):

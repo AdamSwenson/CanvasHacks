@@ -4,9 +4,9 @@ Created by adam on 9/20/18
 __author__ = 'adam'
 
 import requests
-from assets.UrlTools import make_url
+from CanvasHacks.UrlTools import make_url
 
-from assets import environment
+from CanvasHacks import environment
 
 
 def make_request_header():

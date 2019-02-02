@@ -6,7 +6,7 @@ __author__ = 'adam'
 from ipywidgets import widgets
 from IPython.display import display
 
-from assets.Configuration import InteractiveConfiguration
+from CanvasHacks.Configuration import InteractiveConfiguration
 
 # -------- General
 def make_text_input( input_dict ):

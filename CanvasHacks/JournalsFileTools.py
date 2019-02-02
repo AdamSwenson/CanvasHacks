@@ -7,7 +7,7 @@ import csv
 import json
 import os
 
-from assets import environment
+from CanvasHacks import environment
 
 DATA_FOLDER = '%s/data' % environment.PROJ_BASE
 IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER

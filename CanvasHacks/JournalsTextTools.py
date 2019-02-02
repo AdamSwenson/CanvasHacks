@@ -3,7 +3,7 @@ Created by adam on 10/26/18
 """
 __author__ = 'adam'
 
-from assets.JournalsFileTools import load_words_to_ignore
+from CanvasHacks.JournalsFileTools import load_words_to_ignore
 
 def filter_out_terms(combined):
     """Loads the strings to ignore from IGNORE_FILE and returns the filtered wordbag"""
