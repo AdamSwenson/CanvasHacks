@@ -7,7 +7,7 @@ import csv
 import json
 import os
 
-import environment
+from assets import environment
 
 DATA_FOLDER = '%s/data' % environment.PROJ_BASE
 IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER

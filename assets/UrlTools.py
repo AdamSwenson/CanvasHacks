@@ -3,10 +3,9 @@ Created by adam on 9/20/18
 """
 __author__ = 'adam'
 
+from assets import environment
 
-import environment
-import os
-import sys
+
 # import configparser
 
 # # Load api token and section numbers
