@@ -18,11 +18,11 @@ URL = 'https://github.com/AdamSwenson/CanvasHacks'
 EMAIL = 'adam.swenson@csun.edu'
 AUTHOR = 'adam swenson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.10'
+VERSION = '0.0.11'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'PyPDF2', 'docx', 'requests'  # 'requests', 'maya', 'records',
+    'PyPDF2', 'python-docx', 'requests'  # 'requests', 'maya', 'records',
 ]
 
 # What packages are optional?
