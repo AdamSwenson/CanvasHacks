@@ -11,14 +11,14 @@ from CanvasHacks import environment
 
 def make_request_header():
     """Creates the request header with Authorization value expected by canvas"""
-    return {'Authorization': 'Bearer {}'.format( environment.TOKEN ) }
+    return {'Authorization': 'Bearer {}'.format( environment.CONFIG.canvas_token ) }
 
 
 def send_get_request(url, data={}):
     """Makes a get request to the given url, using the data.
     Returns a dictionary from the json
     """
-    head = {'Authorization': 'Bearer {}'.format( environment.TOKEN ) }
+    head = {'Authorization': 'Bearer {}'.format( environment.CONFIG.canvas_token) }
     response = requests.get(url, headers=make_request_header(), json=data)
     return response.json()
 
@@ -27,7 +27,7 @@ def send_post_request(url, data):
     """Makes a post request to the given url, using the data.
     Returns a dictionary from the json
     """
-    head = {'Authorization': 'Bearer {}'.format( environment.TOKEN ) }
+    head = {'Authorization': 'Bearer {}'.format( environment.CONFIG.canvas_token ) }
     response = requests.post(url, headers=head, json=data)
     return response.json()
 
