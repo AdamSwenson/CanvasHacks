@@ -22,6 +22,12 @@ def make_canvas_token_input():
     canvas_token_input = {'label' : 'Canvas token', 'handler': InteractiveConfiguration.handle_token_entry}
     make_text_input(canvas_token_input)
 
+def make_canvas_url_input():
+    """Creates the input field for the canvas api token"""
+    canvas_url_input = {'label' : 'Canvas url', 'handler': InteractiveConfiguration.handle_url_entry}
+    make_text_input(canvas_url_input)
+
+
 
 def make_course_ids_input():
     """

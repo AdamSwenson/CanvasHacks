@@ -51,6 +51,14 @@ class InteractiveConfiguration( Configuration ):
             v = event[ 'new' ]
             cls.add_canvas_token( v )
 
+    @classmethod
+    def handle_url_entry( cls, event ):
+        if event[ 'type' ] == 'change' and event[ 'name' ] == 'value':
+            v = event[ 'new' ]
+            cls.add_canvas_url_base( v )
+
+
+
 
 class FileBasedConfiguration(Configuration):
     configuration = False
