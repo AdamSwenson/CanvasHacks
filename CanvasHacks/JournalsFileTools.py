@@ -9,13 +9,15 @@ import os
 
 from CanvasHacks import environment
 
-DATA_FOLDER = '%s/data' % environment.PROJ_BASE
+DATA_FOLDER = '%s/data' % environment.CONFIG.proj_base
 IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER
+JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % environment.CONFIG.archive_folder
+LOG_FOLDER = environment.CONFIG.log_folder
 
 
 # ----------------- create files
 
-def journal_folder_name( journal_name, course_id, journal_folder=environment.JOURNAL_ARCHIVE_FOLDER ):
+def journal_folder_name( journal_name, course_id, journal_folder=JOURNAL_ARCHIVE_FOLDER ):
     """Creates a folder to store student work for the assignment"""
     folder_name = journal_name.replace( '(', '' ).replace( ')', '' ).replace( ' ', '-' )
     return "%s/%s-%s" % (journal_folder, course_id, folder_name)
@@ -30,7 +32,7 @@ def create_folder( folder_path ):
         pass
 
 
-def get_journal_folders( journal_archive=environment.JOURNAL_ARCHIVE_FOLDER ):
+def get_journal_folders( journal_archive=JOURNAL_ARCHIVE_FOLDER ):
     """Constructs paths to all journal folders and returns the list
         example result: [
             '/Users/adam/Box Sync/Phil 305 Business ethics/Student work/41181-Journal-week-2',
