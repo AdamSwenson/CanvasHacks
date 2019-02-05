@@ -18,7 +18,7 @@ from CanvasHacks import environment
 
 def make_url(section_id, verb):
     """Returns the canvas request url"""
-    return "%s/%s/%s" % (environment.URL_BASE, section_id, verb)
+    return "%s/%s/%s" % (environment.CONFIG.canvas_url_base, section_id, verb)
 
 
 if __name__ == '__main__':
