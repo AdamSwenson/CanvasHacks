@@ -8,10 +8,15 @@ import os, sys
 
 class Configuration( object ):
     archive_folder = False
+    assignments = []
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
     log_folder = False
+
+    @classmethod
+    def add_assignment( cls, assignment_id, assignment_name=None ):
+        cls.assignments.append( ( assignment_id, assignment_name) )
 
     @classmethod
     def add_course_id( cls, course_id ):
@@ -24,6 +29,15 @@ class Configuration( object ):
     @classmethod
     def add_canvas_url_base( cls, url ):
         cls.canvas_url_base = url
+
+    @classmethod
+    def get_assignment_ids( cls ):
+        return [i[0] for i in cls.assignments ]
+
+    @classmethod
+    def reset_assignments( cls ):
+        cls.assignments = [ ]
+        print("List of assignments is empty")
 
     @classmethod
     def reset_course_ids( cls ):
