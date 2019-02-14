@@ -6,7 +6,8 @@ __author__ = 'adam'
 from IPython.display import display
 from ipywidgets import widgets
 
-from CanvasHacks.InputFields import make_course_ids_input, make_canvas_token_input, make_general_reset_button
+from CanvasHacks.Widgets.InputFields import make_course_ids_input, make_canvas_token_input
+
 TOKEN_INSTRUCTIONS = """
     <div>
         <div>

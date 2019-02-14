@@ -17,6 +17,7 @@ class Configuration( object ):
     @classmethod
     def add_assignment( cls, assignment_id, assignment_name=None ):
         cls.assignments.append( ( assignment_id, assignment_name) )
+        cls.assignments = list(set(cls.assignments))
 
     @classmethod
     def add_course_id( cls, course_id ):
@@ -33,6 +34,12 @@ class Configuration( object ):
     @classmethod
     def get_assignment_ids( cls ):
         return [i[0] for i in cls.assignments ]
+
+    @classmethod
+    def remove_assignment( cls, assignment_id ):
+        el = list(filter(lambda x: x[0] == assignment_id, cls.assignments))[0]
+        idx = cls.assignments.index(el)
+        return cls.assignments.pop(idx)
 
     @classmethod
     def reset_assignments( cls ):
@@ -53,6 +60,7 @@ class Configuration( object ):
     def reset_config( cls ):
         cls.reset_canvas_token()
         cls.reset_course_ids()
+
 
 
 class InteractiveConfiguration( Configuration ):
