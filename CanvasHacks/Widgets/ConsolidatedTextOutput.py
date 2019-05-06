@@ -80,6 +80,7 @@ def make_consolidated_text_fields( store ):
 def make_consolidated_text_file( journal_folder, filename='compiled-text.txt' ):
     """Reads the data from the relevant json file and then
     writes each entry in to a single text file for ease of reading
+    todo: This should be refactored out of the widgets file
     """
     entry = """
     {student_id} \n

@@ -10,6 +10,14 @@ from matplotlib import pyplot as plt
 sns.set( style="whitegrid" )
 
 
+def clearplot_function( ):
+    """Clears the matplotlib plot to free system resources. Call in next cell after plot"""
+    try:
+        plt.close( plt.gcf( ) ); plt.close( 'all' )
+    except:
+        pass
+
+
 def draw_cloud( wordlist, title, font_size=20 ):
     """Given a list of words, it plots a wordcloud"""
     # make into block of text
@@ -28,16 +36,16 @@ def draw_cloud( wordlist, title, font_size=20 ):
     plt.show()
 
 
-def draw_cloud_from_freqs( freqs, week_num, title, font_size=20 ):
+def draw_cloud_from_freqs( freqDistObj, title, font_size=20 ):
     """Given the frequency object with keys like w1, w2,
     this plots a wordcloud from those frequencies
     """
-    f = { }
-    w = "w%s" % week_num
-    for k in freqs[ w ].freqDist:
-        f[ k ] = freqs[ w ].freqDist.freq( k )
+    # f = { }
+    # w = "w%s" % week_num
+    # for k in freqs[ w ].freqDist:
+    #     f[ k ] = freqs[ w ].freqDist.freq( k )
 
-    wc = wordcloud.WordCloud( width=2500, height=2000 ).generate_from_frequencies( f )
+    wc = wordcloud.WordCloud( width=2500, height=2000 ).generate_from_frequencies( freqDistObj )
     plt.figure( 1, figsize=(13, 13) )
     plt.imshow( wc )
     plt.axis( 'off' )
@@ -47,13 +55,13 @@ def draw_cloud_from_freqs( freqs, week_num, title, font_size=20 ):
     plt.show()
 
 
-def draw_cumulative_freq( freqs, week_num, max_terms=30, font_size=20 ):
+def draw_cumulative_freq( freqDistObj, title, max_terms=30, font_size=20 ):
     """Plots cumulative frequencies of terms"""
-    week = "w%s" % week_num
+    # week = "w%s" % week_num
 
     fig = plt.gcf()
     ax = plt.gca()
-    ax.set_title( week )
+    ax.set_title( title )
 
     #     # rotate the x axis labels to 45 degrees
     #     for tick in ax.get_xticklabels():
@@ -66,8 +74,9 @@ def draw_cumulative_freq( freqs, week_num, max_terms=30, font_size=20 ):
         item.set_fontsize( font_size )
 
     plt.xticks( rotation=45 )
+    freqDistObj.plot( max_terms )
 
-    freqs[ week ].plot( max_terms )
+    # freqs[ week ].plot( max_terms )
     fig.tight_layout()
 
 

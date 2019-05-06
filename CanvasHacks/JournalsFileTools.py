@@ -1,4 +1,5 @@
 """
+todo This is very much tied to my own filesystem and needs. Should be abstracted.
 Created by adam on 10/26/18
 """
 __author__ = 'adam'
@@ -69,6 +70,12 @@ def load_words_to_ignore( file=IGNORE_FILE ):
             #             print (row['journals'])
             words.append( row[ 'journals' ] )
     return words
+
+
+def week_key_gen(start=2, stop=16):
+    """Create an iterator for all the keys to the various dictionaries"""
+    for i in range(start, stop):
+        yield "w%s" % i
 
 
 if __name__ == '__main__':

@@ -53,20 +53,20 @@ class WordFreq(object):
         assert(type(number_to_display) is int)
         self.freqDist.plot(number_to_display, cumulative=True, **kwargs)
 
-    def compute_individual_word_freq(self):
+    @property
+    def word_freq_dicts( self ):
         """
-        Computes the frequency of individual words
-
+        A list of dictionaries with the frequency of each word
         Returns:
-            List of dictionaries with the keys 'word' and 'count'
+            Dictionary with words as keys and 'word' and 'count'
         """
-        fd = nltk.FreqDist()
-        for word in self.data:
-            fd.inc(word)
-        results = []
-        for w in fd.items():
-            results.append({'word': w[0], 'count' : w[1]})
-        return results
+        # fd = nltk.FreqDist(self.data)
+        # for word in self.data:
+        #     fd.inc(word)
+        # results = []
+        return [{'word': w[0], 'count' : w[1]} for w in self.freqDist.items()]
+        #     results.append()
+        # return results
 
 
 if __name__ == '__main__':

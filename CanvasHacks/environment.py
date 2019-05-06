@@ -16,7 +16,7 @@ if ROOT[:12] == '/Users/adam':
     ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
     JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
     LOG_FOLDER = FileBasedConfiguration.log_folder
-    DATA_FOLDER = FileBasedConfiguration.proj_base
+    DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
 
     TOKEN = FileBasedConfiguration.canvas_token
     URL_BASE = FileBasedConfiguration.canvas_url_base

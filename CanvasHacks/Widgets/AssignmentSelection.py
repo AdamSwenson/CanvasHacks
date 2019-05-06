@@ -6,7 +6,8 @@ from IPython.display import display
 from ipywidgets import widgets
 
 from CanvasHacks import environment
-from CanvasHacks.RequestTools import get_all_course_assignments, get_assignments_needing_grading
+from CanvasHacks.RequestTools import get_assignments_needing_grading, \
+    get_assignments_with_submissions
 
 
 def make_assignment_button( assignment_id, name, ):
@@ -35,14 +36,6 @@ def make_assignment_button( assignment_id, name, ):
     return b
 
 
-def get_assignments_with_submissions( course_id ):
-    """Queries the server and returns only the assignments
-    in the course which at least one
-    student has submitted."""
-    assignments = get_all_course_assignments( course_id )
-    return [ a for a in assignments if a[ "has_submitted_submissions" ] is True ]
-
-
 def view_selected_assignments():
     out = widgets.Output( layout={ 'border': '1px solid black' } )
     with out:
@@ -57,6 +50,8 @@ def view_ungraded_assignments():
     to_grade = [ ]
     for sec in environment.CONFIG.course_ids:
         assigns = get_assignments_needing_grading( sec )
+        to_grade += [ (g[ 'name' ].strip(), g[ 'id' ]) for g in assigns ]
+
         # assigns = assigns[ sec ]
         with out:
             to_grade += [ print( g[ 0 ] ) for g in assigns ]

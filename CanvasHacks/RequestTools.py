@@ -63,11 +63,22 @@ def get_assignments_needing_grading( course_id ):
     """Returns a list of tuples (name, id) of assignments which
     have at least one ungraded submission"""
     assigns = get_all_course_assignments( course_id )
-    to_grade = [ a for a in assigns if a[ 'needs_grading_count' ] > 0 ]
+    assigns = [ a for a in assigns if a[ 'needs_grading_count' ] > 0 ]
 
-    to_grade = [ (g[ 'name' ].strip(), g[ 'id' ]) for g in to_grade ]
-    return to_grade
+    # to_grade = [ (g[ 'name' ].strip(), g[ 'id' ]) for g in to_grade ]
+    return assigns
 
 
 if __name__ == '__main__':
     pass
+
+
+def get_assignments_with_submissions( course_id, needs_grading=True ):
+    """Queries the server and returns only the assignments
+    in the course which at least one
+    student has submitted."""
+    assignments = get_all_course_assignments( course_id )
+    if needs_grading:
+        assignments = [ a for a in assignments if a[ 'needs_grading_count' ] > 0 ]
+    assignments = [ a for a in assignments if a[ "has_submitted_submissions" ] is True ]
+    return assignments

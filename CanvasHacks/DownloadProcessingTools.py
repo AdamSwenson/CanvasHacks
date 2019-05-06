@@ -32,7 +32,7 @@ def download_submitted_file( url, filepath ):
     open( filepath, 'wb' ).write( response.content )
 
 
-def get_submissions( course_id, assignment_id, per_page=42 ):
+def get_submissions( course_id, assignment_id, assign_type='assignments', per_page=42 ):
     """Makes request to the server for all submissions for the given assignment
     Example
         course_id = SECTION_930
@@ -40,7 +40,7 @@ def get_submissions( course_id, assignment_id, per_page=42 ):
         response2 = get_submissions(course_id, assignment_id)
     """
     responses = [ ]
-    url = make_url( course_id, 'assignments' )
+    url = make_url( course_id, assign_type )
     url = "%s/%s/submissions?per_page=%s" % (url, assignment_id, per_page)
     try:
         while True:
@@ -119,10 +119,13 @@ def docx_handler( filename ):
 def pdf_handler( filepath ):
     """Extracts the text from a pdf file"""
     if type(filepath) is bytes:
+        # if using online version and not saving
+        # downloads to file
         pdfReader = PyPDF2.PdfFileReader( io.BytesIO(filepath))
     else:
-        pdfReader = open( filepath, 'rb' )
-    # pdfReader = PyPDF2.PdfFileReader( pdfFileObj )
+        # If loading downloaded work from file
+        pdfFileObj = open( filepath, 'rb' )
+        pdfReader = PyPDF2.PdfFileReader( pdfFileObj )
     pageObj = pdfReader.getPage( 0 )
     return pageObj.extractText()
 
