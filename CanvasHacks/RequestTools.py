@@ -69,9 +69,6 @@ def get_assignments_needing_grading( course_id ):
     return assigns
 
 
-if __name__ == '__main__':
-    pass
-
 
 def get_assignments_with_submissions( course_id, needs_grading=True ):
     """Queries the server and returns only the assignments
@@ -82,3 +79,37 @@ def get_assignments_with_submissions( course_id, needs_grading=True ):
         assignments = [ a for a in assignments if a[ 'needs_grading_count' ] > 0 ]
     assignments = [ a for a in assignments if a[ "has_submitted_submissions" ] is True ]
     return assignments
+
+
+
+def get_all_course_quizzes(course_id):
+    """ GET /api/v1/courses/:course_id/quizzes """
+    url = make_url(course_id, 'quizzes')
+    #     print(url)
+    return send_get_request(url)
+
+
+def get_all_quiz_submissions(course_id, quiz_id, per_page=42):
+    """
+    GET /api/v1/courses/:course_id/quizzes/:quiz_id/submissions
+    """
+    url = make_url(course_id, 'quizzes')
+    url += "/%s/submissions?per_page=%s" % (quiz_id, per_page)
+
+    print(url)
+    #     return send_get_request(url)
+    responses = [ ]
+    #     url = make_url( course_id, assign_type )
+    #     url = "%s/%s/submissions?per_page=%s" % (url, quiz_id, per_page)
+    try:
+        while True:
+            print( url )
+            response = requests.get( url, headers=make_request_header() )
+            responses += response.json()['quiz_submissions']
+            url = response.links[ 'next' ][ 'url' ]
+    except KeyError:
+        return responses
+
+
+if __name__ == '__main__':
+    pass
