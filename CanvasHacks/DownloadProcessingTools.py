@@ -6,6 +6,7 @@ import io
 import PyPDF2
 import docx
 import requests
+from requests.exceptions import HTTPError
 
 from CanvasHacks.RequestTools import make_request_header
 from CanvasHacks.UrlTools import make_url
@@ -46,10 +47,25 @@ def get_submissions( course_id, assignment_id, assign_type='assignments', per_pa
         while True:
             print( url )
             response = requests.get( url, headers=make_request_header() )
+            # If the response was successful, no Exception will be raised
+            response.raise_for_status()
+            # Continuing on since was successful
             responses += response.json()
             url = response.links[ 'next' ][ 'url' ]
+
     except KeyError:
         return responses
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')  # Python 3.6
+        return responses
+
+    except Exception as err:
+        print(f'Other error occurred: {err}')  # Python 3.6
+        return responses
+
+
+
 
 
 def process_response( response_json, journal_folder ):
