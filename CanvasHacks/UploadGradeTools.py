@@ -9,7 +9,7 @@ import requests
 from IPython.display import display
 from ipywidgets import widgets
 
-from CanvasHacks.DataManagement import DataStore
+from CanvasHacks.Repositories.DataManagement import DataStore
 from CanvasHacks.RequestTools import make_request_header
 from CanvasHacks.UrlTools import make_url
 

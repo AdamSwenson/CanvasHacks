@@ -4,6 +4,7 @@ Created by adam on 9/20/18
 __author__ = 'adam'
 
 import requests
+from requests.exceptions import HTTPError
 
 from CanvasHacks import environment
 from CanvasHacks.UrlTools import make_url
@@ -21,6 +22,34 @@ def send_get_request( url, data={ } ):
     head = { 'Authorization': 'Bearer {}'.format( environment.CONFIG.canvas_token ) }
     response = requests.get( url, headers=make_request_header(), json=data )
     return response.json()
+
+
+def send_multi_page_get_request(url, data={}, per_page=45):
+    responses = []
+
+    url = "{}/?per_page={}".format(url, per_page)
+
+    try:
+        while True:
+            print( url )
+            response = requests.get( url, headers=make_request_header(), json=data )
+            # If the response was successful, no Exception will be raised
+            response.raise_for_status()
+            # Continuing on since was successful
+            responses += response.json()
+            url = response.links[ 'next' ][ 'url' ]
+
+    except KeyError:
+        return responses
+
+    except HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')  # Python 3.6
+        return responses
+
+    except Exception as err:
+        print(f'Other error occurred: {err}')  # Python 3.6
+        return responses
+
 
 
 def send_post_request( url, data ):

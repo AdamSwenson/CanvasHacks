@@ -2,7 +2,7 @@
 Created by adam on 2/22/19
 """
 from unittest import TestCase
-from CanvasHacks.DataManagement import BagStore
+from CanvasHacks.Repositories.DataManagement import BagStore
 
 __author__ = 'adam'
 

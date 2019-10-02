@@ -26,7 +26,7 @@ def make_assignment_header( store ):
     return display( widgets.HTML( entry.format( store.assignment_name, store.course_id ) ) )
 
 
-def make_text_display( student_id, text ):
+def make_text_display( student_id, text, student_name='' ):
     """Handles the formatting of the student's text"""
     entry = """
           <div id='%s'>
@@ -35,11 +35,13 @@ def make_text_display( student_id, text ):
                 %s
             </p>
         </div>"""
-    e = entry % (student_id, student_id, text)
+    student_name = "{}  |  ".format(student_name) if len(student_name) > 1 else student_name
+    header = "{}{}".format(student_name, student_id)
+    e = entry % (student_id, header, text)
     return widgets.HTML( e )
 
 
-def make_submission_output( text, student_id, credit_list ):
+def make_submission_output( text, student_id, credit_list, studentRepository=None ):
     """Creates the display of the submitted text with a toggle button to
     update whether the student receives credit
     """
@@ -50,8 +52,12 @@ def make_submission_output( text, student_id, credit_list ):
         description='',
         disabled=False
     )
+    student_name = ''
 
-    ta = make_text_display( student_id, text )
+    if studentRepository:
+        student_name = studentRepository.get_student_name(student_id)
+
+    ta = make_text_display( student_id, text, student_name )
 
     def on_value_change( change ):
         """The relevant callback
@@ -70,14 +76,14 @@ def make_submission_output( text, student_id, credit_list ):
     display( widgets.VBox( [ ta, credit_button ] ) )
 
 
-def make_consolidated_text_fields( store ):
+def make_consolidated_text_fields( store, studentRepository=None ):
     """Displays each entry with a toggle to adjust whether the
     student receives credit"""
     for r in store.submissions:
-        make_submission_output( r[ 'body' ], r[ 'student_id' ], store.credit )
+        make_submission_output( r[ 'body' ], r[ 'student_id' ], store.credit, studentRepository )
 
 
-def make_consolidated_text_file( journal_folder, filename='compiled-text.txt' ):
+def make_consolidated_text_file( journal_folder, filename='compiled-text.txt', studentRepository=None ):
     """Reads the data from the relevant json file and then
     writes each entry in to a single text file for ease of reading
     todo: This should be refactored out of the widgets file
@@ -92,8 +98,13 @@ def make_consolidated_text_file( journal_folder, filename='compiled-text.txt' ):
         j = json.load( f )
         with open( to_write, 'w+' ) as cf:
             for rec in j:
+                txt = entry.format( **rec )
+                if studentRepository:
+                    name = studentRepository.get_student_name(rec['student_id'])
+                    txt = "{} \n {}".format(name, txt)
                 #     print(entry.format(**rec))
-                cf.write( entry.format( **rec ) )
+                cf.write(  txt )
+
     print( "Consolidated file written to {}".format( to_write ) )
 
 
