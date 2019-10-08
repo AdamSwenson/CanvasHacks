@@ -36,7 +36,7 @@ class QuizData(object):
 
     @property
     def folder_path(self):
-        return "{}/{}".format(env.ARCHIVE_FOLDER, self.name)
+        return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.name)
 
     @property
     def lock_date(self):

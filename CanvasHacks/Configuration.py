@@ -3,12 +3,12 @@ Created by adam on 1/31/19
 """
 __author__ = 'adam'
 import configparser
-import os, sys
+import os
 
 
 class Configuration( object ):
     archive_folder = False
-    assignments = []
+    assignments = [ ]
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
@@ -16,8 +16,8 @@ class Configuration( object ):
 
     @classmethod
     def add_assignment( cls, assignment_id, assignment_name=None ):
-        cls.assignments.append( ( assignment_id, assignment_name) )
-        cls.assignments = list(set(cls.assignments))
+        cls.assignments.append( (assignment_id, assignment_name) )
+        cls.assignments = list( set( cls.assignments ) )
 
     @classmethod
     def add_course_id( cls, course_id ):
@@ -33,34 +33,33 @@ class Configuration( object ):
 
     @classmethod
     def get_assignment_ids( cls ):
-        return [i[0] for i in cls.assignments ]
+        return [ i[ 0 ] for i in cls.assignments ]
 
     @classmethod
     def remove_assignment( cls, assignment_id ):
-        el = list(filter(lambda x: x[0] == assignment_id, cls.assignments))[0]
-        idx = cls.assignments.index(el)
-        return cls.assignments.pop(idx)
+        el = list( filter( lambda x: x[ 0 ] == assignment_id, cls.assignments ) )[ 0 ]
+        idx = cls.assignments.index( el )
+        return cls.assignments.pop( idx )
 
     @classmethod
     def reset_assignments( cls ):
         cls.assignments = [ ]
-        print("List of assignments is empty")
+        print( "List of assignments is empty" )
 
     @classmethod
     def reset_course_ids( cls ):
         cls.course_ids = [ ]
-        print("List of course ids is empty")
+        print( "List of course ids is empty" )
 
     @classmethod
     def reset_canvas_token( cls ):
         cls.canvas_token = False
-        print("Canvas token reset to empty")
+        print( "Canvas token reset to empty" )
 
     @classmethod
     def reset_config( cls ):
         cls.reset_canvas_token()
         cls.reset_course_ids()
-
 
 
 class InteractiveConfiguration( Configuration ):
@@ -80,23 +79,21 @@ class InteractiveConfiguration( Configuration ):
             cls.add_canvas_url_base( v )
 
 
-
-
-class FileBasedConfiguration(Configuration):
+class FileBasedConfiguration( Configuration ):
     configuration = False
     file_path = False
 
-    def __init__(self, configuration_file_path):
+    def __init__( self, configuration_file_path ):
         super().__init__()
         FileBasedConfiguration.file_path = configuration_file_path
 
     @classmethod
-    def read_config_file( cls):
+    def read_config_file( cls ):
         if not cls.file_path:
             # The file path could've been customized by instantiating the class
             # If that didn't happen, we go with the default
             # The folder containing the assets folder
-            cls.proj_base = os.path.abspath( os.path.dirname( os.path.dirname( __file__ )) )
+            cls.proj_base = os.path.abspath( os.path.dirname( os.path.dirname( __file__ ) ) )
             # All login credentials are defined in files here.
             # THIS CONTENTS OF THIS FOLDER MUST NOT BE COMMITTED TO VERSION CONTROL!
             CREDENTIALS_FOLDER_PATH = "%s/private" % cls.proj_base
@@ -104,7 +101,7 @@ class FileBasedConfiguration(Configuration):
 
         cls.configuration = configparser.ConfigParser()
         cls.configuration.read( cls.file_path )
-        print( "Reading credentials and settings from %s" % cls.file_path  )
+        print( "Reading credentials and settings from %s" % cls.file_path )
 
     @classmethod
     def load( cls ):
@@ -117,8 +114,8 @@ class FileBasedConfiguration(Configuration):
     @classmethod
     def load_section_ids( cls ):
         try:
-            for v in cls.configuration['sections'].values():
-                cls.add_course_id(v)
+            for v in cls.configuration[ 'sections' ].values():
+                cls.add_course_id( v )
         except:
             pass
 
@@ -134,13 +131,13 @@ class FileBasedConfiguration(Configuration):
         if not cls.configuration:
             cls.read_config_file()
 
-        cls.add_canvas_token(cls.configuration[ 'credentials' ].get( 'TOKEN' ))
+        cls.add_canvas_token( cls.configuration[ 'credentials' ].get( 'TOKEN' ) )
 
     @classmethod
     def load_url_base( cls ):
-        cls.add_canvas_url_base(cls.configuration[ 'url' ].get( 'BASE' ))
+        cls.add_canvas_url_base( cls.configuration[ 'url' ].get( 'BASE' ) )
 
 
 if __name__ == '__main__':
     FileBasedConfiguration.load()
-    print(FileBasedConfiguration.canvas_token)
+    print( FileBasedConfiguration.canvas_token )
