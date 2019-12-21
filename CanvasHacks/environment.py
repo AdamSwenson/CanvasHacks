@@ -3,8 +3,8 @@ Created by adam on 9/14/18
 """
 __author__ = 'adam'
 
-TEST = True
-# TEST = False
+# TEST = True
+TEST = False
 if TEST:
     print("RUNNING IN TEST MODE")
 

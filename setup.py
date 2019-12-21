@@ -22,7 +22,7 @@ VERSION = '0.0.17'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'PyPDF2', 'python-docx', 'requests'  # 'requests', 'maya', 'records',
+    'PyPDF2', 'python-docx', 'requests', 'AdamTools'  # 'requests', 'maya', 'records',
 ]
 
 # What packages are optional?
