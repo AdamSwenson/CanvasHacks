@@ -5,6 +5,10 @@ __author__ = 'adam'
 import configparser
 import os
 
+CREDENTIALS_FOLDER_PATH = "{}/private"
+LIVE_CREDENTIALS = "{}/canvas-credentials.ini"
+TEST_CREDENTIALS = "{}/test-credentials.ini"
+
 
 class Configuration( object ):
     archive_folder = False
@@ -96,15 +100,17 @@ class FileBasedConfiguration( Configuration ):
             cls.proj_base = os.path.abspath( os.path.dirname( os.path.dirname( __file__ ) ) )
             # All login credentials are defined in files here.
             # THIS CONTENTS OF THIS FOLDER MUST NOT BE COMMITTED TO VERSION CONTROL!
-            CREDENTIALS_FOLDER_PATH = "%s/private" % cls.proj_base
-            cls.file_path = "%s/canvas-credentials.ini" % CREDENTIALS_FOLDER_PATH
+            folder_path = CREDENTIALS_FOLDER_PATH.format(cls.proj_base)
+            creds = TEST_CREDENTIALS if cls.is_test else LIVE_CREDENTIALS
+            cls.file_path = creds.format(folder_path )
 
         cls.configuration = configparser.ConfigParser()
         cls.configuration.read( cls.file_path )
         print( "Reading credentials and settings from %s" % cls.file_path )
 
     @classmethod
-    def load( cls ):
+    def load( cls, is_test=False ):
+        cls.is_test = is_test
         cls.read_config_file()
         cls.load_token()
         cls.load_url_base()
