@@ -1,0 +1,17 @@
+@startuml
+Student1 --> Canvas: Submits assignment (initial1)
+Student2 --> Canvas: Submits assignment (initial2)
+Canvas --> Student1: Assigns to review initial2
+Canvas --> Student2: Assigns to review initial1
+
+Student1 --> Canvas: Submits review of initial2
+Canvas --> Student2: Shows review of initial2
+Canvas --> Student2: Opens metareview
+Student2 --> Canvas: Submits metareview
+
+Student2 --> Canvas: Submits review of initial1
+Canvas --> Student1: Shows review of initial1
+Canvas --> Student1: Opens metareview
+Student1 --> Canvas: Submits metareview
+
+@enduml

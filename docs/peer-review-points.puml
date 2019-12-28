@@ -1,0 +1,16 @@
+@startuml
+(*)  --> "Initial submission"
+If "Student turns in assignment" then
+--> [Yes] "Receives completion points"
+--> "Review assignment"
+    if "Student completes review" then
+        --> [Yes] "Receives review completion points"
+    else
+        --> [No] "No review completion points"
+    endif
+else
+--> [No] "No points"
+--> (*)
+Endif
+-->(*)
+@enduml
