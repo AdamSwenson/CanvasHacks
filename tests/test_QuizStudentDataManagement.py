@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from unittest import TestCase
 
-from CanvasHacks.QuizStudentDataManagement import make_drop_list
+from CanvasHacks.Repositories.quizzes import make_drop_list
 
 __author__ = 'adam'
 
