@@ -10,27 +10,35 @@ __author__ = 'adam'
 if __name__ == '__main__':
     pass
 
-from CanvasHacks.Models.IModel import StoreMixin
+from CanvasHacks.Models.model import StoreMixin
+from CanvasHacks.Models.QuizModels import QuizData
 
 
-class Activity( StoreMixin ):
-    """A component of the assignment.
+class Activity( QuizData ):
+    """A wrapper around the canvas provided properties for a quiz which adds
+     properties and methods specific to the peer review assignments
+
     NOT SPECIFIC TO ANY GIVEN STUDENT
     """
 
-    def __init__( self, open_date, due_date, completion_points=0, max_points=0, **kwargs ):
-        """
-        open_date: The date that the review could begin reviewing
-        due_date: The date by which the reviewer must complete the review
-        completion_date: The date at which the student submitted the thing
-        """
-        self.id = None
-        self.max_points = max_points
-        # The points received for just turning in the activity non-empty
-        self.completion_points = completion_points
+    def __init__( self, **kwargs ):
+        super().__init__(**kwargs)
+    #     self.handle_kwargs( kwargs )
 
-        self.due_date = type( self )._check_date( due_date )
-        self.open_date = type( self )._check_date( open_date )
+    #
+    # def __init__( self, open_date, due_date, completion_points=0, max_points=0, **kwargs ):
+    #     """
+    #     open_date: The date that the review could begin reviewing
+    #     due_date: The date by which the reviewer must complete the review
+    #     completion_date: The date at which the student submitted the thing
+    #     """
+    #     self.id = None
+    #     self.max_points = max_points
+    #     # The points received for just turning in the activity non-empty
+    #     self.completion_points = completion_points
+    #
+    #     self.due_date = type( self )._check_date( due_date )
+    #     self.open_date = type( self )._check_date( open_date )
 
     @property
     def assignable_points( self ):
@@ -46,20 +54,34 @@ class Activity( StoreMixin ):
 
 class InitialWork( Activity ):
 
-    def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
-        super().__init__(  open_date, due_date, completion_points, max_points, **kwargs )
+    def __init__( self, **kwargs ):
+        self.question_columns = [ ]
+
+        super().__init__( **kwargs )
+    #
+    # def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
+    #     super().__init__(  open_date, due_date, completion_points, max_points, **kwargs )
 
 
 class Review( Activity ):
     """Representation of the peer review component of the
      assignment """
 
-    def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
-        """
-        :param open_date: The date that the review could begin reviewing
-        :param due_date: The date by which the reviewer must complete the review
-        """
-        super().__init__( open_date, due_date, completion_points, max_points, **kwargs )
+    def __init__( self, **kwargs ):
+        # Code used to open the review assignment
+        self.access_code = None
+
+        # Link to the activity on canvas so students can click
+        # directly to it
+        self.activity_link = None
+
+        super().__init__( **kwargs )
+    # def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
+    #     """
+    #     :param open_date: The date that the review could begin reviewing
+    #     :param due_date: The date by which the reviewer must complete the review
+    #     """
+    #     super().__init__( open_date, due_date, completion_points, max_points, **kwargs )
 
 
 class MetaReview( Activity ):
@@ -67,14 +89,17 @@ class MetaReview( Activity ):
     """Representation of the peer review of 
     another student's submission"""
 
-    def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
-        """
-        :param open_date: The date that the review could begin reviewing
-        :param due_date: The date by which the reviewer must complete the review
-        """
-        # we use the same values for both completion pints and max points
-        # since there are no assignable points
-        super().__init__( open_date, due_date, completion_points, max_points, **kwargs )
+    def __init__( self, **kwargs ):
+        super().__init__( **kwargs )
+    # def __init__( self, open_date, due_date, completion_points, max_points, **kwargs ):
+    #     """
+    #     :param open_date: The date that the review could begin reviewing
+    #     :param due_date: The date by which the reviewer must complete the review
+    #     """
+    #     # we use the same values for both completion pints and max points
+    #     # since there are no assignable points
+    #     super().__init__( open_date, due_date, completion_points, max_points, **kwargs )
+    #
 
 
 class Assignment( StoreMixin ):

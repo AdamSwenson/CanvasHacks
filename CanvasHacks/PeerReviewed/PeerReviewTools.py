@@ -6,7 +6,7 @@ from CanvasHacks.PeerReviewed.Submissions import Submission
 
 __author__ = 'adam'
 
-from CanvasHacks.Models.Student import Student
+from CanvasHacks.Models.student import Student
 
 
 def determine_overall_grade():

@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from faker import Faker
 
-from CanvasHacks.Models.Student import Student
+from CanvasHacks.Models.student import Student
 
 fake = Faker()
 

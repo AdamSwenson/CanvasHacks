@@ -1,17 +1,26 @@
 @startuml
 Student1 --> Canvas: Submits assignment (initial1)
+Canvas --> Student1: Shows my example or rubric
+Student1 --> Canvas: Revises and resubmits (initial1)
+
 Student2 --> Canvas: Submits assignment (initial2)
+Canvas --> Student2: Shows my example or rubric
+Student2 --> Canvas: Revises and resubmits (initial2)
+
 Canvas --> Student1: Assigns to review initial2
+Canvas --> Student1: Opens review (sends access code)
+
 Canvas --> Student2: Assigns to review initial1
+Canvas --> Student2: Opens review (sends access code)
 
 Student1 --> Canvas: Submits review of initial2
-Canvas --> Student2: Shows review of initial2
-Canvas --> Student2: Opens metareview
+Canvas --> Student2: Shows review of initial2 (w/o grade?)
+Canvas --> Student2: Opens metareview (sends access code)
 Student2 --> Canvas: Submits metareview
 
 Student2 --> Canvas: Submits review of initial1
-Canvas --> Student1: Shows review of initial1
-Canvas --> Student1: Opens metareview
+Canvas --> Student1: Shows review of initial1 (w/o grade?)
+Canvas --> Student1: Opens metareview (sends access code)
 Student1 --> Canvas: Submits metareview
 
 @enduml

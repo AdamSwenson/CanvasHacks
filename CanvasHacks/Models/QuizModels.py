@@ -5,13 +5,19 @@ __author__ = 'adam'
 
 from CanvasHacks import environment as env
 import pandas as pd
+from CanvasHacks.Models.model import Model
 
-class QuizData(object):
-    """Holds the relevant info for a quiz type assignment"""
+
+class QuizData(Model):
+    """Holds the data which defines the properties of a
+    canvas quiz type assignment
+    """
 
     def __init__(self, **kwargs):
-        for k in kwargs.keys():
-            self.__setattr__(k, kwargs[k])
+        super().__init__(kwargs)
+        # self.handle_kwargs(kwargs)
+        # for k in kwargs.keys():
+        #     self.__setattr__(k, kwargs[k])
         self.question_columns = []
 
     @property
@@ -24,7 +30,11 @@ class QuizData(object):
 
     @property
     def due_date(self):
-        return self.due_at
+        return type( self )._check_date(self.due_at)
+
+    @property
+    def open_date( self ):
+        return type( self )._check_date(self.open_at)
 
     @property
     def quarter_credit_date(self):
@@ -40,7 +50,7 @@ class QuizData(object):
 
     @property
     def lock_date(self):
-        return self.lock_at
+        return type( self )._check_date(self.lock_at)
 
     @property
     def max_score(self):
@@ -63,6 +73,12 @@ class QuizData(object):
         those probably contain the question answers
         """
         return [c for c in columns if len(c.split(':')) > 1]
+
+    @staticmethod
+    def _check_date( date ):
+        """Checks that a value is a pd.Timestamp
+        if not, it tries to make it into one"""
+        return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
 
 
 

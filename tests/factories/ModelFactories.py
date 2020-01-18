@@ -12,11 +12,11 @@ import random
 import pandas as pd
 
 
-from CanvasHacks.Models.Student import Student
+from CanvasHacks.Models.student import Student
 
 
 def student_factory():
-    return Student(fake.isbn10(), name=fake.name())
+    return Student(random.randint( 111111111, 99999999 ), name=fake.name())
 
 
 

@@ -7,11 +7,10 @@ if __name__ == '__main__':
     pass
 
 
-def make_conversation_data(me_id, student_id, subject, body):
+def make_conversation_data( student_id, subject, body):
     """Creates the request data to be sent to canvas"""
     return {
-        # must include self
-        'recipients' : [me_id, student_id],
+        'recipients' : [student_id],
         'body': body,
         'subect' : subject,
         'force_new' : True
@@ -30,17 +29,19 @@ def make_prompt_and_response(response_list):
 
 def make_notice(data):
     """Should define
-    name, response_list, review_assignment_name, access_code
+    name, responses, review_assignment_name, access_code
     """
 
-    data['responses'] = make_prompt_and_response(data['response_list'])
+    # data['responses'] = make_prompt_and_response(data['response_list'])
 
     return """
-    Hi {name},
+    <p>Hi {name},</p>
     
-    Here is another student's assignment for you to review:
+    <p>Here is another student's assignment for you to review:</p>
     
     {responses}
+    
+    {other}
     
     <p>To complete your review, open the quiz named {review_assignment_name} </br>
     

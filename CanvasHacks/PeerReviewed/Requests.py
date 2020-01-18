@@ -4,7 +4,7 @@ canvas api specific to the peer reviewded assignments
 
 Created by adam on 12/24/19
 """
-from CanvasHacks.Models.Student import Student
+from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Submissions import Submission, ReviewSubmission
 
 __author__ = 'adam'

@@ -13,6 +13,8 @@ from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfigu
 
 ROOT = os.getenv( "HOME" )
 
+REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
+
 # Check whether it is being run on my machine or remotely
 if ROOT[:12] == '/Users/adam':
     FileBasedConfiguration.load(TEST)

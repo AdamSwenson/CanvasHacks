@@ -9,6 +9,7 @@ class Model(object):
 
     def __init__(self, kwargs):
         for k in kwargs.keys():
+            # print(k, kwargs[k])
             setattr(self, k,  kwargs[k])
 
 

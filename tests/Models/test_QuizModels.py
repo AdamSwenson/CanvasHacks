@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from unittest import TestCase
 
-from CanvasHacks.QuizModels import QuizData
+from CanvasHacks.Models.QuizModels import QuizData
 
 __author__ = 'adam'
 

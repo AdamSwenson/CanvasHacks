@@ -17,8 +17,8 @@ from tests.factories.CanvasApiFactories import *
 
 def activity_data_factory():
     return {
-        'open_date': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=None ) ),
-        'due_date': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None ) ),
+        'open_at': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=None ) ),
+        'due_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None ) ),
         'completion_points': random.randint( 0, 1000 ),
         'max_points': random.randint( 0, 1000 ),
     }
@@ -38,6 +38,8 @@ def assignment_factory():
     initial.id = random.randint( 0, 10000 )
     review = Review( **test_data[ 'review' ] )
     review.id = random.randint( 0, 10000 )
+    review.access_code = fake.ean8()
+    review.activity_link = fake.uri()
     meta = MetaReview( **test_data[ 'metareview' ] )
     meta.id = random.randint( 0, 10000 )
     return Assignment( initial, review, meta )
@@ -70,3 +72,38 @@ def submissions_factory( student1, student2, assignment ):
     submissions.append( sfac3.make( mr2 ) )
 
     return submissions
+
+
+def discussion_entry_factory( **kwargs ):
+    """ Returns something like:
+    {'id': 2132485, 'user_id': 169155,
+    'parent_id': None, 'created_at': '2020-01-16T23:01:53Z',
+    'updated_at': '2020-01-16T23:01:53Z', 'rating_count': None,
+    'rating_sum': None, 'user_name': 'Test Student',
+    'message': '<p>got em</p>', 'user': {'id': 169155,
+    'display_name': 'Test Student',
+    'avatar_image_url': 'https://canvas.csun.edu/images/messages/avatar-50.png',
+    'html_url': 'https://canvas.csun.edu/courses/85210/users/169155',
+    'pronouns': None, 'fake_student': True},
+    'read_state': 'unread', 'forced_read_state': False,
+    'discussion_id': 737847, 'course_id': 85210}
+    """
+    dummy = { 'id': random.randint( 0, 100000 ),
+             'user_id': random.randint( 0, 10000 ),
+             'parent_id': None,
+             'created_at': pd.to_datetime(fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None )),
+             'updated_at': pd.to_datetime(fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None )),
+             'rating_count': None,
+             'rating_sum': None,
+             'user_name': fake.name(),
+             'message': '<p>{}</p>'.format(fake.paragraph()),
+             'read_state': 'unread', 'forced_read_state': False,
+             'discussion_id': random.randint( 0, 10000 ),
+             'course_id': random.randint( 0, 10000 )
+             }
+
+    # if stuff passed in, replace
+    for k in kwargs.keys():
+        dummy[k] = kwargs[k]
+    return dummy
+

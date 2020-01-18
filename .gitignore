@@ -2,7 +2,7 @@
 
 Notebooks/.ipynb_checkpoints
 
-canv-env
+venv
 
 private
 .pypirc
@@ -93,6 +93,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
+canv-env
 .env
 .venv
 env/

@@ -1,8 +1,8 @@
 """
 Created by adam on 12/24/19
 """
-from CanvasHacks.Models.IModel import StoreMixin
-from CanvasHacks.Models.Student import Student
+from CanvasHacks.Models.model import StoreMixin
+from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview
 
 __author__ = 'adam'
