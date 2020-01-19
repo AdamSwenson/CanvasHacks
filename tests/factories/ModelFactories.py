@@ -16,7 +16,7 @@ from CanvasHacks.Models.student import Student
 
 
 def student_factory():
-    return Student(random.randint( 111111111, 99999999 ), name=fake.name())
+    return Student(random.randint( 11111, 999999 ), name=fake.name())
 
 
 
