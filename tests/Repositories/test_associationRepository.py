@@ -15,15 +15,19 @@ if __name__ == '__main__':
 class TestAssociationRepository( TestCase ):
     def setUp(self):
         dao = SqliteDAO()
+        self.student_ids = [i for i in range(0,5)]
         self.students = [student_factory() for i in range(0,5)]
-        # for i in range(0,5):
-        #     self.students.append(student_factory())
         self.obj = AssociationRepository(dao)
 
     def test__make_associations_single_submissions( self ):
         # Students only submit once
+        # id case
+        assoc = self.obj._make_associations(self.student_ids)
+        self.assertEqual(5, len(assoc) , "single submission; ids")
+
+        # obj case
         assoc = self.obj._make_associations(self.students)
-        self.assertEqual(5, len(assoc) )
+        self.assertEqual(5, len(assoc) , "single submission; objects" )
 
     def test__make_associations_double_submissions( self ):
         # Students only submit twice adjacent
@@ -31,12 +35,23 @@ class TestAssociationRepository( TestCase ):
         for so in self.students:
             s.append(so)
             s.append(so)
+        # obj case
         assoc = self.obj._make_associations(s)
-        self.assertEqual(10, len(assoc) )
+        for a, b in assoc:
+            self.assertNotEqual(a, b,  "self-assignment multi submission; objects"  )
+
+    def test__make_associations_double_submissions_ids( self ):
+        s = []
+        for so in self.student_ids:
+            s.append(so)
+            s.append(so)
+        # obj case
+        assoc = self.obj._make_associations(s)
+        for a, b in assoc:
+            self.assertNotEqual(a, b,  "self-assignment multi submission; objects"  )
 
 
-
-    #
+#
     # def test_get_associations( self ):
     #     self.fail()
     #

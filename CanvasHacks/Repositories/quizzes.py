@@ -11,6 +11,7 @@ import pandas as pd
 from CanvasHacks import environment as env
 import json
 
+
 def process_work( work_frame, submissions_frame ):
     work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
     # merge it with matching rows from the submissions frame
@@ -155,7 +156,9 @@ def grade( frame, quiz_data_obj, grace_period=None ):
         # will be 0 if not docking
         fudge_points = total_score * -penalty
         if penalty > 0:
-            print( 'Student #{}: Submitted on {}; was due {}. Penalized {}'.format( row[ 'student_id' ], row[ 'submitted' ], quiz_data_obj.due_date, penalty ) )
+            print( 'Student #{}: Submitted on {}; was due {}. Penalized {}'.format( row[ 'student_id' ],
+                                                                                    row[ 'submitted' ],
+                                                                                    quiz_data_obj.due_date, penalty ) )
 
         out[ 'data' ][ "quiz_submissions" ] = [
             {
@@ -184,27 +187,36 @@ class QuizRepository( object ):
 
     def _process( self, work_frame, submissions ):
         self.submissions = submissions
-        if not isinstance(submissions, pd.DataFrame):
-            submissions_frame = pd.DataFrame(submissions)
+        if not isinstance( submissions, pd.DataFrame ):
+            submissions_frame = pd.DataFrame( submissions )
         else:
             submissions_frame = submissions
-        submissions_frame['student_id'] = submissions_frame.user_id
+
+        submissions_frame[ 'student_id' ] = submissions_frame.user_id
         self.data = process_work( work_frame, submissions_frame )
-        remove_non_final_attempts(self.data)
+        remove_non_final_attempts( self.data )
+        # finish setting up the dataframe
+        self._cleanup_data()
+
+    def _cleanup_data( self ):
+        """This is abstracted out so it can be
+        called independently for use with test data
+        """
+        # Store ids so we don't have to reset the index for submitters prop
+        self.student_ids = self.data.student_id.tolist()
         # the name will be set as index from sorting
         # so we set to student id to make look ups easier
-        self.data.set_index('student_id', inplace=True)
+        self.data.set_index( 'student_id', inplace=True )
         # Remove unneeded columns
         # self.data = self.data[self.activity.question_columns]
 
     def get_student_work( self, student ):
-        return self.data.iloc[student.student_id]
+        return self.data.loc[ student.student_id ]
 
     @property
     def submitters( self ):
         """returns a list of student objects for whom work has been submitted"""
-        return [ Student(s) for s in self.data.student_id.tolist() ]
-
+        return [ Student( s ) for s in self.student_ids ]
 
 
 if __name__ == '__main__':

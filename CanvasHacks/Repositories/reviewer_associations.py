@@ -7,8 +7,8 @@ from CanvasHacks.Models.review_association import ReviewAssociation
 
 __author__ = 'adam'
 import numpy as np
-
-from CanvasHacks.Models.student import Student
+import random
+from CanvasHacks.Models.student import Student, ensure_student
 
 
 def assign_reviewers( student_ids ):
@@ -50,53 +50,56 @@ class AssociationRepository:
         We use this since it builds in checks for problem cases given that
         for some assignments students may submit more than
         one item."""
-        # make an assignment
-        assoc_to_make = []
-        bad = False
-        while bad:
-        # while len(assoc_to_make) == 0:
-            candidates = assign_reviewers( [ s for s in submitters])
-            # Perform checks
-            # check no self-assignment
-            for s1, s2 in assoc_to_make:
-                if s1 == s2:
+        while True:
+            # randomize list of submitters
+            # to hopefully (further) split up adjacent submissions by the
+            # same student
+            random.shuffle( submitters )
+            # Making a list upon input incase we've been passed an iterator
+            candidate = assign_reviewers( [ s for s in submitters ] )
+            bad = False
+            for b, c in candidate:
+                # Perform checks
+                # Note that this should work regardless of whether
+                # received list of student objects or just their ids
+                if b == c:
+                    # self assignment so start over
                     bad = True
+            if bad:
+                continue
+            else:
+                # if we completed the loops, no one is reviewing themselves
+                return candidate
 
-        return assoc_to_make
-
-
-    def get_associations( self, activity ):
-        return self.session.query( ReviewAssociation )\
-            .filter( ReviewAssociation.activity_id == activity.id )\
-            .all()
-        #
-        #
-        # query = """FROM {table_name} SELECT assessor, assessee WHERE activity_id = {activity_id}"""
-        #
-        # data = {'table_name' : self.table_name, 'activity_id' : activity.id }
-        #
-        # results = []
-        #
-        # for row in self.cursor.execute(query.format(**data)):
-        #     ra = ReviewAssociation( activity, row[0], row[1])
-        #     results.append(ra)
-        #
-        # return results
-
-    def create( self, activity, submitters ):
-        """Sets up a list of associations and then stores them
-        This is the main thing to call
+    def assign_reviewers( self, activity, submitters ):
+        """Assigns every student in submitters to review one other
+        student.
+        This is the main method to call
         todo: Need to ensure that a person can't be assigned to review themselves since there may be multiple submissions per person
         """
-        assoc_to_make = assign_reviewers( [ s for s in submitters])
+        assoc_to_make = self._make_associations(  submitters)
+        # assoc_to_make = assign_reviewers( [ s for s in submitters ] )
+        assocs = []
         for s1, s2 in assoc_to_make:
-            self.create_association(activity, assessor=s1, assessee=s2)
-        print('Review associations created for {} submitters'.format(len(submitters)))
+            a = self._create_association( activity, assessor=ensure_student(s1), assessee=ensure_student(s2) )
+            assocs.append(a)
+        print( 'Review associations created for {} submitters and stored in db'.format( len( submitters ) ) )
+        # return assocs
 
-    def create_association( self, activity, assessor, assessee ):
+    def _create_association( self, activity, assessor, assessee ):
+        """Creates a ReviewAssociation object for the given students and
+        saves it to the db
+        """
         ra = ReviewAssociation( activity_id=activity.id, assessor_id=assessor.id, assessee_id=assessee.id )
         self.session.add( ra )
         self.session.commit()
+        return ra
+
+    def get_associations( self, activity ):
+        """Returns all review assignments for the activity"""
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .all()
 
     def get_reviewer( self, activity, submitter: Student ):
         """Returns the student assigned to review the submitter"""
@@ -107,9 +110,9 @@ class AssociationRepository:
 
     def get_submitter( self, activity, reviewer: Student ):
         """Returns the student assigned to review the submitter"""
-        return self.session.query( ReviewAssociation )\
-            .filter( ReviewAssociation.activity_id == activity.id )\
-            .filter( ReviewAssociation.assessor_id == reviewer.id )\
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .filter( ReviewAssociation.assessor_id == reviewer.id ) \
             .one()
 
     def get_for_assignment( self, assignment ):

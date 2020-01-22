@@ -1,6 +1,7 @@
 """
 Created by adam on 10/1/19
 """
+from CanvasHacks.Models.student import Student
 from CanvasHacks.Repositories.IRepositories import IRepo
 
 __author__ = 'adam'
@@ -9,13 +10,18 @@ from CanvasHacks.RequestTools import send_multi_page_get_request
 from CanvasHacks.UrlTools import make_url
 
 
+
+
 class StudentRepository( IRepo ):
 
-    def __init__( self, course_ids ):
+    def __init__( self, course_ids=[] ):
         self.data = { }
         self.course_ids = course_ids
-        for cid in course_ids:
-            self.download( cid )
+        if len(course_ids) > 0:
+            # option to use blank so can just load
+            # test data from file manually
+            for cid in course_ids:
+                self.download( cid )
 
         print( "Loaded {} students".format( len( self.data.keys() ) ) )
 
@@ -42,7 +48,7 @@ class StudentRepository( IRepo ):
             self.data[ r[ 'id' ] ] = r
 
     def get_student( self, canvas_id ):
-        return self.data[ canvas_id ]
+        return Student(student_id=canvas_id, name=self.data[ canvas_id ])
 
     def get_student_name( self, canvas_id ):
         try:

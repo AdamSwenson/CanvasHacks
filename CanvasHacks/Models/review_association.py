@@ -30,12 +30,19 @@ class ReviewAssociation( Base, Model ):
         # ...                             self.name, self.fullname, self.nickname)
 
     @property
-    def assessee( self ):
-        return Student(self.assessee_id)
+    def is_self_assignment( self ):
+        """This will be an invalid assignment
+        but we will leave it up to something checking this property
+        to raise an error or determine what to do"""
+        return self.assessee_id == self.assessor_id
 
-    @property
-    def assessor( self ):
-        return Student(self.assessor_id)
+    # @property
+    # def assessee( self ):
+    #     return Student(self.assessee_id)
+    #
+    # @property
+    # def assessor( self ):
+    #     return Student(self.assessor_id)
 
 
 
