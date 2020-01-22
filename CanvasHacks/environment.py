@@ -16,6 +16,8 @@ ROOT = os.getenv( "HOME" )
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
 STUDENT_TABLE_NAME = 'students'
 
+STUDENT_WORK_PROCESSING_LOGNAME = '{}/student-work-processing-log.txt'
+
 # Check whether it is being run on my machine or remotely
 if ROOT[:12] == '/Users/adam':
     FileBasedConfiguration.load(TEST)
@@ -33,3 +35,5 @@ else:
     CONFIG = InteractiveConfiguration
     TOKEN = InteractiveConfiguration.canvas_token
     URL_BASE = InteractiveConfiguration.canvas_url_base
+    # Logging should stream
+    LOG_FOLDER = None

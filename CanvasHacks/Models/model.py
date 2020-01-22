@@ -8,9 +8,12 @@ class Model(object):
     """Parent class of all model objects"""
 
     def __init__(self, **kwargs):
-        for k in kwargs.keys():
-            # print(k, kwargs[k])
-            setattr(self, k,  kwargs[k])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+    #
+    # for k in kwargs.keys():
+    #         # print(k, kwargs[k])
+    #         setattr(self, k,  kwargs[k])
 
 
 if __name__ == '__main__':
@@ -20,5 +23,5 @@ if __name__ == '__main__':
 class StoreMixin( object ):
 
     def handle_kwargs( self, kwargs ):
-        for k in kwargs.keys():
-            setattr( self, k, kwargs[ k ] )
+        for key, value in kwargs.items():
+            setattr(self, key, value)
