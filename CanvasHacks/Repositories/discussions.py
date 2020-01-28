@@ -7,6 +7,7 @@ __author__ = 'adam'
 
 
 class DiscussionRepository(IRepo):
+    """Manages the data for one discussion assignment"""
 
     def __init__(self, course):
         self.course = course
@@ -54,6 +55,16 @@ class DiscussionRepository(IRepo):
         # Look up the student submission
         submission = self.submissions.get(student_id)
         return submission.edit(posted_grade=pct)
+
+    def display_for_grading( self ):
+        """Returns student submissions in format expected for
+        ipython display
+        "Returns a list of tuples of all dicussion posts for the topic
+        Format:
+        [ ( user_id, text )]
+        """
+        return [( e.user_id, e.user_name, e.message ) for e in self.data ]
+
 
 
 if __name__ == '__main__':

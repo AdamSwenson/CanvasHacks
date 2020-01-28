@@ -9,14 +9,63 @@ __author__ = 'adam'
 from CanvasHacks.RequestTools import send_multi_page_get_request
 from CanvasHacks.UrlTools import make_url
 
-
+# import canvasapi.course
 
 
 class StudentRepository( IRepo ):
+    """Manages information about students downloaded
+    using canavasapi
+    """
+
+    def __init__( self, course_objects=[] ):
+        """
+        :param course_objects: List of canvasapi.Course objects or single object
+        """
+        if not isinstance(course_objects, list):
+            course_objects = [course_objects]
+        # List of canvas api objects
+        self.course_objects = course_objects
+        self.data = { }
+
+    def download( self ):
+        """Makes request to the server for all students enrolled in the
+         course
+        Stores student records in self.data with canvas id as keys
+        """
+        if len(self.course_objects) > 0:
+            for course in self.course_objects:
+                for u in course.get_users():
+                    self.data[u.id] = u
+        print( "Loaded {} students".format( len( self.data.keys() ) ) )
+
+    def store_results( self, results_list, course_id ):
+        pass
+
+    def get_student( self, canvas_id ):
+        return self.data.get(canvas_id)
+        # return Student(**s)
+        # return Student(student_id=canvas_id, name=self.data[ canvas_id ])
+
+    def get_student_name( self, canvas_id ):
+        try:
+            s = self.get_student( canvas_id )
+            return s.name
+            # return s['name']
+        except KeyError:
+            print('No student found for id: {}'.format(canvas_id))
+            return ''
+        except AttributeError:
+            print('No student found for id: {}'.format(canvas_id))
+            return ''
+
+
+class StudentRepositoryOld( IRepo ):
 
     def __init__( self, course_ids=[] ):
         self.data = { }
         self.course_ids = course_ids
+        # List of canvas api objects
+        self.courses = []
         if len(course_ids) > 0:
             # option to use blank so can just load
             # test data from file manually
@@ -48,11 +97,14 @@ class StudentRepository( IRepo ):
             self.data[ r[ 'id' ] ] = r
 
     def get_student( self, canvas_id ):
+        # s = self.data.get(canvas_id)
+        # return Student(**s)
         return Student(student_id=canvas_id, name=self.data[ canvas_id ])
 
     def get_student_name( self, canvas_id ):
         try:
             s = self.get_student( canvas_id )
+            # return s.name
             return s['name']
         except KeyError:
             return ''

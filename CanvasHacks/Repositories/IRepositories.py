@@ -6,7 +6,7 @@ __author__ = 'adam'
 
 class IRepo(object):
 
-    def download(self, course_id):
+    def download(self):
         raise NotImplementedError
 
     def store_results( self, results_list ):
