@@ -15,25 +15,63 @@ def make_assignment_button( assignment_id, name, ):
     style is success if the assignment has been selected
     style is primary if not selected
     """
+    return make_selection_button( assignment_id, name,
+                                  environment.CONFIG.get_assignment_ids,
+                                  environment.CONFIG.add_assignment,
+                                  environment.CONFIG.remove_assignment )
+    #
+    #
+    # def get_style( assignment_id ):
+    #     return 'success' if assignment_id in environment.CONFIG.get_assignment_ids() else 'primary'
+    #
+    #     # Create the button
+    #
+    # layout = widgets.Layout( width='50%' )
+    # b = widgets.Button( description=name, layout=layout, button_style=get_style( assignment_id ) )
+    #
+    # def callback( change ):
+    #     if assignment_id in environment.CONFIG.get_assignment_ids():
+    #         environment.CONFIG.remove_assignment( assignment_id )
+    #     else:
+    #         environment.CONFIG.add_assignment( assignment_id, name )
+    #     b.button_style = get_style( assignment_id )
+    #
+    # b.on_click( callback )
+    # display( b )
+    # return b
 
-    def get_style( assignment_id ):
-        return 'success' if assignment_id in environment.CONFIG.get_assignment_ids() else 'primary'
+
+def make_selection_button( item_id, name, get_func, add_func, remove_func ):
+    """Creates a single selection button
+    style is success if the assignment has been selected
+    style is primary if not selected
+    """
+
+    def get_style( item_id ):
+        return 'success' if item_id in get_func() else 'primary'
 
         # Create the button
 
     layout = widgets.Layout( width='50%' )
-    b = widgets.Button( description=name, layout=layout, button_style=get_style( assignment_id ) )
+    b = widgets.Button( description=name, layout=layout, button_style=get_style( item_id ) )
 
     def callback( change ):
-        if assignment_id in environment.CONFIG.get_assignment_ids():
-            environment.CONFIG.remove_assignment( assignment_id )
+        if item_id in get_func():
+            remove_func( item_id )
         else:
-            environment.CONFIG.add_assignment( assignment_id, name )
-        b.button_style = get_style( assignment_id )
+            add_func( item_id, name )
+        b.button_style = get_style( item_id )
 
     b.on_click( callback )
     display( b )
     return b
+
+
+def make_discussion_selection_button( topic_id, name ):
+    return make_selection_button( topic_id, name,
+                                  environment.CONFIG.get_discussion_ids,
+                                  environment.CONFIG.add_discussion,
+                                  environment.CONFIG.remove_discussion )
 
 
 def view_selected_assignments():

@@ -12,7 +12,10 @@ TEST_CREDENTIALS = "{}/test-credentials.ini"
 
 class Configuration( object ):
     archive_folder = False
+    # Which assignments we should be grading
     assignments = [ ]
+    # Which discussions we should grading
+    discussions = []
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
@@ -36,14 +39,30 @@ class Configuration( object ):
         cls.canvas_url_base = url
 
     @classmethod
+    def add_discussion( cls, topic_id, name=None ):
+        cls.discussions.append( (topic_id, name) )
+        cls.discussions = list( set( cls.discussions ) )
+
+
+    @classmethod
     def get_assignment_ids( cls ):
         return [ i[ 0 ] for i in cls.assignments ]
+
+    @classmethod
+    def get_discussion_ids( cls ):
+        return [ i[ 0 ] for i in cls.discussions ]
 
     @classmethod
     def remove_assignment( cls, assignment_id ):
         el = list( filter( lambda x: x[ 0 ] == assignment_id, cls.assignments ) )[ 0 ]
         idx = cls.assignments.index( el )
         return cls.assignments.pop( idx )
+
+    @classmethod
+    def remove_discussion( cls, topic_id ):
+        el = list( filter( lambda x: x[ 0 ] == topic_id, cls.discussions ) )[ 0 ]
+        idx = cls.discussions.index( el )
+        return cls.discussions.pop( idx )
 
     @classmethod
     def reset_assignments( cls ):

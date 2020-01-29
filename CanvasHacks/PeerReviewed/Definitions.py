@@ -44,6 +44,8 @@ class Activity( Model ):
 
 
 class TopicalAssignment( Activity ):
+    __name__ = 'Topical assignment'
+
     regex = re.compile( r"\btopical assignment\b" )
 
     def __init__( self, **kwargs ):
@@ -51,6 +53,8 @@ class TopicalAssignment( Activity ):
 
 
 class InitialWork( Activity ):
+    __name__ = "Content assignment"
+
     regex = re.compile( r"\bcontent assignment\b" )
 
     def __init__( self, **kwargs ):
@@ -61,7 +65,7 @@ class InitialWork( Activity ):
 class Review( Activity ):
     """Representation of the peer review component of the
      assignment """
-
+    __name__ = "Review of content assignment"
     regex = re.compile( r"\breview\b" )
 
     def __init__( self, **kwargs ):
@@ -79,6 +83,7 @@ class MetaReview( Activity ):
     """The review review"""
     """Representation of the peer review of 
     another student's submission"""
+    __name__ = "Metareview"
 
     regex = re.compile( r"\bmetareview\b" )
 
@@ -88,6 +93,8 @@ class MetaReview( Activity ):
 
 class DiscussionForum( Activity ):
     """Representation of the main discussion forum"""
+    __name__ = "Unit discussion forum"
+
     regex = re.compile( r"\bforum\b" )
 
     def __init__( self, **kwargs ):
@@ -96,6 +103,8 @@ class DiscussionForum( Activity ):
 
 class DiscussionReview( Activity ):
     """Representation of the peer review of the main discussion forum"""
+    __name__ = "Review of discussion"
+
     regex = re.compile( r"\bdiscussion review\b" )
 
     def __init__( self, **kwargs ):
@@ -104,6 +113,7 @@ class DiscussionReview( Activity ):
 
 class Unit:
     """The main SKAA. This holds the definitions of all the consituent parts"""
+    __name__ = 'Unit'
 
     def __init__( self, course, unit_number ):
         self.component_types = [TopicalAssignment,
