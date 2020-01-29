@@ -29,7 +29,22 @@ class Activity( Model ):
         return cls.regex.search( assignment_name.strip().lower(), re.IGNORECASE )
 
     def __init__( self, **kwargs ):
+        # when the activity is due
+        # ": "2013-01-23T23:59:00-07:00"
+        self.due_at = None
+        # when to lock the activity
+        self.lock_at = None
+        # // when to unlock the activity
+        self.unlock_at = None
+        self.points_possible = None
+        self.unit_number = None
+
         super().__init__( **kwargs )
+
+    @property
+    def make_title( self ):
+        # if self.unit_number:
+        return "Unit {} {}".format(self.unit_number, self.title_base)
 
     @property
     def assignable_points( self ):
@@ -42,9 +57,12 @@ class Activity( Model ):
         if not, it tries to make it into one"""
         return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
 
+    # @property
+    # def dates_dict( self ):
+    #     return {'assign' self.make_title
 
 class TopicalAssignment( Activity ):
-    __name__ = 'Topical assignment'
+    title_base = 'Topical assignment'
 
     regex = re.compile( r"\btopical assignment\b" )
 
@@ -53,7 +71,7 @@ class TopicalAssignment( Activity ):
 
 
 class InitialWork( Activity ):
-    __name__ = "Content assignment"
+    title_base = "Content assignment"
 
     regex = re.compile( r"\bcontent assignment\b" )
 
@@ -65,7 +83,7 @@ class InitialWork( Activity ):
 class Review( Activity ):
     """Representation of the peer review component of the
      assignment """
-    __name__ = "Review of content assignment"
+    title_base = "Peer review"
     regex = re.compile( r"\breview\b" )
 
     def __init__( self, **kwargs ):
@@ -83,7 +101,7 @@ class MetaReview( Activity ):
     """The review review"""
     """Representation of the peer review of 
     another student's submission"""
-    __name__ = "Metareview"
+    title_base = "Metareview"
 
     regex = re.compile( r"\bmetareview\b" )
 
@@ -93,7 +111,7 @@ class MetaReview( Activity ):
 
 class DiscussionForum( Activity ):
     """Representation of the main discussion forum"""
-    __name__ = "Unit discussion forum"
+    title_base = "Main discussion"
 
     regex = re.compile( r"\bforum\b" )
 
@@ -103,7 +121,7 @@ class DiscussionForum( Activity ):
 
 class DiscussionReview( Activity ):
     """Representation of the peer review of the main discussion forum"""
-    __name__ = "Review of discussion"
+    title_base = "Discussion review"
 
     regex = re.compile( r"\bdiscussion review\b" )
 
