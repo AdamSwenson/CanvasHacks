@@ -12,8 +12,8 @@ remove += stopwords.words('english')
 remove = set(remove)
 
 
-def make_wordbag(text):
-    return [word.lower() for sent in nltk.tokenize.sent_tokenize(text) for word in nltk.tokenize.word_tokenize(sent) if word.lower() not in remove]
+def make_wordbag(text, to_remove=remove):
+    return [word.lower() for sent in nltk.tokenize.sent_tokenize(text) for word in nltk.tokenize.word_tokenize(sent) if word.lower() not in to_remove]
 
 
 
