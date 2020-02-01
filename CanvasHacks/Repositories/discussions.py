@@ -7,72 +7,109 @@ from CanvasHacks.UploadGradeTools import upload_credit
 __author__ = 'adam'
 
 
-class DiscussionRepository(IRepo):
+class DiscussionRepository( IRepo ):
     """Manages the data for one discussion assignment"""
 
-    def __init__(self, course):
+    def __init__( self, course ):
         self.course = course
-        self.data = []
+        # List of dictionaries from arsed data:
+        # [{'student_id', 'student_name', 'text'}]
+        self.data = [ ]
+        # self.posts = []
 
-    def download(self, topic_id):
-        self._get_discussion_entries(topic_id)
-        self._get_info_for_grading(topic_id)
+    def download( self, topic_id ):
+        # self._get_discussion_entries(topic_id)
+        self._get_submissions( topic_id )
+        self._parse_posts_from_submissions()
+        print( "Loaded {} posts".format( len( self.data ) ) )
 
-    def _get_discussion_entries(self, topic_id):
-        """Loads and returns a list of discussion objects.
-            Objects look something like:
-            {'id': 2132485, 'user_id': 169155,
-            'parent_id': None, 'created_at': '2020-01-16T23:01:53Z',
-            'updated_at': '2020-01-16T23:01:53Z', 'rating_count': None,
-            'rating_sum': None, 'user_name': 'Test Student',
-            'message': '<p>got em</p>', 'user': {'id': 169155,
-            'display_name': 'Test Student',
-            'avatar_image_url': 'https://canvas.csun.edu/images/messages/avatar-50.png',
-            'html_url': 'https://canvas.csun.edu/courses/85210/users/169155',
-            'pronouns': None, 'fake_student': True},
-            'read_state': 'unread', 'forced_read_state': False,
-            'discussion_id': 737847, 'course_id': 85210}
-        """
-        discussion = self.course.get_discussion_topic(topic_id)
-        # result is lazy loaded, so iterate through it
-        self.data = [e for e in discussion.get_topic_entries()]
-        return self.data
+    # def _get_discussion_entries(self, topic_id):
+    #     """
+    #     THIS WON'T WORK BECAUSE ONLY RETURNS TOP LEVEL ENTRIES
+    #     Loads and returns a list of discussion objects.
+    #         Objects look something like:
+    #         {'id': 2132485, 'user_id': 169155,
+    #         'parent_id': None, 'created_at': '2020-01-16T23:01:53Z',
+    #         'updated_at': '2020-01-16T23:01:53Z', 'rating_count': None,
+    #         'rating_sum': None, 'user_name': 'Test Student',
+    #         'message': '<p>got em</p>', 'user': {'id': 169155,
+    #         'display_name': 'Test Student',
+    #         'avatar_image_url': 'https://canvas.csun.edu/images/messages/avatar-50.png',
+    #         'html_url': 'https://canvas.csun.edu/courses/85210/users/169155',
+    #         'pronouns': None, 'fake_student': True},
+    #         'read_state': 'unread', 'forced_read_state': False,
+    #         'discussion_id': 737847, 'course_id': 85210}
+    #     """
+    #     discussion = self.course.get_discussion_topic(topic_id)
+    #     # result is lazy loaded, so iterate through it
+    #     # self.data = [e for e in discussion.get_entries()]
+    #     self.data = [e for e in discussion.get_topic_entries()]
+    #     return self.data
 
-    def _get_info_for_grading( self, topic_id ):
+    def _get_submissions( self, topic_id ):
         """Retrieves all the information we'll need for grading"""
-        topic = self.course.get_discussion_topic(topic_id)
+        topic = self.course.get_discussion_topic( topic_id )
         # Graded discussions will be tied to an assignment, so
         # we need the id
         self.assignment_id = topic.assignment_id
-        print("Assignment {} is associated with topic {}".format(self.assignment_id, topic_id))
+        print( "Assignment {} is associated with topic {}".format( self.assignment_id, topic_id ) )
         # Load the assignment object
-        self.assignment = self.course.get_assignment(self.assignment_id)
+        self.assignment = self.course.get_assignment( self.assignment_id )
         # Load all submissions for the assignment
-        self.submissions = {s.user_id : s for s in self.assignment.get_submissions()}
-        print("Loaded {} submissions for the assignment".format(len(self.submissions.keys())))
+        self.submissions = { s.user_id: s for s in self.assignment.get_submissions() }
+        print( "Loaded {} submissions for the assignment".format( len( self.submissions.keys() ) ) )
+
+    def _parse_posts_from_submissions( self ):
+        """The submission objects downloaded for the assignment will
+        have the post information stored in a list called dicussion_entries.
+        This takes all of those and loads the user id, name and text into
+        posts"""
+        for sid, submission in self.submissions.items():
+            for entry in submission.discussion_entries:
+                self.data.append( { 'student_id': entry[ 'user_id' ],
+                                    'student_name': entry[ 'user_name' ],
+                                    'text': entry[ 'message' ]
+                                    } )
+            #
+            # self.posts.append( (entry.user_id, entry.user_name, entry.message) )
 
     def get_student_posts( self, student_id ):
         """Returns a list of all posts by student for the topic"""
-        return [p.message for p in self.data if p.user_id == student_id]
+        return [ p['text'] for p in self.data if p['student_id'] == student_id ]
 
-    def upload_student_grade( self, student_id, pct_credit):
+        # return [ p.message for p in self.data if p.user_id == student_id ]
+
+    def upload_student_grade( self, student_id, pct_credit ):
         # pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
         # Look up the student submission
-        submission = self.submissions.get(student_id)
+        submission = self.submissions.get( student_id )
 
-        upload_credit(submission.course_id, submission.assignment_id, student_id, pct_credit)
+        upload_credit( submission.course_id, submission.assignment_id, student_id, pct_credit )
         # Not sure why this doesn't work, but doing it manually does
         # return submission.edit(posted_grade=pct)
 
     def display_for_grading( self ):
         """Returns student submissions in format expected for
         ipython display
-        "Returns a list of tuples of all dicussion posts for the topic
+        "Returns a list of dictionaries of all dicussion posts for the topic
         Format:
-        [ ( user_id, text )]
         """
-        return [( e.user_id, e.user_name, e.message ) for e in self.data ]
+        return self.data # [ e for e in self.data ]
 
+    # return [ (e.user_id, e.user_name, e.message) for e in self.data ]
+
+    @property
+    def student_ids( self ):
+        uids = list( set( [ k['student_id'] for k in self.data ] ) )
+        uids.sort()
+        return uids
+
+    @property
+    def post_counts( self ):
+        counts = []
+        for sid in self.student_ids:
+            counts.append((sid, len([ s for s in self.data if s['student_id'] == sid])))
+        return counts
 
 
 if __name__ == '__main__':

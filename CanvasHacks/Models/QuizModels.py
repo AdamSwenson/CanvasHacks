@@ -14,7 +14,7 @@ class QuizData(Model):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(kwargs)
+        super().__init__(**kwargs)
         # self.handle_kwargs(kwargs)
         # for k in kwargs.keys():
         #     self.__setattr__(k, kwargs[k])
