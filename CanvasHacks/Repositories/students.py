@@ -1,6 +1,7 @@
 """
 Created by adam on 10/1/19
 """
+import CanvasHacks.environment as env
 from CanvasHacks.Models.student import Student
 from CanvasHacks.Repositories.IRepositories import IRepo
 
@@ -35,8 +36,14 @@ class StudentRepository( IRepo ):
         if len(self.course_objects) > 0:
             for course in self.course_objects:
                 for u in course.get_users():
-                    self.data[u.id] = u
+                    # Filter out teachers et al
+                    if u.id not in env.CONFIG.excluded_users:
+                        self.data[u.id] = u
         print( "Loaded {} students".format( len( self.data.keys() ) ) )
+
+    @property
+    def student_ids( self ):
+        return list(set([k for k in self.data.keys()]))
 
     def store_results( self, results_list, course_id ):
         pass

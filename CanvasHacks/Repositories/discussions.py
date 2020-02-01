@@ -2,6 +2,7 @@
 Created by adam on 1/27/20
 """
 from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.UploadGradeTools import upload_credit
 
 __author__ = 'adam'
 
@@ -50,11 +51,18 @@ class DiscussionRepository(IRepo):
         self.submissions = {s.user_id : s for s in self.assignment.get_submissions()}
         print("Loaded {} submissions for the assignment".format(len(self.submissions.keys())))
 
+    def get_student_posts( self, student_id ):
+        """Returns a list of all posts by student for the topic"""
+        return [p.message for p in self.data if p.user_id == student_id]
+
     def upload_student_grade( self, student_id, pct_credit):
-        pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
+        # pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
         # Look up the student submission
         submission = self.submissions.get(student_id)
-        return submission.edit(posted_grade=pct)
+
+        upload_credit(submission.course_id, submission.assignment_id, student_id, pct_credit)
+        # Not sure why this doesn't work, but doing it manually does
+        # return submission.edit(posted_grade=pct)
 
     def display_for_grading( self ):
         """Returns student submissions in format expected for

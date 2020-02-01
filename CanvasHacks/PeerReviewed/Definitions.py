@@ -174,6 +174,12 @@ class Unit:
         return [ a for a in assignments if rx.search( a.name.strip().lower() ) ]
 
     @property
+    def topical_assignment( self ):
+        for c in self.components:
+            if isinstance( c, TopicalAssignment ):
+                return c
+
+    @property
     def initial_work( self ):
         for c in self.components:
             if isinstance( c, InitialWork ):

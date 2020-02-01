@@ -19,6 +19,8 @@ class Configuration( object ):
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
+    # Ids of users, e.g., the teacher to exclude from grading operations
+    excluded_users = []
     log_folder = False
 
     @classmethod
@@ -43,6 +45,10 @@ class Configuration( object ):
         cls.discussions.append( (topic_id, name) )
         cls.discussions = list( set( cls.discussions ) )
 
+    @classmethod
+    def add_excluded_user( cls, user_id ):
+        cls.excluded_users.append(user_id)
+        cls.excluded_users = list(set(cls.excluded_users))
 
     @classmethod
     def get_assignment_ids( cls ):
@@ -135,6 +141,7 @@ class FileBasedConfiguration( Configuration ):
         cls.load_url_base()
         cls.load_local_filepaths()
         cls.load_section_ids()
+        cls.load_excluded_users()
 
     @classmethod
     def load_section_ids( cls ):
@@ -161,6 +168,15 @@ class FileBasedConfiguration( Configuration ):
     @classmethod
     def load_url_base( cls ):
         cls.add_canvas_url_base( cls.configuration[ 'url' ].get( 'BASE' ) )
+
+    @classmethod
+    def load_excluded_users( cls ):
+        try:
+            for v in cls.configuration[ 'excluded_users' ].values():
+                cls.add_excluded_user(int(v))
+            print("Will ignore work by users: ", cls.excluded_users)
+        except:
+            pass
 
 
 if __name__ == '__main__':

@@ -17,16 +17,43 @@ from CanvasHacks.UrlTools import make_url
 def upload_students_receiving_credit( store: DataStore ):
     """Makes the requests to the server to assign each of the students credit
     for the assignment
+    Hits https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.update
     """
-    data = { 'submission': { 'posted_grade': 'pass' } }
+    # data = { 'submission': { 'posted_grade': 'pass' } }
+    #
+    # url = make_url( store.course_id, 'assignments' )
+    # url = "%s/%s/submissions" % (url, store.assignment_id)
 
-    url = make_url( store.course_id, 'assignments' )
-    url = "%s/%s/submissions" % (url, store.assignment_id)
+    for sid in store.credit:
+        upload_credit(store.course_id, store.assignment_id, sid, 100)
+        # surl = "%s/%s" % (url, s)
+        # print( 'credit', surl )
+        # requests.put( surl, headers=make_request_header(), json=data )
 
-    for s in store.credit:
-        surl = "%s/%s" % (url, s)
-        print( 'credit', surl )
-        requests.put( surl, headers=make_request_header(), json=data )
+
+def upload_credit( course_id, assignment_id, student_id, pct_credit ):
+    """
+    Handles actual upload to server.
+
+    Hits https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.update
+    :param pct_credit: 100 for full
+    :param course_id:
+    :param assignment_id:
+    :param student_id:
+    :return:
+    """
+    pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
+
+    data = { 'submission': { 'posted_grade': pct } }
+
+    url_temp = "{url_base}/{assignment_id}/submissions/{student_id}"
+
+    url = url_temp.format( url_base=make_url( course_id, 'assignments' ),
+                           assignment_id=assignment_id,
+                           student_id=student_id )
+
+    print( 'Uploading {} credit'.format(pct), url )
+    requests.put( url, headers=make_request_header(), json=data )
 
 
 def assign_no_credit( course_id, assignment_id, students ):
