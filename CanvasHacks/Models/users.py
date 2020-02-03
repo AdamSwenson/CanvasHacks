@@ -20,6 +20,7 @@ class StudentUser(Model):
         self.token = token
         self.topic_id = None
         self.assignment_id = None
+        self.quiz_id = None
         self.discussion_entries = []
         super().__init__(**kwargs)
 
