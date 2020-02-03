@@ -10,16 +10,21 @@ __author__ = 'adam'
 class DiscussionRepository( IRepo ):
     """Manages the data for one discussion assignment"""
 
-    def __init__( self, course ):
+    def __init__( self, course, topic_id ):
+        self.topic_id = topic_id
         self.course = course
         # List of dictionaries from arsed data:
         # [{'student_id', 'student_name', 'text'}]
-        self.data = [ ]
+        self.data = []
         # self.posts = []
 
-    def download( self, topic_id ):
+    @property
+    def course_id( self ):
+        return self.course.id
+
+    def download( self ):
         # self._get_discussion_entries(topic_id)
-        self._get_submissions( topic_id )
+        self._get_submissions( self.topic_id )
         self._parse_posts_from_submissions()
         print( "Loaded {} posts".format( len( self.data ) ) )
 
@@ -47,7 +52,10 @@ class DiscussionRepository( IRepo ):
     #     return self.data
 
     def _get_submissions( self, topic_id ):
-        """Retrieves all the information we'll need for grading"""
+        """Retrieves all the information we'll need for grading
+        Not using self.topic_id to allow method to be called
+        independently for testing
+        """
         topic = self.course.get_discussion_topic( topic_id )
         # Graded discussions will be tied to an assignment, so
         # we need the id
@@ -80,12 +88,11 @@ class DiscussionRepository( IRepo ):
         # return [ p.message for p in self.data if p.user_id == student_id ]
 
     def upload_student_grade( self, student_id, pct_credit ):
+        upload_credit( self.course_id, self.assignment_id, student_id, pct_credit )
+        # Not sure why this doesn't work, but doing it manually does
         # pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
         # Look up the student submission
-        submission = self.submissions.get( student_id )
-
-        upload_credit( submission.course_id, submission.assignment_id, student_id, pct_credit )
-        # Not sure why this doesn't work, but doing it manually does
+        # submission = self.submissions.get( student_id )
         # return submission.edit(posted_grade=pct)
 
     def display_for_grading( self ):
@@ -94,18 +101,22 @@ class DiscussionRepository( IRepo ):
         "Returns a list of dictionaries of all dicussion posts for the topic
         Format:
         """
-        return self.data # [ e for e in self.data ]
+        return self.data
+        # [ e for e in self.data ]
 
     # return [ (e.user_id, e.user_name, e.message) for e in self.data ]
 
-    @property
-    def student_ids( self ):
-        uids = list( set( [ k['student_id'] for k in self.data ] ) )
-        uids.sort()
-        return uids
+    # @property
+    # def student_ids( self ):
+    #     uids = list( set( [ k['student_id'] for k in self.data ] ) )
+    #     uids.sort()
+    #     return uids
 
     @property
     def post_counts( self ):
+        """Returns list of tuples
+        ( student id, # of posts )
+        """
         counts = []
         for sid in self.student_ids:
             counts.append((sid, len([ s for s in self.data if s['student_id'] == sid])))

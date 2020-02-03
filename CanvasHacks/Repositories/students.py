@@ -41,12 +41,9 @@ class StudentRepository( IRepo ):
                         self.data[u.id] = u
         print( "Loaded {} students".format( len( self.data.keys() ) ) )
 
-    @property
-    def student_ids( self ):
-        return list(set([k for k in self.data.keys()]))
-
-    def store_results( self, results_list, course_id ):
-        pass
+    # @property
+    # def student_ids( self ):
+    #     return list(set([k for k in self.data.keys()]))
 
     def get_student( self, canvas_id ):
         return self.data.get(canvas_id)
