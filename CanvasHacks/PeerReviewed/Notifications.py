@@ -1,33 +1,45 @@
 """
 Created by adam on 12/26/19
 """
+from CanvasHacks.RequestTools import send_post_request
+
 __author__ = 'adam'
 
 if __name__ == '__main__':
     pass
 
 
-def make_conversation_data( student_id, subject, body):
+def notify_student( student_id, subject, body ):
+    """Sends a new message to the student.
+    Returns the result object which will contain the conversation id
+    if needed for future use
+    """
+    d = make_conversation_data( student_id, subject, body )
+
+    return send_post_request( 'https://canvas.csun.edu/api/v1/conversations', d )
+
+
+def make_conversation_data( student_id, subject, body ):
     """Creates the request data to be sent to canvas"""
     return {
-        'recipients' : [student_id],
+        'recipients': [ student_id ],
         'body': body,
-        'subect' : subject,
-        'force_new' : True
+        'subject': subject,
+        'force_new': True
     }
 
 
-def make_prompt_and_response(response_list):
+def make_prompt_and_response( response_list ):
     temp = """
     <h3>{prompt}</h3>
 
     <p>{response}</p>
     """
-    rs = [ temp.format(**r) for r in response_list]
-    return " ".join(rs)
+    rs = [ temp.format( **r ) for r in response_list ]
+    return " ".join( rs )
 
 
-def make_notice(data):
+def make_notice( data ):
     """Should define
     name, responses, review_assignment_name, access_code
     """
@@ -48,5 +60,4 @@ def make_notice(data):
     and use the access code <strong>{access_code}</strong>
     </p>
     
-    """.format(**data)
-
+    """.format( **data )
