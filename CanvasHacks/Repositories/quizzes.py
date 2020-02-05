@@ -4,6 +4,7 @@ Created by adam on 5/6/19
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.QuizGrading import get_penalty
+from CanvasHacks.Repositories.IRepositories import IRepo
 
 __author__ = 'adam'
 
@@ -181,7 +182,7 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository( QuizDataMixin ):
+class QuizRepository(  QuizDataMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity ):
@@ -208,7 +209,7 @@ class QuizRepository( QuizDataMixin ):
         called independently for use with test data
         """
         # Store ids so we don't have to reset the index for submitters prop
-        self.student_ids = self.data.student_id.tolist()
+        self.student_ids = list(set(self.data.student_id.tolist()))
         # the name will be set as index from sorting
         # so we set to student id to make look ups easier
         self.data.set_index( 'student_id', inplace=True )
