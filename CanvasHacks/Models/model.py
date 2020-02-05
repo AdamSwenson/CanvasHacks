@@ -9,7 +9,11 @@ class Model(object):
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except AttributeError as e:
+                print("Problem setting {} to {} \n".format(key, value), e)
+
     #
     # for k in kwargs.keys():
     #         # print(k, kwargs[k])
@@ -22,6 +26,9 @@ if __name__ == '__main__':
 
 class StoreMixin( object ):
 
-    def handle_kwargs( self, kwargs ):
+    def handle_kwargs( self, **kwargs ):
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except AttributeError as e:
+                print("Problem setting {} to {} \n".format(key, value), e)

@@ -8,7 +8,36 @@ import pandas as pd
 from CanvasHacks.Models.model import Model
 
 
-class QuizData(Model):
+class QuizDataMixin:
+    """ Methods for handling data downloaded for quiz type assignments """
+
+    @property
+    def folder_path(self):
+        safename = "".join([n for n in self.name if n != ':'])
+        return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, safename)
+
+    def set_question_columns(self, results_frame):
+        """Finds the question columns in a results frame
+        and stores them in a list of tuples
+        with the form (question id, string column name)
+        """
+        questions = self._detect_question_columns(results_frame.columns)
+        self.question_columns = [(q.split(':')[0], q) for q in questions ]
+
+    def _detect_question_columns(self, columns):
+        """Return a list of columns which contain a colon,
+        those probably contain the question answers
+        """
+        return [c for c in columns if len(c.split(':')) > 1]
+
+    @staticmethod
+    def _check_date( date ):
+        """Checks that a value is a pd.Timestamp
+        if not, it tries to make it into one"""
+        return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
+
+
+class QuizData(Model, QuizDataMixin):
     """Holds the data which defines the properties of a
     canvas quiz type assignment
     """
@@ -43,10 +72,10 @@ class QuizData(Model):
     @quarter_credit_date.setter
     def quarter_credit_date(self, date):
         self._quarter_credit_date = pd.to_datetime(date)
-
-    @property
-    def folder_path(self):
-        return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.name)
+    #
+    # @property
+    # def folder_path(self):
+    #     return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.name)
 
     @property
     def lock_date(self):
@@ -60,25 +89,25 @@ class QuizData(Model):
     def name(self):
         return self.title
 
-    def set_question_columns(self, results_frame):
-        """Finds the question columns in a results frame
-        and stores them in a list of tuples
-        with the form (question id, string column name)
-        """
-        questions = self._detect_question_columns(results_frame.columns)
-        self.question_columns = [(q.split(':')[0], q) for q in questions ]
-
-    def _detect_question_columns(self, columns):
-        """Return a list of columns which contain a colon,
-        those probably contain the question answers
-        """
-        return [c for c in columns if len(c.split(':')) > 1]
-
-    @staticmethod
-    def _check_date( date ):
-        """Checks that a value is a pd.Timestamp
-        if not, it tries to make it into one"""
-        return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
+    # def set_question_columns(self, results_frame):
+    #     """Finds the question columns in a results frame
+    #     and stores them in a list of tuples
+    #     with the form (question id, string column name)
+    #     """
+    #     questions = self._detect_question_columns(results_frame.columns)
+    #     self.question_columns = [(q.split(':')[0], q) for q in questions ]
+    #
+    # def _detect_question_columns(self, columns):
+    #     """Return a list of columns which contain a colon,
+    #     those probably contain the question answers
+    #     """
+    #     return [c for c in columns if len(c.split(':')) > 1]
+    #
+    # @staticmethod
+    # def _check_date( date ):
+    #     """Checks that a value is a pd.Timestamp
+    #     if not, it tries to make it into one"""
+    #     return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
 
 
 

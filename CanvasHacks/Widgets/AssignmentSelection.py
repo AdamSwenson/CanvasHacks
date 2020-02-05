@@ -10,6 +10,20 @@ from CanvasHacks.RequestTools import get_assignments_needing_grading, \
     get_assignments_with_submissions
 
 
+def make_unit_button( unit_number ):
+    """Creates a single selection button
+    style is success if the unit has been selected
+    style is primary if not selected
+    """
+    name = "Unit {}".format( unit_number )
+    return make_selection_button( unit_number,
+                                  name,
+                                  environment.CONFIG.get_unit_number,
+                                  environment.CONFIG.set_unit_number,
+                                  environment.CONFIG.reset_unit_number
+                                  )
+
+
 def make_assignment_button( assignment_id, name, ):
     """Creates a single selection button
     style is success if the assignment has been selected
@@ -19,7 +33,7 @@ def make_assignment_button( assignment_id, name, ):
                                   environment.CONFIG.get_assignment_ids,
                                   environment.CONFIG.add_assignment,
                                   environment.CONFIG.remove_assignment )
-    #
+
     #
     # def get_style( assignment_id ):
     #     return 'success' if assignment_id in environment.CONFIG.get_assignment_ids() else 'primary'
@@ -115,6 +129,18 @@ def make_assignment_chooser():
         buttons.append( make_assignment_button( assignment_id, assignment_name ) )
     # return buttons
 
+
+def make_unit_chooser(num_units=6):
+    """Display inputs for selecting assignments
+    The selected assignments will be stored in the
+    environment.CONFIG
+    """
+    buttons = [ ]
+    #     if course_id:
+    #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
+    num_units += 1
+    for i in range(1, num_units ) :
+        buttons.append( make_unit_button( i ) )
 
 if __name__ == '__main__':
     pass

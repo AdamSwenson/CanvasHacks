@@ -29,6 +29,19 @@ class TestAssociationRepository( TestCase ):
         assoc = self.obj._make_associations(self.students)
         self.assertEqual(5, len(assoc) , "single submission; objects" )
 
+    def test__make_associations_3_submissions( self ):
+        # Students only submit once
+        # id case
+        self.student_ids = [i for i in range(0,3)]
+        assoc = self.obj._make_associations(self.student_ids)
+        self.assertEqual(3, len(assoc) , "single submission; ids")
+
+        # obj case
+        self.students = [student_factory() for i in range(0,3)]
+        assoc = self.obj._make_associations(self.students)
+        self.assertEqual(3, len(assoc) , "single submission; objects" )
+
+
     def test__make_associations_double_submissions( self ):
         # Students only submit twice adjacent
         s = []

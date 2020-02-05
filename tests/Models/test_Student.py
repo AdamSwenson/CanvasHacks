@@ -36,6 +36,21 @@ class TestStudentUtilities( TestCase ):
         self.assertIsInstance( r, Student, "Returns student" )
         self.assertTrue( int( s ) == r.student_id )
 
+    def test_ensure_student_dict( self ):
+        s = {'student_id' : '1111114',
+             'other' : 'taco'}
+        r = ensure_student( s )
+        self.assertIsInstance( r, Student, "Returns student in dictionary case" )
+        self.assertTrue( int( s['student_id'] ) == r.id )
+
+    def test_ensure_student_obj( self ):
+        s = object()
+        s.student_id = '1111114'
+        r = ensure_student( s )
+        self.assertIsInstance( r, Student, "Returns student in object case" )
+        self.assertTrue( int( s['student_id'] ) == r.id )
+
+
 
 class TestStudent( TestCase ):
 

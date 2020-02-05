@@ -1,6 +1,7 @@
 """
 Created by adam on 5/6/19
 """
+from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.QuizGrading import get_penalty
 
@@ -50,6 +51,7 @@ def load_student_work( csv_filepath, submissions ):
 # Limit to just the final attempts
 
 def remove_non_final_attempts( frame ):
+    """Can only be ran after submission has been added?"""
     frame.dropna( subset=[ 'submission_id' ], inplace=True )
 
 
@@ -179,11 +181,12 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository( object ):
+class QuizRepository( QuizDataMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity ):
         self.activity = activity
+        self.question_columns = []
 
     def _process( self, work_frame, submissions ):
         self.submissions = submissions
@@ -197,6 +200,8 @@ class QuizRepository( object ):
         remove_non_final_attempts( self.data )
         # finish setting up the dataframe
         self._cleanup_data()
+        # Store the text column names
+        self.set_question_columns(self.data)
 
     def _cleanup_data( self ):
         """This is abstracted out so it can be
@@ -210,8 +215,8 @@ class QuizRepository( object ):
         # Remove unneeded columns
         # self.data = self.data[self.activity.question_columns]
 
-    def get_student_work( self, student ):
-        return self.data.loc[ student.student_id ]
+    def get_student_work( self, student_id ):
+        return self.data.loc[ student_id ]
 
     @property
     def submitters( self ):

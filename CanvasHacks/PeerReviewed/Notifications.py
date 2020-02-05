@@ -31,9 +31,14 @@ def make_conversation_data( student_id, subject, body ):
 
 def make_prompt_and_response( response_list ):
     temp = """
-    <h3>{prompt}</h3>
+    ------
+    
+    Prompt: {prompt}
 
-    <p>{response}</p>
+    Their response:
+    {response}
+    
+    ------
     """
     rs = [ temp.format( **r ) for r in response_list ]
     return " ".join( rs )
@@ -47,17 +52,31 @@ def make_notice( data ):
     # data['responses'] = make_prompt_and_response(data['response_list'])
 
     return """
-    <p>Hi {name},</p>
+    Hi {name},
     
-    <p>Here is another student's assignment for you to review:</p>
+    Here is another student's assignment for you to review:
+    =======================
     
     {responses}
     
+    =======================
     {other}
     
-    <p>To complete your review, open the quiz named {review_assignment_name} </br>
+     Please make sure you read the instructions in {review_assignment_name} before getting started.
+     
+     To complete your review, open the quiz named 
+             {review_assignment_name} 
+             {review_url}
+    and use the access code: 
+            {access_code}
     
-    and use the access code <strong>{access_code}</strong>
-    </p>
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
     
+    You may open and look at the peer review assignment as many times as you like.
+    
+    (Apologies for the terrible formatting of this message, Canvas is being annoying).
+    
+    Enjoy,
+    /a
+   
     """.format( **data )

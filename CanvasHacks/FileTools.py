@@ -4,9 +4,22 @@ Tools for reading and writing csv files
 Created by adam on 6/22/18
 """
 __author__ = 'adam'
-
+import datetime
 import csv
 import os
+
+def getDateForMakingFileName():
+    return datetime.date.isoformat( datetime.date.today() )
+
+
+def create_folder(folder_path):
+    try:
+        os.mkdir(folder_path)
+        print("created: %s" % folder_path)
+    except Exception as e:
+        print("error creating: %s" % folder_path)
+        print(e)
+        pass
 
 
 def makeDataFileIterator(folderPath, exclude=[]):

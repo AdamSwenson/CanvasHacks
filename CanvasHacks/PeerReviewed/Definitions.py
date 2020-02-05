@@ -11,9 +11,15 @@ import canvasapi
 if __name__ == '__main__':
     pass
 import re
-
+import pandas as pd
+from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.model import Model
 
+def utc_string_to_local_dt(utc_string):
+    """'2020-02-07T07:59:59Z'
+    returns Timestamp('2020-02-06 23:59:59-0800', tz='US/Pacific')
+    """
+    return pd.to_datetime(utc_string).tz_convert('US/Pacific')
 
 class Activity( Model ):
     """A wrapper around the canvas provided properties for a quiz which adds
@@ -51,6 +57,14 @@ class Activity( Model ):
         """How many points are assigned by the reviewer"""
         return self.max_points - self.completion_points
 
+    @property
+    def string_due_date( self ):
+        """Returns a human readable date for the due date with
+        the format yyyy-mm-dd
+        """
+        t = utc_string_to_local_dt(self.due_at)
+        return t.date().isoformat()
+
     @staticmethod
     def _check_date( date ):
         """Checks that a value is a pd.Timestamp
@@ -61,7 +75,7 @@ class Activity( Model ):
     # def dates_dict( self ):
     #     return {'assign' self.make_title
 
-class TopicalAssignment( Activity ):
+class TopicalAssignment( Activity, QuizDataMixin ):
     title_base = 'Topical assignment'
 
     regex = re.compile( r"\btopical assignment\b" )
@@ -70,7 +84,7 @@ class TopicalAssignment( Activity ):
         super().__init__( **kwargs )
 
 
-class InitialWork( Activity ):
+class InitialWork( Activity,  QuizDataMixin):
     title_base = "Content assignment"
 
     regex = re.compile( r"\bcontent assignment\b" )

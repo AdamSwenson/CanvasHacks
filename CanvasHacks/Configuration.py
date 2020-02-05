@@ -21,7 +21,12 @@ class Configuration( object ):
     canvas_url_base = False
     # Ids of users, e.g., the teacher to exclude from grading operations
     excluded_users = []
+    # Whether in test environment
+    is_test = False
     log_folder = False
+    # Number of the unit
+    unit = None
+    test_course_id = None
 
     @classmethod
     def add_assignment( cls, assignment_id, assignment_name=None ):
@@ -90,6 +95,22 @@ class Configuration( object ):
         cls.reset_canvas_token()
         cls.reset_course_ids()
 
+    # ------------ Unit selection
+    @classmethod
+    def set_unit_number( cls, unit_number, name=None ):
+        cls.unit = unit_number
+
+    @classmethod
+    def reset_unit_number( cls, dummy_param=None):
+        cls.unit = None
+
+    @classmethod
+    def get_unit_number( cls ):
+        """I know, stupid. But it parallels other methods
+        so the selection buttons will work the same"""
+        return [cls.unit]
+
+
 
 class InteractiveConfiguration( Configuration ):
     def __init__( self ):
@@ -147,7 +168,7 @@ class FileBasedConfiguration( Configuration ):
     def load_section_ids( cls ):
         try:
             for v in cls.configuration[ 'sections' ].values():
-                cls.add_course_id( v )
+                cls.add_course_id( int(v) )
         except:
             pass
 
@@ -177,6 +198,25 @@ class FileBasedConfiguration( Configuration ):
             print("Will ignore work by users: ", cls.excluded_users)
         except:
             pass
+
+    # --------------- Test vs live
+    @classmethod
+    def set_test( cls ):
+        """Tells to set all variables to test settings"""
+        cls.is_test = True
+        # set course id
+        test_id = cls.configuration['testing'].get('TEST_COURSE_ID')
+        cls.course_ids = [int(test_id)]
+        print(" ".join([" TEST " for _ in range(0, 5)]))
+
+    @classmethod
+    def set_live( cls ):
+        """Set all variables to live setting"""
+        cls.is_test = False
+        # clear out possible test values
+        cls.course_ids = []
+        cls.load_section_ids()
+        print(" ".join([" LIVE " for _ in range(0, 5)]))
 
 
 if __name__ == '__main__':
