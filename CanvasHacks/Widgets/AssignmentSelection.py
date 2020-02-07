@@ -10,51 +10,6 @@ from CanvasHacks.RequestTools import get_assignments_needing_grading, \
     get_assignments_with_submissions
 
 
-def make_unit_button( unit_number ):
-    """Creates a single selection button
-    style is success if the unit has been selected
-    style is primary if not selected
-    """
-    name = "Unit {}".format( unit_number )
-    return make_selection_button( unit_number,
-                                  name,
-                                  environment.CONFIG.get_unit_number,
-                                  environment.CONFIG.set_unit_number,
-                                  environment.CONFIG.reset_unit_number
-                                  )
-
-
-def make_assignment_button( assignment_id, name, ):
-    """Creates a single selection button
-    style is success if the assignment has been selected
-    style is primary if not selected
-    """
-    return make_selection_button( assignment_id, name,
-                                  environment.CONFIG.get_assignment_ids,
-                                  environment.CONFIG.add_assignment,
-                                  environment.CONFIG.remove_assignment )
-
-    #
-    # def get_style( assignment_id ):
-    #     return 'success' if assignment_id in environment.CONFIG.get_assignment_ids() else 'primary'
-    #
-    #     # Create the button
-    #
-    # layout = widgets.Layout( width='50%' )
-    # b = widgets.Button( description=name, layout=layout, button_style=get_style( assignment_id ) )
-    #
-    # def callback( change ):
-    #     if assignment_id in environment.CONFIG.get_assignment_ids():
-    #         environment.CONFIG.remove_assignment( assignment_id )
-    #     else:
-    #         environment.CONFIG.add_assignment( assignment_id, name )
-    #     b.button_style = get_style( assignment_id )
-    #
-    # b.on_click( callback )
-    # display( b )
-    # return b
-
-
 def make_selection_button( item_id, name, get_func, add_func, remove_func ):
     """Creates a single selection button
     style is success if the assignment has been selected
@@ -81,12 +36,29 @@ def make_selection_button( item_id, name, get_func, add_func, remove_func ):
     return b
 
 
+# ------------------------- Discussions
 def make_discussion_selection_button( topic_id, name ):
     return make_selection_button( topic_id, name,
                                   environment.CONFIG.get_discussion_ids,
                                   environment.CONFIG.add_discussion,
                                   environment.CONFIG.remove_discussion )
 
+
+def make_discussion_chooser( course ):
+    """Display inputs for selecting assignments
+    The selected assignments will be stored in the
+    environment.CONFIG
+    """
+    discussions = [ d for d in course.get_discussion_topics() ]
+    buttons = [ ]
+    discussions = [ (a.id, a.title) for a in discussions ]
+    #     if course_id:
+    #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
+    for discussion_id, discussion_name in discussions:
+        buttons.append( make_discussion_selection_button( discussion_id, discussion_name ) )
+
+
+# ---------------------------- Assignments
 
 def view_selected_assignments():
     out = widgets.Output( layout={ 'border': '1px solid black' } )
@@ -110,6 +82,17 @@ def view_ungraded_assignments():
     display( out )
 
 
+def make_assignment_button( assignment_id, name, ):
+    """Creates a single selection button
+    style is success if the assignment has been selected
+    style is primary if not selected
+    """
+    return make_selection_button( assignment_id, name,
+                                  environment.CONFIG.get_assignment_ids,
+                                  environment.CONFIG.add_assignment,
+                                  environment.CONFIG.remove_assignment )
+
+
 def make_assignment_chooser():
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
@@ -130,7 +113,23 @@ def make_assignment_chooser():
     # return buttons
 
 
-def make_unit_chooser(num_units=6):
+# ------------------------------ Unit
+
+def make_unit_button( unit_number ):
+    """Creates a single selection button
+    style is success if the unit has been selected
+    style is primary if not selected
+    """
+    name = "Unit {}".format( unit_number )
+    return make_selection_button( unit_number,
+                                  name,
+                                  environment.CONFIG.get_unit_number,
+                                  environment.CONFIG.set_unit_number,
+                                  environment.CONFIG.reset_unit_number
+                                  )
+
+
+def make_unit_chooser( num_units=6 ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -139,8 +138,9 @@ def make_unit_chooser(num_units=6):
     #     if course_id:
     #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
     num_units += 1
-    for i in range(1, num_units ) :
+    for i in range( 1, num_units ):
         buttons.append( make_unit_button( i ) )
+
 
 if __name__ == '__main__':
     pass

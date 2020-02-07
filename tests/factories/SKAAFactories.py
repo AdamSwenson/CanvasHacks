@@ -16,6 +16,59 @@ from faker import Faker
 
 fake = Faker()
 
+# ------------------------------ Survey answer tools
+import random
+
+def answer_essay_survey_questions( questions):
+    # make answers
+    answers = []
+    for q in essay_questions:
+        answers.append({
+            'id' : q.id,
+            'answer': "\n".join([fake.paragraph() for _ in range(0,5)])
+        })
+    return answers
+
+def answer_multiple_choice_survey_questions(questions):
+    answers = []
+    for q in questions:
+        choices = q.answers
+        random.shuffle(choices)
+        answers.append({
+            'id': q.id,
+            'answer': choices[0]['id']
+        })
+    return answers
+
+
+def answer_survey(student_token, course_id, quiz_id, essay_questions, multiple_choice):
+    student = StudentUser(student_token, course_id, quiz_id=quiz_id)
+    quiz = student.course.get_quiz(quiz_id)
+
+    # Create a submission object
+    try:
+        submission = quiz.create_submission()
+    except canvasapi.exceptions.Conflict:
+        # a submission was already created
+        # so get that one
+        submission = [s for s in quiz.get_submissions()][0]
+
+    # make answers
+    answers = []
+    answers += answer_essay_survey_questions(essay_questions)
+    answers += answer_multiple_choice_survey_questions(multiple_choice)
+
+    # submit answers
+    question_subs = submission.answer_submission_questions(quiz_questions=answers)
+
+    # Complete the quiz
+    submission.complete()
+    print("Answers created for user {}".format(submission.user_id))
+
+    # return for use in testing
+    return answers
+
+
 
 # ------------------------------- Discussion answer tools
 

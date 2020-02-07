@@ -62,6 +62,7 @@ class Activity( Model ):
         """Returns a human readable date for the due date with
         the format yyyy-mm-dd
         """
+        if self.due_at is None: return ''
         t = utc_string_to_local_dt(self.due_at)
         return t.date().isoformat()
 
@@ -94,7 +95,7 @@ class InitialWork( Activity,  QuizDataMixin):
         super().__init__( **kwargs )
 
 
-class Review( Activity ):
+class Review( Activity, QuizDataMixin):
     """Representation of the peer review component of the
      assignment """
     title_base = "Peer review"
@@ -111,7 +112,7 @@ class Review( Activity ):
         super().__init__( **kwargs )
 
 
-class MetaReview( Activity ):
+class MetaReview( Activity, QuizDataMixin ):
     """The review review"""
     """Representation of the peer review of 
     another student's submission"""

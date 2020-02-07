@@ -55,6 +55,13 @@ def student_from_canvas_user(user_obj):
     return s
 
 
+def get_first_name(user):
+    """Given a canvas api user object representing a student
+    returns the first name
+    """
+    return user.sortable_name.split(',')[1]
+
+
 class Student( Base, StoreMixin ):
     """
     Storable model of student

@@ -12,9 +12,14 @@ class QuizDataMixin:
     """ Methods for handling data downloaded for quiz type assignments """
 
     @property
+    def safe_name( self ):
+        """Returns a name that won't f up the file path"""
+        return "".join([n for n in self.name if n != ':'])
+
+    @property
     def folder_path(self):
-        safename = "".join([n for n in self.name if n != ':'])
-        return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, safename)
+        # ssafename = "".join([n for n in self.name if n != ':'])
+        return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.safe_name)
 
     def set_question_columns(self, results_frame):
         """Finds the question columns in a results frame

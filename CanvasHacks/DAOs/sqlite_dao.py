@@ -3,13 +3,14 @@ Created by adam on 1/18/20
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+
 from CanvasHacks.Models.review_association import Base
 
 __author__ = 'adam'
 
 if __name__ == '__main__':
     pass
+
 
 # Base = declarative_base()
 
@@ -45,12 +46,16 @@ class SqliteDAO( object ):
         print( "creating connection: %s " % connection_string )
         self.engine = create_engine( connection_string, echo=False )
 
-        Base.metadata.create_all(self.engine)
+        Base.metadata.create_all( self.engine )
         # print( "creating connection: %s " % conn )
         # self.engine = create_engine( conn, echo=False )
 
+    def initialize_db_file( self ):
+        Base.metadata.create_all( self.engine )
+
+
     def _make_file_engine( self, filepath ):
-        connection_string =  'sqlite:{}'.format( filepath )
+        connection_string = 'sqlite:///{}'.format( filepath )
         print( "creating connection: %s " % connection_string )
         self.engine = create_engine( connection_string, echo=False )
 
