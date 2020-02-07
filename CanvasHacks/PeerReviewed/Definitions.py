@@ -188,7 +188,9 @@ class Unit:
         for t in self.component_types:
             for a in unit_assignments:
                 if t.is_activity_type( a.name ):
-                    self.components.append( t( **a.attributes ) )
+                    o = t( **a.attributes )
+                    o.access_code = self._set_access_code(o)
+                    self.components.append( o )
 
     def find_for_unit( self, unit_number, assignments ):
         """Given a list of assignment names finds the one's
@@ -196,6 +198,23 @@ class Unit:
         """
         rx = re.compile( r"\bunit {}\b".format( unit_number ) )
         return [ a for a in assignments if rx.search( a.name.strip().lower() ) ]
+
+    def _set_access_code( self, obj ):
+        """Some things will have an access code stored
+        on them. Others ahve no access code. Some have
+        the access code stored elsewhere.
+        This sorts that out and sets the access code if possible
+        """
+        try:
+            # first we try to set from self
+            return obj.access_code
+        except AttributeError:
+            # check to see if we ahve a quiz id
+            try:
+                return self.course.get_quiz( obj.quiz_id ).access_code
+            except AttributeError:
+                print( "No access code for {}".format(obj.name) )
+                return None
 
     @property
     def topical_assignment( self ):
