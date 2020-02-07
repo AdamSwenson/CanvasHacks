@@ -16,11 +16,18 @@ import json
 from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
 
 def process_work( work_frame, submissions_frame ):
-    work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
+    try:
+        v = work_frame['student_id']
+    except KeyError:
+        work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
     # merge it with matching rows from the submissions frame
     frame = pd.merge( work_frame, submissions_frame, how='left', on=[ 'student_id', 'attempt' ] )
-    frame.set_index( 'name', inplace=True )
-    frame.sort_index( inplace=True )
+    try:
+        # Try to sort it on student names if possible
+        frame.set_index( 'name', inplace=True )
+        frame.sort_index( inplace=True )
+    except KeyError:
+        pass
     return frame
 
 
@@ -183,10 +190,11 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
+class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
     """Manages the data for a quiz type assignment"""
 
-    def __init__( self, activity ):
+    def __init__( self, activity, course=None ):
+        self.course = course
         self.activity = activity
         self.question_columns = []
 
@@ -197,6 +205,11 @@ class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
         else:
             submissions_frame = submissions
 
+        # If we are loading from file the student_id may
+        # already have been set
+        # try:
+        #     v = submissions_frame['student_id']
+        # except KeyError:
         submissions_frame[ 'student_id' ] = submissions_frame.user_id
         self.data = process_work( work_frame, submissions_frame )
         remove_non_final_attempts( self.data )
@@ -210,7 +223,7 @@ class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
         called independently for use with test data
         """
         # Store ids so we don't have to reset the index for submitters prop
-        self.student_ids = list(set(self.data.student_id.tolist()))
+        # self.student_ids = list(set(self.data.student_id.tolist()))
         # the name will be set as index from sorting
         # so we set to student id to make look ups easier
         self.data.set_index( 'student_id', inplace=True )
@@ -218,10 +231,15 @@ class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
         # self.data = self.data[self.activity.question_columns]
 
     def get_student_work( self, student_id ):
-        return self.data.loc[ student_id ]
+        try:
+            return self.data.loc[ student_id ]
+        except (ValueError, KeyError):
+            # The student id may not be set as the index, depending
+            # on the source of the data
+            return self.data.set_index('student_id').loc[student_id]
 
     def get_formatted_work( self, student_id ):
-        """Returns all entries by the student, formatted for
+        """Returns all review entries by the student, formatted for
         sending out for review or display"""
         work = self.get_student_work(student_id)
         # narrow down to just the relevant columns
@@ -234,6 +252,64 @@ class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
         """returns a list of student objects for whom work has been submitted"""
         return [ Student( s ) for s in self.student_ids ]
 
+
+class ReviewRepository(QuizRepository):
+    """Quiz repo specific to needs of reviews.
+    Basically just differs in implementation of
+    get_formatted_work and related methods
+    """
+    def __init__( self, activity, course=None ):
+        self.course = course
+        self.activity = activity
+        self.question_columns = []
+
+    def _set_question_types( self ):
+        def __init__( self, activity ):
+            self.activity = activity
+        self.question_columns = []
+
+    @property
+    def questions( self ):
+        """Returns canvasapi questions for the activity"""
+        return self.course.get_quiz(self.activity.quiz_id).get_questions()
+
+    @property
+    def essay_questions_names( self ):
+        essay_questions = [q.id for q in self.questions if q.question_type == 'essay_question']
+        return [c[1] for c in self.question_columns if int(c[0]) in essay_questions]
+
+    @property
+    def multiple_choice_names( self ):
+        multiple_choice = [q.id for q in self.questions if q.question_type == 'multiple_choice_question']
+        return  [c[1] for c in self.question_columns if int(c[0]) in multiple_choice]
+
+    @property
+    def question_names( self ):
+        return self.multiple_choice_names + self.essay_questions_names
+
+    def get_formatted_work( self, student_id ):
+        """Returns all entries by the reviewer, formatted for
+        sending out for review or display"""
+
+        def format_feedback(prompt, response):
+            return """
+            ========
+            Prompt: 
+            {}
+            
+            Response: 
+            {}
+            =========
+            """.format(prompt, response)
+
+        work = self.get_student_work(student_id)
+
+        content = []
+        for c in self.question_names:
+            content.append(format_feedback(c.split(':')[1], work[c]))
+
+        content = "\n".join(content)
+        return content
 
 if __name__ == '__main__':
     pass

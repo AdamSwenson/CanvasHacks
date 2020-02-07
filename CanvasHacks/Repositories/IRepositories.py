@@ -3,7 +3,7 @@ Created by adam on 10/1/19
 """
 __author__ = 'adam'
 
-
+import pandas as pd
 class IRepo(object):
 
     def download(self):
@@ -12,9 +12,15 @@ class IRepo(object):
     @property
     def student_ids( self ):
         if isinstance(self.data, dict):
-            uids = list(set([k for k in self.data.keys()]))
+            uids = [k for k in self.data.keys()]
         if isinstance(self.data, list):
-            uids = list( set( [ k['student_id'] for k in self.data ] ) )
+            uids = [ k['student_id'] for k in self.data ]
+        if isinstance(self.data, pd.DataFrame):
+            try:
+                uids = self.data.student_id.tolist()
+            except KeyError:
+                uids = self.data.reset_index()['student_id'].tolist()
+        uids = list(set(uids))
         uids.sort()
         return uids
 

@@ -2,6 +2,7 @@
 Created by adam on 12/26/19
 """
 from CanvasHacks.RequestTools import send_post_request
+from CanvasHacks.Models.student import get_first_name
 
 __author__ = 'adam'
 
@@ -115,3 +116,42 @@ def make_metareview_notice(data):
     /a
    
     """.format( **data )
+
+
+def send_message_to_reviewers(associationRepo, studentRepo, contentRepo, activity, send=False):
+    # Load list of ReviewAssociation objects representing who reviews whom
+    review_assigns = associationRepo.get_associations(activity)
+    print("loaded {} student reviewer assignments".format(len(review_assigns)))
+
+    for rev in review_assigns:
+        assessor = studentRepo.get_student(rev.assessor_id)
+        # assessee = studentRepo.get_student(rev.assessee_id)
+
+        content = contentRepo.get_formatted_work(rev.assessee_id)
+
+        d = {
+            'intro': activity.email_intro,
+
+            'name': get_first_name(assessor),
+
+            # Formatted work for sending
+            'responses': content,
+
+            # Add any materials from me
+            'other': '',
+
+            # Add code and link to do reviewing assignment
+            'review_assignment_name': activity.name,
+            'access_code': activity.access_code,
+            'review_url': activity.html_url,
+            'due_date' : activity.string_due_date
+        }
+
+        message = make_notice(d)
+
+        if send:
+            subject = activity.email_subject #"Unit {} peer-review of discussion forum posts".format(environment.CONFIG.unit)
+            m = notify_student(rev.assessor_id, subject, message)
+            print(m)
+        else:
+            print(message)
