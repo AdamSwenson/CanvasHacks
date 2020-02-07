@@ -3,7 +3,6 @@ Objects which define the parameters/ values for the entire assignment
 
 Created by adam on 12/24/19
 """
-import pandas as pd
 
 __author__ = 'adam'
 import canvasapi
@@ -14,12 +13,15 @@ import re
 import pandas as pd
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.model import Model
+from CanvasHacks import environment as env
 
-def utc_string_to_local_dt(utc_string):
+
+def utc_string_to_local_dt( utc_string ):
     """'2020-02-07T07:59:59Z'
     returns Timestamp('2020-02-06 23:59:59-0800', tz='US/Pacific')
     """
-    return pd.to_datetime(utc_string).tz_convert('US/Pacific')
+    return pd.to_datetime( utc_string ).tz_convert( 'US/Pacific' )
+
 
 class Activity( Model ):
     """A wrapper around the canvas provided properties for a quiz which adds
@@ -50,7 +52,7 @@ class Activity( Model ):
     @property
     def make_title( self ):
         # if self.unit_number:
-        return "Unit {} {}".format(self.unit_number, self.title_base)
+        return "Unit {} {}".format( self.unit_number, self.title_base )
 
     @property
     def assignable_points( self ):
@@ -63,7 +65,7 @@ class Activity( Model ):
         the format yyyy-mm-dd
         """
         if self.due_at is None: return ''
-        t = utc_string_to_local_dt(self.due_at)
+        t = utc_string_to_local_dt( self.due_at )
         return t.date().isoformat()
 
     @staticmethod
@@ -76,6 +78,7 @@ class Activity( Model ):
     # def dates_dict( self ):
     #     return {'assign' self.make_title
 
+
 class TopicalAssignment( Activity, QuizDataMixin ):
     title_base = 'Topical assignment'
 
@@ -85,7 +88,7 @@ class TopicalAssignment( Activity, QuizDataMixin ):
         super().__init__( **kwargs )
 
 
-class InitialWork( Activity,  QuizDataMixin):
+class InitialWork( Activity, QuizDataMixin ):
     title_base = "Content assignment"
 
     regex = re.compile( r"\bcontent assignment\b" )
@@ -95,7 +98,7 @@ class InitialWork( Activity,  QuizDataMixin):
         super().__init__( **kwargs )
 
 
-class Review( Activity, QuizDataMixin):
+class Review( Activity, QuizDataMixin ):
     """Representation of the peer review component of the
      assignment """
     title_base = "Peer review"
@@ -110,6 +113,8 @@ class Review( Activity, QuizDataMixin):
         self.activity_link = None
 
         super().__init__( **kwargs )
+        self.email_subject = "Unit {} peer-review of content assignment".format( env.CONFIG.unit )
+        self.email_intro = "Here is another student's assignment for you to review:"
 
 
 class MetaReview( Activity, QuizDataMixin ):
@@ -122,6 +127,8 @@ class MetaReview( Activity, QuizDataMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+        self.email_subject = "Unit {} metareview of peer-review".format( env.CONFIG.unit )
+        self.email_intro = "Here is the feedback on your assignment:"
 
 
 class DiscussionForum( Activity ):
@@ -142,6 +149,8 @@ class DiscussionReview( Activity ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+        self.email_subject = "Unit {} peer-review of discussion forum posts".format( env.CONFIG.unit )
+        self.email_intro = "Here are the discussion forum posts from another student for you to review:"
 
 
 class Unit:
@@ -149,13 +158,13 @@ class Unit:
     __name__ = 'Unit'
 
     def __init__( self, course, unit_number ):
-        self.component_types = [TopicalAssignment,
-                                InitialWork,
-                                Review,
-                                MetaReview,
-                                DiscussionForum,
-                                DiscussionReview
-                                ]
+        self.component_types = [ TopicalAssignment,
+                                 InitialWork,
+                                 Review,
+                                 MetaReview,
+                                 DiscussionForum,
+                                 DiscussionReview
+                                 ]
         self.components = [ ]
 
         self.course = course
@@ -201,7 +210,7 @@ class Unit:
                 return c
 
     @property
-    def meta_review( self ):
+    def metareview( self ):
         for c in self.components:
             if isinstance( c, MetaReview ):
                 return c

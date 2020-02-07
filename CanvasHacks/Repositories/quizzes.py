@@ -4,7 +4,7 @@ Created by adam on 5/6/19
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.QuizGrading import get_penalty
-from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
 
 __author__ = 'adam'
 
@@ -13,6 +13,7 @@ import pandas as pd
 from CanvasHacks import environment as env
 import json
 
+from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
 
 def process_work( work_frame, submissions_frame ):
     work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
@@ -182,7 +183,7 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository(  QuizDataMixin ):
+class QuizRepository(  QuizDataMixin, StudentWorkRepo ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity ):
@@ -218,6 +219,15 @@ class QuizRepository(  QuizDataMixin ):
 
     def get_student_work( self, student_id ):
         return self.data.loc[ student_id ]
+
+    def get_formatted_work( self, student_id ):
+        """Returns all entries by the student, formatted for
+        sending out for review or display"""
+        work = self.get_student_work(student_id)
+        # narrow down to just the relevant columns
+        rs = [{'prompt' : column_name, 'response' : work[column_name]} for col_id, column_name in self.question_columns]
+        r = make_prompt_and_response(rs)
+        return self._check_empty(r)
 
     @property
     def submitters( self ):

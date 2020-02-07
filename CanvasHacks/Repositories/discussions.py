@@ -1,13 +1,13 @@
 """
 Created by adam on 1/27/20
 """
-from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
 from CanvasHacks.UploadGradeTools import upload_credit
 
 __author__ = 'adam'
 
 
-class DiscussionRepository( IRepo ):
+class DiscussionRepository( IRepo, StudentWorkRepo ):
     """Manages the data for one discussion assignment"""
 
     def __init__( self, course, topic_id ):
@@ -86,6 +86,14 @@ class DiscussionRepository( IRepo ):
         return [ p['text'] for p in self.data if p['student_id'] == student_id ]
 
         # return [ p.message for p in self.data if p.user_id == student_id ]
+
+    def get_formatted_work( self, student_id ):
+        """Returns all posts by the student, formatted for
+        sending out for review or display"""
+        posts = self.get_student_posts(student_id)
+        # self._check_empty(posts)
+        posts = "\n        -------        \n".join(posts)
+        return posts
 
     def upload_student_grade( self, student_id, pct_credit ):
         upload_credit( self.course_id, self.assignment_id, student_id, pct_credit )
