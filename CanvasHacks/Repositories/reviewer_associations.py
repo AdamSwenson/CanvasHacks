@@ -10,7 +10,7 @@ from CanvasHacks.PeerReviewed.Definitions import Activity
 __author__ = 'adam'
 import numpy as np
 import random
-from CanvasHacks.Models.student import Student, ensure_student
+import datetime
 
 
 def assign_reviewers( student_ids ):
@@ -27,21 +27,20 @@ def assign_reviewers( student_ids ):
     return list( zip( student_ids, np.roll( student_ids, 1 ) ) )
 
 
-def force_to_ids(list_of_students):
+def force_to_ids( list_of_students ):
     """We could receive a list of ids, Student
     objects or canvasapi User objects. This returns
     a list of ids"""
-    out = []
+    out = [ ]
 
     for s in list_of_students:
-        if isinstance(s, int):
-            out.append(s)
+        if isinstance( s, int ):
+            out.append( s )
         else:
             # Both Student and User objects will have an id attribute
             # which contains the canvas id of the student
-            out.append(s.id)
+            out.append( s.id )
     return out
-
 
 
 class AssociationRepository:
@@ -86,23 +85,24 @@ class AssociationRepository:
         This is the main method to call
         """
         # Force list of submitters to be a list of ids
-        submitters = force_to_ids(submitters)
+        submitters = force_to_ids( submitters )
         # Filter out anyone who has already been assigned to review
         # someone. That will leave anyone who is just now submitting
         # and anyone who was left hanging without a reviewee in a previous
         # run.
-        submitters = self.filter_assigned_reviewers(submitters)
+        submitters = self.filter_assigned_reviewers( submitters )
 
         # Pair up the remaining students
-        assoc_to_make = self._make_associations(  submitters)
+        assoc_to_make = self._make_associations( submitters )
         # assoc_to_make = assign_reviewers( [ s for s in submitters ] )
 
-        assocs = []
+        assocs = [ ]
         for s1, s2 in assoc_to_make:
-            print(s1, s2)
+            print( s1, s2 )
             a = self._create_association( self.activity, assessor_id=s1, assessee_id=s2 )
-            assocs.append(a)
-        print( '{} Review associations created for {} submitters and stored in db'.format(len(assocs), len( submitters ) ) )
+            assocs.append( a )
+        print( '{} Review associations created for {} submitters and stored in db'.format( len( assocs ),
+                                                                                           len( submitters ) ) )
         # return assocs
 
     def _create_association( self, activity, assessor_id, assessee_id ):
@@ -111,7 +111,11 @@ class AssociationRepository:
         Leaving activity as a param even though it is now a property of the object
         so test methods can call on its own
         """
-        ra = ReviewAssociation( activity_id=activity.id, assessor_id=int(assessor_id), assessee_id=int(assessee_id) )
+        ra = ReviewAssociation( activity_id=activity.id,
+                                assessor_id=int( assessor_id ),
+                                assessee_id=int( assessee_id ),
+                                created_at=datetime.datetime.utcnow()
+                                )
         self.session.add( ra )
         self.session.commit()
         return ra
@@ -159,10 +163,20 @@ class AssociationRepository:
     def filter_assigned_reviewers( self, submitters ):
         """Removes entries from list who have already
         been assigned to review someone"""
-        prev = len(submitters)
-        submitters = [ s for s in submitters if self.get_assessee(self.activity, s) is None]
-        print("Removed {} submitters who were already assigned".format(prev - len(submitters) ))
+        prev = len( submitters )
+        submitters = [ s for s in submitters if self.get_assessee( self.activity, s ) is None ]
+        print( "Removed {} submitters who were already assigned".format( prev - len( submitters ) ) )
         return submitters
+
+    def get_most_recent_date( self, activity ):
+        """will return the most recent date (in utc) of the
+        review assignments for the activity.
+        This can be used to determine which students have
+        submitted after the last run
+        """
+        results = self.get_associations( activity )
+        results.sort( key=lambda x: x.created_at, reverse=True )
+        return results
 
 
 if __name__ == '__main__':

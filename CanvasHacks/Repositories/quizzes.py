@@ -16,10 +16,10 @@ import json
 from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
 
 def process_work( work_frame, submissions_frame ):
-    try:
-        v = work_frame['student_id']
-    except KeyError:
-        work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
+    # try:
+    #     v = work_frame['student_id']
+    # except KeyError:
+    work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
     # merge it with matching rows from the submissions frame
     frame = pd.merge( work_frame, submissions_frame, how='left', on=[ 'student_id', 'attempt' ] )
     try:

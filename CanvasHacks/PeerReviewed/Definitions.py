@@ -22,6 +22,12 @@ def utc_string_to_local_dt( utc_string ):
     """
     return pd.to_datetime( utc_string ).tz_convert( 'US/Pacific' )
 
+def local_dt_string_to_utc( local_string ):
+    """'2020-02-07T07:59:59Z'
+    returns Timestamp('2020-02-06 23:59:59-0800', tz='US/Pacific')
+    """
+    return pd.Timestamp( local_string, tz='US/Pacific' ).tz_convert( 'utc' )
+
 
 class Activity( Model ):
     """A wrapper around the canvas provided properties for a quiz which adds

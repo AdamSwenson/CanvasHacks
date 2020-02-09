@@ -19,7 +19,7 @@ class IRepo(object):
             try:
                 uids = self.data.student_id.tolist()
             except KeyError:
-                uids = self.data.reset_index()['student_id'].tolist()
+                uids = self.data.reset_index().student_id.tolist()
         uids = list(set(uids))
         uids.sort()
         return uids

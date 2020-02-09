@@ -1,3 +1,5 @@
+sqlalchemy
+numpy
 appnope==0.1.0
 attrs==19.2.0
 backcall==0.1.0

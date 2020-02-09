@@ -3,8 +3,10 @@ Created by adam on 1/18/20
 """
 __author__ = 'adam'
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy.dialects.sqlite import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
 
 from CanvasHacks import environment as env
 from CanvasHacks.Models.model import Model
@@ -19,15 +21,10 @@ class ReviewAssociation( Base, Model ):
     activity_id = Column( Integer )
     assessor_id = Column( Integer )
     assessee_id = Column( Integer )
+    created_at = Column(DATETIME)
 
-    # def __init__(self, activity, assessor, assessee):
-    #     self.activity = activity
-    #     self.assessor = assessor
-    #     self.assessee = assessee
     def __repr__( self ):
-        return "<ReviewAssociation(activity_id={}, assessor_id={}, assessee_id={}".format(self.activity_id, self.assessor_id, self.assessee_id)
-        # "<User(name='%s', fullname='%s', nickname='%s')>" % (
-        # ...                             self.name, self.fullname, self.nickname)
+        return "<ReviewAssociation(activity_id={}, assessor_id={}, assessee_id={} created_at={}".format(self.activity_id, self.assessor_id, self.assessee_id, self.created_at)
 
     @property
     def is_self_assignment( self ):
