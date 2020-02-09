@@ -175,9 +175,9 @@ class FileBasedConfiguration( Configuration ):
     @classmethod
     def load_local_filepaths( cls ):
         root = os.getenv( "HOME" )
-        cls.archive_folder = "%s/%s" % (root, cls.configuration[ 'folders' ].get( 'STUDENT_WORK_ARCHIVE_FOLDER' ))
-        cls.log_folder = "%s/%s" % (root, cls.configuration[ 'folders' ].get( 'LOG_FOLDER' ))
-        cls.data_folder = '%s/data' % cls.proj_base
+        cls.archive_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'STUDENT_WORK_ARCHIVE_FOLDER' ))
+        cls.log_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'LOG_FOLDER' ))
+        cls.data_folder = '{}/data'.format(cls.proj_base)
 
     @classmethod
     def load_token( cls ):

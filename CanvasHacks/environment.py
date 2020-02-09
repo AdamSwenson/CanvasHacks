@@ -13,12 +13,6 @@ from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfigu
 
 ROOT = os.getenv( "HOME" )
 
-REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
-STUDENT_TABLE_NAME = 'students'
-
-STUDENT_WORK_PROCESSING_LOGNAME = '{}/student-work-processing-log.txt'
-MESSAGE_LOGNAME = "{}/message-log.txt"
-
 # Check whether it is being run on my machine or remotely
 if ROOT[:12] == '/Users/adam':
     FileBasedConfiguration.load(TEST)
@@ -38,3 +32,11 @@ else:
     URL_BASE = InteractiveConfiguration.canvas_url_base
     # Logging should stream
     LOG_FOLDER = None
+
+
+REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
+STUDENT_TABLE_NAME = 'students'
+
+t = "TEST-" if CONFIG.is_test else ""
+STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format(t)
+MESSAGE_LOGNAME = "{}message-log.txt".format(t)

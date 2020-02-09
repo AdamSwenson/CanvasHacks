@@ -20,6 +20,11 @@ def entry_separator():
     return '\n --------------------------------- {} --------------------------- \n'.format( datetime.now() )
 
 
+def error_entry_separator():
+    """Standard separator between log entries for all text logs"""
+    return '\n ===================== ERROR ===== {} ===== ERROR ===================== \n'.format( datetime.now() )
+
+
 class ILogger( object ):
 
     def __init__( self, **kwargs ):
@@ -75,25 +80,33 @@ class TextLogger( ILogger ):
     def initialize_logger( cls, log_file_path=None ):
         if log_file_path:
             cls.log_file_path = log_file_path
-        # else:
+        t = "TEST-" if env.CONFIG.is_test else ""
+        cls.log_file_path = "{}/{}{}".format( env.LOG_FOLDER, t, cls.log_file_name )
+
+    # else:
         #     # todo raise error if LOG_FOLDER is none to indicate we want streaming log
         #     cls.log_file_path = env.STUDENT_WORK_PROCESSING_LOGNAME.format(env.LOG_FOLDER)
 
     @classmethod
-    def write( cls, stuff ):
+    def write( cls, stuff, is_error=False ):
         """Writes to text log"""
         try:
-            cls._actually_write( stuff )
+            cls._actually_write( stuff, is_error )
         except AttributeError:
             cls.initialize_logger()
-            cls._actually_write( stuff )
+            cls._actually_write( stuff, is_error )
 
     @classmethod
-    def _actually_write( cls, stuff ):
+    def _actually_write( cls, stuff, is_error=False ):
         """Abstracted out to allow automatic initialization"""
         with open( cls.log_file_path, 'a' ) as f:
-            f.write( entry_separator() )
-            f.write( stuff )
+            if is_error:
+                f.write( error_entry_separator() )
+                f.write( stuff.__str__() )
+            else:
+                f.write( entry_separator() )
+                f.write( stuff )
+
     #
     # def initialize_logger( self ):
     #     try:
@@ -115,12 +128,18 @@ class StudentWorkLogger( TextLogger ):
     """
     Handles logging student work
     """
-    log_file_path = env.STUDENT_WORK_PROCESSING_LOGNAME.format( env.LOG_FOLDER )
+    log_file_name = env.STUDENT_WORK_PROCESSING_LOGNAME
+
+    # t = "TEST-" if env.CONFIG.is_test else ""
+    # log_file_path = "{}/{}{}".format( env.LOG_FOLDER, t, env.STUDENT_WORK_PROCESSING_LOGNAME )
 
 
 class MessageLogger( TextLogger ):
     """All outgoing messages logged with this"""
-    log_file_path = env.MESSAGE_LOGNAME.format( env.LOG_FOLDER )
+    log_file_name = env.MESSAGE_LOGNAME
+    #
+    # t = "TEST-" if env.CONFIG.is_test else ""
+    # log_file_path = "{}/{}{}".format( env.LOG_FOLDER, t, env.MESSAGE_LOGNAME )
 
 
 def log_student_work( func ):
@@ -143,14 +162,31 @@ def log_message( func ):
 
     @wraps( func )
     def wrapper( *args, **kwargs ):
+        margs = "\n".join( [ str( a ) for a in args ] )
+        mkwargs = "\n".join( [ "{} \t: {}".format( k, v ) for k, v in kwargs.items() ] )
+        to_log = "{}\n{}".format( margs, mkwargs )
         # handle logging
-        MessageLogger.write( "\n".join( [str(a) for a in args] ) )
-        # call og function
-        func( *args, **kwargs )
+        # MessageLogger.write( to_log )
+        try:
+            # call og function
+            result = func( *args, **kwargs )
+            if result:
+                to_log += " \n ------- RESULT ------- \n "
+                to_log += str( result )
+                MessageLogger.write( to_log )
+                return result
+            MessageLogger.write( to_log )
+
+        except Exception as e:
+            to_log += " \n ------- ERROR ------- \n "
+            to_log += e.__str__()
+            MessageLogger.write( to_log, is_error=False )
+            raise e
 
     return wrapper
 
     #
+
     # def __init__( self, log_file_path=.format() ):
     #     self.log = ''
     #     super().__init__( )

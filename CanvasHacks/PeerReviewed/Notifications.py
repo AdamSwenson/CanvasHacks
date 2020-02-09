@@ -1,7 +1,8 @@
 """
 Created by adam on 12/26/19
 """
-from CanvasHacks.RequestTools import send_post_request
+from CanvasHacks.Logging import log_message
+from CanvasHacks.Messaging.SendTools import send_message_to_student
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks import environment as env
 from CanvasHacks.FileTools import getDateForMakingFileName
@@ -9,26 +10,6 @@ __author__ = 'adam'
 
 if __name__ == '__main__':
     pass
-
-
-def notify_student( student_id, subject, body ):
-    """Sends a new message to the student.
-    Returns the result object which will contain the conversation id
-    if needed for future use
-    """
-    d = make_conversation_data( student_id, subject, body )
-
-    return send_post_request( 'https://canvas.csun.edu/api/v1/conversations', d )
-
-
-def make_conversation_data( student_id, subject, body ):
-    """Creates the request data to be sent to canvas"""
-    return {
-        'recipients': [ student_id ],
-        'body': body,
-        'subject': subject,
-        'force_new': True
-    }
 
 
 def make_prompt_and_response( response_list ):
@@ -127,7 +108,7 @@ def metareview_send_message_to_reviewers(review_assignments, studentRepo, conten
             try:
                 assessee = studentRepo.get_student(rev.assessee_id)
 
-                content = contentRepo.get_formatted_work(rev.assessee_id)
+                content = contentRepo.get_formatted_work_by(rev.assessor_id)
 
                 d = {
                     'intro': activity.email_intro,
@@ -153,8 +134,10 @@ def metareview_send_message_to_reviewers(review_assignments, studentRepo, conten
 
                 if send:
                     subject = activity.email_subject
-                    # Oh you fucking idiot
-                    m = notify_student(rev.assessee_id, subject, message)
+                    m = send_message_to_student(
+                        student_id=rev.assessee_id,
+                        subject=subject,
+                        body=message )
                     print(m)
                 else:
                     print(message)
@@ -162,7 +145,6 @@ def metareview_send_message_to_reviewers(review_assignments, studentRepo, conten
                 # todo Replace with raise LookupError and hook handler
                 f.write("\n=========\n {}".format(e))
                 print(e)
-
 
 
 def review_send_message_to_reviewers(review_assignments, studentRepo, contentRepo, activity, send=False):
@@ -201,12 +183,76 @@ def review_send_message_to_reviewers(review_assignments, studentRepo, contentRep
 
             if send:
                 subject = activity.email_subject
-                # Oh you fucking idiot
-                m = notify_student(rev.assessor_id, subject, message)
+                # fix this you fucking idiot
+                m = send_message_to_student( student_id=rev.assessor_id, subject=subject, body=message )
                 print(m)
             else:
                 print(message)
         except Exception as e:
             # todo Replace with raise LookupError and hook handler
             print(e)
+
+
+class SkaaMessaging:
+
+    def __init__(self, activity):
+        self.activity = activity
+
+    def make_message_content( self, receiving_student, content, other=None ):
+        """Creates the message to be sent to the receiving student"""
+
+        d = {
+            'intro': self.activity.email_intro,
+
+            'name': get_first_name(receiving_student),
+
+            # Formatted work for sending
+            'responses': content,
+
+            # Add any materials from me
+            'other': other,
+
+            # Add code and link to do reviewing assignment
+            'review_assignment_name': self.activity.name,
+            'access_code': self.activity.access_code,
+            'review_url': self.activity.html_url,
+            'due_date' : self.activity.string_due_date
+        }
+
+        return make_notice(d)
+
+    def make_send_data( self, receiving_student_id, message_body ):
+        """Creates a dictionary with data to be passed to the
+        method which actually sends the info"""
+        return {'subject' : self.activity.email_subject,
+                'to' : receiving_student_id,
+                'message' : message_body
+                }
+
+
+
+class ReviewMessaging(SkaaMessaging):
+
+    def __init__(self, activity, student_repository, content_repository):
+        self.student_repository = student_repository
+        self.content_repository = content_repository
+        self.activity = activity
+
+    def prepare_message( self, review_assignment, other=None ):
+        try:
+            assessor = self.studentRepo.get_student(review_assignment.assessor_id)
+            receiving_student = assessor
+
+            content = self.contentRepo.get_formatted_work(review_assignment.assessee_id)
+
+            message = self.make_message_content(receiving_student, content, other=None)
+
+            send_data = self.make_send_data(receiving_student.id)
+
+
+        except Exception as e:
+            # todo exception handling
+            print(e)
+
+
 

@@ -238,7 +238,7 @@ class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
             # on the source of the data
             return self.data.set_index('student_id').loc[student_id]
 
-    def get_formatted_work( self, student_id ):
+    def get_formatted_work_by( self, student_id ):
         """Returns all review entries by the student, formatted for
         sending out for review or display"""
         work = self.get_student_work(student_id)
@@ -262,16 +262,20 @@ class ReviewRepository(QuizRepository):
         self.course = course
         self.activity = activity
         self.question_columns = []
+        if course:
+            self.questions = self.course.get_quiz(self.activity.quiz_id).get_questions()
 
-    def _set_question_types( self ):
-        def __init__( self, activity ):
-            self.activity = activity
-        self.question_columns = []
+    #
+    # def _set_question_types( self ):
+    #     def __init__( self, activity ):
+    #         self.activity = activity
+    #     self.question_columns = []
 
-    @property
-    def questions( self ):
-        """Returns canvasapi questions for the activity"""
-        return self.course.get_quiz(self.activity.quiz_id).get_questions()
+    # @property
+    # def questions( self ):
+    #     """Returns canvasapi questions for the activity"""
+    #     print('getting qs')
+    #     return self.course.get_quiz(self.activity.quiz_id).get_questions()
 
     @property
     def essay_questions_names( self ):
@@ -287,7 +291,7 @@ class ReviewRepository(QuizRepository):
     def question_names( self ):
         return self.multiple_choice_names + self.essay_questions_names
 
-    def get_formatted_work( self, student_id ):
+    def get_formatted_work_by( self, student_id ):
         """Returns all entries by the reviewer, formatted for
         sending out for review or display"""
 
