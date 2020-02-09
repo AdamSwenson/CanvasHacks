@@ -8,6 +8,7 @@ import datetime
 import csv
 import os
 
+
 def getDateForMakingFileName():
     return datetime.date.isoformat( datetime.date.today() )
 

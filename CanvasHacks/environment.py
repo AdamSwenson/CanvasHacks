@@ -17,6 +17,7 @@ REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
 STUDENT_TABLE_NAME = 'students'
 
 STUDENT_WORK_PROCESSING_LOGNAME = '{}/student-work-processing-log.txt'
+MESSAGE_LOGNAME = "{}/message-log.txt"
 
 # Check whether it is being run on my machine or remotely
 if ROOT[:12] == '/Users/adam':
