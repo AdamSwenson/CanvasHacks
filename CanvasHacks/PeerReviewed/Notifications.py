@@ -3,7 +3,8 @@ Created by adam on 12/26/19
 """
 from CanvasHacks.RequestTools import send_post_request
 from CanvasHacks.Models.student import get_first_name
-
+from CanvasHacks import environment as env
+from CanvasHacks.FileTools import getDateForMakingFileName
 __author__ = 'adam'
 
 if __name__ == '__main__':
@@ -32,14 +33,12 @@ def make_conversation_data( student_id, subject, body ):
 
 def make_prompt_and_response( response_list ):
     temp = """
-    ------
-    
+            ------
     Prompt: {prompt}
 
     Their response:
     {response}
-    
-    ------
+            ------
     """
     rs = [ temp.format( **r ) for r in response_list ]
     return " ".join( rs )
@@ -118,40 +117,96 @@ def make_metareview_notice(data):
     """.format( **data )
 
 
-def send_message_to_reviewers(associationRepo, studentRepo, contentRepo, activity, send=False):
-    # Load list of ReviewAssociation objects representing who reviews whom
-    review_assigns = associationRepo.get_associations(activity)
-    print("loaded {} student reviewer assignments".format(len(review_assigns)))
+def metareview_send_message_to_reviewers(review_assignments, studentRepo, contentRepo, activity, send=False):
+    # # Load list of ReviewAssociation objects representing who reviews whom
+    # review_assigns = associationRepo.get_associations(activity)
+    # print("loaded {} student reviewer assignments".format(len(review_assigns)))
+    log_file = "{}/{}-metareview-message-log.txt".format(env.LOG_FOLDER, getDateForMakingFileName())
+    with open(log_file, 'a') as f:
+        for rev in review_assignments:
+            try:
+                assessee = studentRepo.get_student(rev.assessee_id)
 
-    for rev in review_assigns:
-        assessor = studentRepo.get_student(rev.assessor_id)
-        # assessee = studentRepo.get_student(rev.assessee_id)
+                content = contentRepo.get_formatted_work(rev.assessee_id)
 
-        content = contentRepo.get_formatted_work(rev.assessee_id)
+                d = {
+                    'intro': activity.email_intro,
 
-        d = {
-            'intro': activity.email_intro,
+                    'name': get_first_name(assessee),
 
-            'name': get_first_name(assessor),
+                    # Formatted work for sending
+                    'responses': content,
 
-            # Formatted work for sending
-            'responses': content,
+                    # Add any materials from me
+                    'other': '',
 
-            # Add any materials from me
-            'other': '',
+                    # Add code and link to do reviewing assignment
+                    'review_assignment_name': activity.name,
+                    'access_code': activity.access_code,
+                    'review_url': activity.html_url,
+                    'due_date' : activity.string_due_date
+                }
 
-            # Add code and link to do reviewing assignment
-            'review_assignment_name': activity.name,
-            'access_code': activity.access_code,
-            'review_url': activity.html_url,
-            'due_date' : activity.string_due_date
-        }
+                message = make_notice(d)
 
-        message = make_notice(d)
+                f.write("\n=========\n {}".format(message))
 
-        if send:
-            subject = activity.email_subject #"Unit {} peer-review of discussion forum posts".format(environment.CONFIG.unit)
-            m = notify_student(rev.assessor_id, subject, message)
-            print(m)
-        else:
-            print(message)
+                if send:
+                    subject = activity.email_subject
+                    # Oh you fucking idiot
+                    m = notify_student(rev.assessee_id, subject, message)
+                    print(m)
+                else:
+                    print(message)
+            except Exception as e:
+                # todo Replace with raise LookupError and hook handler
+                f.write("\n=========\n {}".format(e))
+                print(e)
+
+
+
+def review_send_message_to_reviewers(review_assignments, studentRepo, contentRepo, activity, send=False):
+
+    #THIS IS UNUSABLE. MUST FIX ERROR
+
+    # # Load list of ReviewAssociation objects representing who reviews whom
+    # review_assigns = associationRepo.get_associations(activity)
+    # print("loaded {} student reviewer assignments".format(len(review_assigns)))
+
+    for rev in review_assignments:
+        try:
+            assessor = studentRepo.get_student(rev.assessor_id)
+
+            content = contentRepo.get_formatted_work(rev.assessee_id)
+
+            d = {
+                'intro': activity.email_intro,
+
+                'name': get_first_name(assessor),
+
+                # Formatted work for sending
+                'responses': content,
+
+                # Add any materials from me
+                'other': '',
+
+                # Add code and link to do reviewing assignment
+                'review_assignment_name': activity.name,
+                'access_code': activity.access_code,
+                'review_url': activity.html_url,
+                'due_date' : activity.string_due_date
+            }
+
+            message = make_notice(d)
+
+            if send:
+                subject = activity.email_subject
+                # Oh you fucking idiot
+                m = notify_student(rev.assessor_id, subject, message)
+                print(m)
+            else:
+                print(message)
+        except Exception as e:
+            # todo Replace with raise LookupError and hook handler
+            print(e)
+
