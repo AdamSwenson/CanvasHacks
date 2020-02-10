@@ -1,11 +1,11 @@
 """
 Created by adam on 12/26/19
 """
-from CanvasHacks.Logging import log_message
-from CanvasHacks.Messaging.SendTools import send_message_to_student
-from CanvasHacks.Models.student import get_first_name
 from CanvasHacks import environment as env
 from CanvasHacks.FileTools import getDateForMakingFileName
+from CanvasHacks.Messaging.SendTools import send_message_to_student
+from CanvasHacks.Models.student import get_first_name
+
 __author__ = 'adam'
 
 if __name__ == '__main__':
@@ -63,8 +63,7 @@ def make_notice( data ):
     """.format( **data )
 
 
-def make_metareview_notice(data):
-
+def make_metareview_notice( data ):
     return """
     Hi {name},
     
@@ -98,22 +97,22 @@ def make_metareview_notice(data):
     """.format( **data )
 
 
-def metareview_send_message_to_reviewers(review_assignments, studentRepo, contentRepo, activity, send=False):
+def metareview_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):
     # # Load list of ReviewAssociation objects representing who reviews whom
     # review_assigns = associationRepo.get_associations(activity)
     # print("loaded {} student reviewer assignments".format(len(review_assigns)))
-    log_file = "{}/{}-metareview-message-log.txt".format(env.LOG_FOLDER, getDateForMakingFileName())
-    with open(log_file, 'a') as f:
+    log_file = "{}/{}-metareview-message-log.txt".format( env.LOG_FOLDER, getDateForMakingFileName() )
+    with open( log_file, 'a' ) as f:
         for rev in review_assignments:
             try:
-                assessee = studentRepo.get_student(rev.assessee_id)
+                assessee = studentRepo.get_student( rev.assessee_id )
 
-                content = contentRepo.get_formatted_work_by(rev.assessor_id)
+                content = contentRepo.get_formatted_work_by( rev.assessor_id )
 
                 d = {
                     'intro': activity.email_intro,
 
-                    'name': get_first_name(assessee),
+                    'name': get_first_name( assessee ),
 
                     # Formatted work for sending
                     'responses': content,
@@ -125,12 +124,12 @@ def metareview_send_message_to_reviewers(review_assignments, studentRepo, conten
                     'review_assignment_name': activity.name,
                     'access_code': activity.access_code,
                     'review_url': activity.html_url,
-                    'due_date' : activity.string_due_date
+                    'due_date': activity.string_due_date
                 }
 
-                message = make_notice(d)
+                message = make_notice( d )
 
-                f.write("\n=========\n {}".format(message))
+                f.write( "\n=========\n {}".format( message ) )
 
                 if send:
                     subject = activity.email_subject
@@ -138,18 +137,17 @@ def metareview_send_message_to_reviewers(review_assignments, studentRepo, conten
                         student_id=rev.assessee_id,
                         subject=subject,
                         body=message )
-                    print(m)
+                    print( m )
                 else:
-                    print(message)
+                    print( message )
             except Exception as e:
                 # todo Replace with raise LookupError and hook handler
-                f.write("\n=========\n {}".format(e))
-                print(e)
+                f.write( "\n=========\n {}".format( e ) )
+                print( e )
 
 
-def review_send_message_to_reviewers(review_assignments, studentRepo, contentRepo, activity, send=False):
-
-    #THIS IS UNUSABLE. MUST FIX ERROR
+def review_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):
+    # THIS IS UNUSABLE. MUST FIX ERROR
 
     # # Load list of ReviewAssociation objects representing who reviews whom
     # review_assigns = associationRepo.get_associations(activity)
@@ -157,14 +155,14 @@ def review_send_message_to_reviewers(review_assignments, studentRepo, contentRep
 
     for rev in review_assignments:
         try:
-            assessor = studentRepo.get_student(rev.assessor_id)
+            assessor = studentRepo.get_student( rev.assessor_id )
 
-            content = contentRepo.get_formatted_work(rev.assessee_id)
+            content = contentRepo.get_formatted_work( rev.assessee_id )
 
             d = {
                 'intro': activity.email_intro,
 
-                'name': get_first_name(assessor),
+                'name': get_first_name( assessor ),
 
                 # Formatted work for sending
                 'responses': content,
@@ -176,35 +174,40 @@ def review_send_message_to_reviewers(review_assignments, studentRepo, contentRep
                 'review_assignment_name': activity.name,
                 'access_code': activity.access_code,
                 'review_url': activity.html_url,
-                'due_date' : activity.string_due_date
+                'due_date': activity.string_due_date
             }
 
-            message = make_notice(d)
+            message = make_notice( d )
 
             if send:
                 subject = activity.email_subject
                 # fix this you fucking idiot
                 m = send_message_to_student( student_id=rev.assessor_id, subject=subject, body=message )
-                print(m)
+                print( m )
             else:
-                print(message)
+                print( message )
         except Exception as e:
             # todo Replace with raise LookupError and hook handler
-            print(e)
+            print( e )
 
 
 class SkaaMessaging:
 
-    def __init__(self, activity):
+    def __init__( self, activity, student_repository, content_repository ):
+        self.student_repository = student_repository
+        self.content_repository = content_repository
         self.activity = activity
 
-    def make_message_content( self, receiving_student, content, other=None ):
-        """Creates the message to be sent to the receiving student"""
+    def _make_message_data( self, receiving_student, content, other=None ):
+        """
+        Creates a dictionary with data to be passed to the
+        method which actually sends the info to the receiving student
+        """
 
         d = {
             'intro': self.activity.email_intro,
 
-            'name': get_first_name(receiving_student),
+            'name': get_first_name( receiving_student ),
 
             # Formatted work for sending
             'responses': content,
@@ -216,43 +219,92 @@ class SkaaMessaging:
             'review_assignment_name': self.activity.name,
             'access_code': self.activity.access_code,
             'review_url': self.activity.html_url,
-            'due_date' : self.activity.string_due_date
+            'due_date': self.activity.string_due_date
         }
 
-        return make_notice(d)
+        message = make_notice( d )
 
-    def make_send_data( self, receiving_student_id, message_body ):
-        """Creates a dictionary with data to be passed to the
-        method which actually sends the info"""
-        return {'subject' : self.activity.email_subject,
-                'to' : receiving_student_id,
-                'message' : message_body
-                }
-
-
-
-class ReviewMessaging(SkaaMessaging):
-
-    def __init__(self, activity, student_repository, content_repository):
-        self.student_repository = student_repository
-        self.content_repository = content_repository
-        self.activity = activity
+        return {
+            'student_id': receiving_student.id,
+            'subject': self.activity.email_subject,
+            'body': message
+        }
 
     def prepare_message( self, review_assignment, other=None ):
+        """Creates the message data for sending specific to the assignment"""
+        raise NotImplementedError
+
+    def notify( self, review_assignments, send=False, other=None ):
+        """Given a list of review assignment objects, sends the
+        appropriate notification message to the correct person
+        for the assignment
+        """
+        messages = []
+        for rev in review_assignments:
+            message_data = self.prepare_message( rev, other )
+            messages.append(message_data)
+
+            if send:
+                m = send_message_to_student( **message_data )
+                print( m )
+            else:
+                # For test runs
+                print( message_data )
+        # Returns for testing / auditing
+        return messages
+
+
+class FeedbackForMetareviewMessaging( SkaaMessaging ):
+    """Handles sending message containg feedback from the peer reviewer
+    to the person who was reviewed
+    """
+
+    def __init__( self, activity, student_repository, content_repository ):
+        super().__init__( activity, student_repository, content_repository )
+
+    def prepare_message( self, review_assignment, other=None ):
+        """This looks up the appropriate data for a review
+        assignment and returns what will be the message body
+        """
         try:
-            assessor = self.studentRepo.get_student(review_assignment.assessor_id)
-            receiving_student = assessor
+            # We are going to send the peer review feedback
+            # created by the assessor to the student who was
+            # assessed in the peer review stage
+            receiving_student = self.studentRepo.get_student( review_assignment.assessee_id )
 
-            content = self.contentRepo.get_formatted_work(review_assignment.assessee_id)
+            # The assessor did the work that we want to send
+            # to the assessee
+            content = self.contentRepo.get_formatted_work_by( review_assignment.assessor_id )
 
-            message = self.make_message_content(receiving_student, content, other=None)
-
-            send_data = self.make_send_data(receiving_student.id)
-
+            return self._make_message_data( receiving_student, content, other=None )
 
         except Exception as e:
             # todo exception handling
-            print(e)
+            print( e )
 
 
+class StudentWorkForPeerReviewMessaging( SkaaMessaging ):
+    """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
+    """
 
+    def __init__( self, activity, student_repository, content_repository ):
+        super().__init__( activity, student_repository, content_repository )
+
+    def prepare_message( self, review_assignment, other=None ):
+        """This looks up the appropriate data for a review
+        assignment and returns what will be the message body
+        """
+        try:
+            # We are going to send the original work to the assessor
+            # who will do the peer review
+            receiving_student = self.studentRepo.get_student( review_assignment.assessor_id )
+
+            # The assessee did the work that we want to send
+            # to the assessor
+            content = self.contentRepo.get_formatted_work_by( review_assignment.assessee_id )
+
+            return self._make_message_data( receiving_student, content, other=None )
+
+        except Exception as e:
+            # todo exception handling
+            print( e )

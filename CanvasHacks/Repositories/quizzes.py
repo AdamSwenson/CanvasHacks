@@ -292,8 +292,8 @@ class ReviewRepository(QuizRepository):
         return self.multiple_choice_names + self.essay_questions_names
 
     def get_formatted_work_by( self, student_id ):
-        """Returns all entries by the reviewer, formatted for
-        sending out for review or display"""
+        """Returns all entries by the indicated student, formatted for
+        sending in a message or display"""
 
         def format_feedback(prompt, response):
             return """
@@ -306,6 +306,7 @@ class ReviewRepository(QuizRepository):
             =========
             """.format(prompt, response)
 
+        # todo Add a check to make sure content is non empty. Raise an error if it is so other methods can decide what to do
         work = self.get_student_work(student_id)
 
         content = []
