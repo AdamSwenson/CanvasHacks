@@ -2,7 +2,7 @@
 Created by adam on 12/26/19
 """
 from CanvasHacks import environment as env
-from CanvasHacks.FileTools import getDateForMakingFileName
+from CanvasHacks.TimeTools import getDateForMakingFileName
 from CanvasHacks.Messaging.SendTools import send_message_to_student
 from CanvasHacks.Models.student import get_first_name
 

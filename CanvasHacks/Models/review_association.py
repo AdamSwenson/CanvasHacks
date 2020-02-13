@@ -20,14 +20,8 @@ class ReviewAssociation( Base, Model ):
     assessor_id = Column( Integer )
     assessee_id = Column( Integer )
 
-    # def __init__(self, activity, assessor, assessee):
-    #     self.activity = activity
-    #     self.assessor = assessor
-    #     self.assessee = assessee
     def __repr__( self ):
-        return "<ReviewAssociation(activity_id={}, assessor_id={}, assessee_id={}".format(self.activity_id, self.assessor_id, self.assessee_id)
-        # "<User(name='%s', fullname='%s', nickname='%s')>" % (
-        # ...                             self.name, self.fullname, self.nickname)
+        return "<ReviewAssociation(id={}, activity_id={}, assessor_id={}, assessee_id={}".format(self.id, self.activity_id, self.assessor_id, self.assessee_id)
 
     @property
     def is_self_assignment( self ):

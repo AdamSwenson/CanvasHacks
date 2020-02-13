@@ -7,20 +7,15 @@ Created by adam on 12/24/19
 __author__ = 'adam'
 import canvasapi
 
-if __name__ == '__main__':
-    pass
 import re
 import pandas as pd
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.model import Model
 from CanvasHacks import environment as env
+from CanvasHacks.TimeTools import utc_string_to_local_dt, check_is_date
 
-
-def utc_string_to_local_dt( utc_string ):
-    """'2020-02-07T07:59:59Z'
-    returns Timestamp('2020-02-06 23:59:59-0800', tz='US/Pacific')
-    """
-    return pd.to_datetime( utc_string ).tz_convert( 'US/Pacific' )
+if __name__ == '__main__':
+    pass
 
 
 class Activity( Model ):
@@ -72,7 +67,7 @@ class Activity( Model ):
     def _check_date( date ):
         """Checks that a value is a pd.Timestamp
         if not, it tries to make it into one"""
-        return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
+        return check_is_date(date)
 
     # @property
     # def dates_dict( self ):
@@ -152,6 +147,15 @@ class DiscussionReview( Activity ):
         self.email_subject = "Unit {} peer-review of discussion forum posts".format( env.CONFIG.unit )
         self.email_intro = "Here are the discussion forum posts from another student for you to review:"
 
+class UnitEndSurvey(Activity):
+    """Representation of the survey at the end of each unit"""
+    title_base = "Unit end survey"
+
+    regex = re.compile( r"\bunit-end survey\b" )
+
+    def __init__( self, **kwargs ):
+        super().__init__( **kwargs )
+
 
 class Unit:
     """The main SKAA. This holds the definitions of all the consituent parts"""
@@ -163,7 +167,8 @@ class Unit:
                                  Review,
                                  MetaReview,
                                  DiscussionForum,
-                                 DiscussionReview
+                                 DiscussionReview,
+                                 UnitEndSurvey
                                  ]
         self.components = [ ]
 
@@ -251,6 +256,13 @@ class Unit:
         for c in self.components:
             if isinstance( c, DiscussionReview ):
                 return c
+
+    @property
+    def unit_end_survey( self ):
+        for c in self.components:
+            if isinstance( c, UnitEndSurvey ):
+                return c
+
 
 # class Assignment( StoreMixin ):
 #     """Defines all constant values for the assignment"""

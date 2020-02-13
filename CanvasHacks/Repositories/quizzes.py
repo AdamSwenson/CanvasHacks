@@ -15,9 +15,10 @@ import json
 
 from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
 
+
 def process_work( work_frame, submissions_frame ):
     try:
-        v = work_frame['student_id']
+        v = work_frame[ 'student_id' ]
     except KeyError:
         work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
     # merge it with matching rows from the submissions frame
@@ -190,13 +191,13 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
+class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):
         self.course = course
         self.activity = activity
-        self.question_columns = []
+        self.question_columns = [ ]
 
     def _process( self, work_frame, submissions ):
         self.submissions = submissions
@@ -216,7 +217,7 @@ class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
         # finish setting up the dataframe
         self._cleanup_data()
         # Store the text column names
-        self.set_question_columns(self.data)
+        self.set_question_columns( self.data )
 
     def _cleanup_data( self ):
         """This is abstracted out so it can be
@@ -236,16 +237,17 @@ class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
         except (ValueError, KeyError):
             # The student id may not be set as the index, depending
             # on the source of the data
-            return self.data.set_index('student_id').loc[student_id]
+            return self.data.set_index( 'student_id' ).loc[ student_id ]
 
     def get_formatted_work_by( self, student_id ):
         """Returns all review entries by the student, formatted for
         sending out for review or display"""
-        work = self.get_student_work(student_id)
+        work = self.get_student_work( student_id )
         # narrow down to just the relevant columns
-        rs = [{'prompt' : column_name, 'response' : work[column_name]} for col_id, column_name in self.question_columns]
-        r = make_prompt_and_response(rs)
-        return self._check_empty(r)
+        rs = [ { 'prompt': column_name, 'response': work[ column_name ] } for col_id, column_name in
+               self.question_columns ]
+        r = make_prompt_and_response( rs )
+        return self._check_empty( r )
 
     @property
     def submitters( self ):
@@ -253,17 +255,18 @@ class QuizRepository(  QuizDataMixin, IRepo, StudentWorkRepo ):
         return [ Student( s ) for s in self.student_ids ]
 
 
-class ReviewRepository(QuizRepository):
+class ReviewRepository( QuizRepository ):
     """Quiz repo specific to needs of reviews.
     Basically just differs in implementation of
     get_formatted_work and related methods
     """
+
     def __init__( self, activity, course=None ):
         self.course = course
         self.activity = activity
-        self.question_columns = []
+        self.question_columns = [ ]
         if course:
-            self.questions = self.course.get_quiz(self.activity.quiz_id).get_questions()
+            self.questions = self.course.get_quiz( self.activity.quiz_id ).get_questions()
 
     #
     # def _set_question_types( self ):
@@ -279,13 +282,13 @@ class ReviewRepository(QuizRepository):
 
     @property
     def essay_questions_names( self ):
-        essay_questions = [q.id for q in self.questions if q.question_type == 'essay_question']
-        return [c[1] for c in self.question_columns if int(c[0]) in essay_questions]
+        essay_questions = [ q.id for q in self.questions if q.question_type == 'essay_question' ]
+        return [ c[ 1 ] for c in self.question_columns if int( c[ 0 ] ) in essay_questions ]
 
     @property
     def multiple_choice_names( self ):
-        multiple_choice = [q.id for q in self.questions if q.question_type == 'multiple_choice_question']
-        return  [c[1] for c in self.question_columns if int(c[0]) in multiple_choice]
+        multiple_choice = [ q.id for q in self.questions if q.question_type == 'multiple_choice_question' ]
+        return [ c[ 1 ] for c in self.question_columns if int( c[ 0 ] ) in multiple_choice ]
 
     @property
     def question_names( self ):
@@ -295,7 +298,7 @@ class ReviewRepository(QuizRepository):
         """Returns all entries by the indicated student, formatted for
         sending in a message or display"""
 
-        def format_feedback(prompt, response):
+        def format_feedback( prompt, response ):
             return """
             ========
             Prompt: 
@@ -304,17 +307,18 @@ class ReviewRepository(QuizRepository):
             Response: 
             {}
             =========
-            """.format(prompt, response)
+            """.format( prompt, response )
 
         # todo Add a check to make sure content is non empty. Raise an error if it is so other methods can decide what to do
-        work = self.get_student_work(student_id)
+        work = self.get_student_work( student_id )
 
-        content = []
+        content = [ ]
         for c in self.question_names:
-            content.append(format_feedback(c.split(':')[1], work[c]))
+            content.append( format_feedback( c.split( ':' )[ 1 ], work[ c ] ) )
 
-        content = "\n".join(content)
+        content = "\n".join( content )
         return content
+
 
 if __name__ == '__main__':
     pass

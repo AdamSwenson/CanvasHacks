@@ -4,13 +4,8 @@ Tools for reading and writing csv files
 Created by adam on 6/22/18
 """
 __author__ = 'adam'
-import datetime
 import csv
 import os
-
-
-def getDateForMakingFileName():
-    return datetime.date.isoformat( datetime.date.today() )
 
 
 def create_folder(folder_path):
