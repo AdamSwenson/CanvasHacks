@@ -28,6 +28,14 @@ class DataStoreNew(object):
         """Alias so can use interfaces for old version"""
         return self.results
 
+    @property
+    def submissions( self ):
+        """Alias so can use interfaces for old version"""
+        r = [s[0].attributes for s in self.results]
+        for s in r:
+            s['student_id'] = s['user_id']
+        return r
+
 
     def print_counts( self ):
         m = "Tentatively assigning credit to {} submissions; no credit to {} submissions."
