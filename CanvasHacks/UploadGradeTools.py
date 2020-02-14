@@ -9,7 +9,7 @@ import requests
 from IPython.display import display
 from ipywidgets import widgets
 
-from CanvasHacks.Repositories.DataManagement import DataStore
+from CanvasHacks.Repositories.DataManagement import DataStore, DataStoreNew
 from CanvasHacks.RequestTools import make_request_header
 from CanvasHacks.UrlTools import make_url
 
@@ -19,16 +19,14 @@ def upload_students_receiving_credit( store: DataStore ):
     for the assignment
     Hits https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.update
     """
-    # data = { 'submission': { 'posted_grade': 'pass' } }
-    #
-    # url = make_url( store.course_id, 'assignments' )
-    # url = "%s/%s/submissions" % (url, store.assignment_id)
-
-    for sid in store.credit:
-        upload_credit(store.course_id, store.assignment_id, sid, 100)
-        # surl = "%s/%s" % (url, s)
-        # print( 'credit', surl )
-        # requests.put( surl, headers=make_request_header(), json=data )
+    if isinstance(store, DataStoreNew):
+        print("uploading from new data store")
+        for sub, score in store.results:
+            sid = sub.user_id
+            upload_credit(store.course_id, store.assignment_id, sid, score)
+    else:
+        for sid in store.credit:
+            upload_credit(store.course_id, store.assignment_id, sid, 100)
 
 
 def upload_credit( course_id, assignment_id, student_id, pct_credit ):

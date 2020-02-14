@@ -68,7 +68,7 @@ def get_submissions( course_id, assignment_id, assign_type='assignments', per_pa
 
 
 
-def process_response( response_json, journal_folder ):
+def process_response( response_json, journal_folder=None ):
     """Takes the response and pulls out submissions which used the text box, then downloads
     submitted files and processes out their text content
     """
@@ -247,6 +247,36 @@ def process_response_without_saving_files( response_json ):
         submissions.append( result )
 
     return submissions
+
+
+def extract_body(submission):
+    """Given a canvas api object returns the body text for the submission"""
+    if submission.body is not None:
+        # The student used the online text box to submit
+        return submission.body
+
+    else:
+        # The student submitted the journal as a separate document
+        if 'attachments' in submission.attributes.keys() and len( submission.attributes[ 'attachments' ] ) > 0:
+            url = submission.attachments[ 0 ][ 'url' ]
+            # download the submitted file
+            # print( "Downloading: ", url )
+            response = requests.get( url, headers=make_request_header() )
+            content = response.content
+
+            # determine the appropriate handler to use
+            filename = response.headers['content-disposition'].split('filename=')[1]
+            filename = filename.replace('"', '')
+            handler = chooseHandler(filename)
+
+            # open the file and extract text
+            return handler( content )
+
+        else:
+            # NB., if a student never submitted (workflow_state = 'unsubmitted'),
+            # then they will have an entry which lacks a body key
+            return None
+
 
 
 if __name__ == '__main__':

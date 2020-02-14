@@ -5,13 +5,13 @@ Created by adam on 12/24/19
 """
 
 __author__ = 'adam'
-import canvasapi
-
 import re
+
+import canvasapi
 import pandas as pd
+from CanvasHacks import environment as env
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.model import Model
-from CanvasHacks import environment as env
 from CanvasHacks.TimeTools import utc_string_to_local_dt, check_is_date
 
 if __name__ == '__main__':
@@ -67,7 +67,7 @@ class Activity( Model ):
     def _check_date( date ):
         """Checks that a value is a pd.Timestamp
         if not, it tries to make it into one"""
-        return check_is_date(date)
+        return check_is_date( date )
 
     # @property
     # def dates_dict( self ):
@@ -147,13 +147,27 @@ class DiscussionReview( Activity ):
         self.email_subject = "Unit {} peer-review of discussion forum posts".format( env.CONFIG.unit )
         self.email_intro = "Here are the discussion forum posts from another student for you to review:"
 
-class UnitEndSurvey(Activity):
+
+class UnitEndSurvey( Activity ):
     """Representation of the survey at the end of each unit"""
     title_base = "Unit end survey"
 
     regex = re.compile( r"\bunit-end survey\b" )
 
     def __init__( self, **kwargs ):
+        super().__init__( **kwargs )
+
+
+class Journal( Activity ):
+    """Representation of a journal assignment.
+    Not related to assignments within a Unit
+    """
+    title_base = "Journal"
+
+    regex = re.compile( r"\bjournal\b" )
+
+    def __init__( self, **kwargs ):
+        self.grace_period = pd.Timedelta('2 days')
         super().__init__( **kwargs )
 
 
@@ -194,7 +208,7 @@ class Unit:
             for a in unit_assignments:
                 if t.is_activity_type( a.name ):
                     o = t( **a.attributes )
-                    o.access_code = self._set_access_code(o)
+                    o.access_code = self._set_access_code( o )
                     self.components.append( o )
 
     def find_for_unit( self, unit_number, assignments ):
@@ -218,7 +232,7 @@ class Unit:
             try:
                 return self.course.get_quiz( obj.quiz_id ).access_code
             except AttributeError:
-                print( "No access code for {}".format(obj.name) )
+                print( "No access code for {}".format( obj.name ) )
                 return None
 
     @property
@@ -262,7 +276,6 @@ class Unit:
         for c in self.components:
             if isinstance( c, UnitEndSurvey ):
                 return c
-
 
 # class Assignment( StoreMixin ):
 #     """Defines all constant values for the assignment"""

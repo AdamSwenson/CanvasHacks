@@ -7,6 +7,33 @@ from CanvasHacks.TextProcessing import WordFreq
 __author__ = 'adam'
 
 
+class DataStoreNew(object):
+    """All downloaded and score data gets stored in this object
+    Methods using the data will expect an instance.
+    New as of CAN-24
+    """
+    credit: List[ int ]
+
+    def __init__(self, activity):
+        self.activity = activity
+        self.course_id = activity.course_id
+        self.assignment_name = activity.name
+        self.assignment_id = activity.id
+        # New (can-24) thing to hold the scores
+        # should contain tuples (submission, pct credit)
+        self.results = []
+
+    @property
+    def credit( self ):
+        """Alias so can use interfaces for old version"""
+        return self.results
+
+
+    def print_counts( self ):
+        m = "Tentatively assigning credit to {} submissions; no credit to {} submissions."
+        print(m.format(len(self.credit), len(self.no_credit)))
+
+
 class DataStore(object):
     """All downloaded and score data gets stored in this object
     Methods using the data will expect an instance.
@@ -17,6 +44,9 @@ class DataStore(object):
         self.course_id = course_id
         self.assignment_name = assignment_name
         self.assignment_id = assignment_id
+        # New (can-24) thing to hold the scores
+        # should contain tuples (submission, pct credit)
+        self.scores = []
         # List of ids from students receiving credit
         self.credit = []
         self.no_credit = []
