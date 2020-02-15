@@ -18,6 +18,10 @@ def clearplot_function( ):
         pass
 
 
+def rotate_x_labels(axis, degrees=45):
+    for tick in axis.get_xticklabels():
+        tick.set_rotation(degrees)
+
 def draw_cloud( wordlist, title, font_size=20 ):
     """Given a list of words, it plots a wordcloud"""
     # make into block of text

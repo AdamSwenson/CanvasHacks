@@ -136,7 +136,7 @@ class DiscussionForum( Activity ):
         super().__init__( **kwargs )
 
 
-class DiscussionReview( Activity ):
+class DiscussionReview( Activity, QuizDataMixin ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
 
