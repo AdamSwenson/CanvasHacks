@@ -124,19 +124,44 @@ class AssociationRepository:
             .filter( ReviewAssociation.activity_id == activity.id ) \
             .all()
 
+    def get_assessor_object( self, activity, student_id ):
+        """Returns the ReviewAssociation object containing the
+        of the student assigned to review the submitter
+        or None if no student has been assigned
+        Leaving activity as a param even though it is now a property of the object
+        so test methods can call on its own
+        """
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .filter( ReviewAssociation.assessee_id == student_id ) \
+            .one_or_none()
+
+
     def get_assessor( self, activity, submitter_id ):
         """Returns the id of the student assigned to review the submitter
         or None if no student has been assigned
         Leaving activity as a param even though it is now a property of the object
         so test methods can call on its own
         """
-        r = self.session.query( ReviewAssociation ) \
-            .filter( ReviewAssociation.activity_id == activity.id ) \
-            .filter( ReviewAssociation.assessee_id == submitter_id ) \
-            .one_or_none()
+        r = self.get_assessor_object(activity, submitter_id)
+        # r = self.session.query( ReviewAssociation ) \
+        #     .filter( ReviewAssociation.activity_id == activity.id ) \
+        #     .filter( ReviewAssociation.assessee_id == submitter_id ) \
+        #     .one_or_none()
         if r:
             return r.assessor_id
         return r
+
+    def get_assessee_object( self, activity, reviewer_id ):
+        """Returns the student assigned to be reviewed by the reviewer
+        or None if no student has been assigned
+        Leaving activity as a param even though it is now a property of the object
+        so test methods can call on its own
+        """
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .filter( ReviewAssociation.assessor_id == reviewer_id ) \
+            .one_or_none()
 
     def get_assessee( self, activity, reviewer_id ):
         """Returns the student assigned to be reviewed by the reviewer
@@ -144,10 +169,11 @@ class AssociationRepository:
         Leaving activity as a param even though it is now a property of the object
         so test methods can call on its own
         """
-        r = self.session.query( ReviewAssociation ) \
-            .filter( ReviewAssociation.activity_id == activity.id ) \
-            .filter( ReviewAssociation.assessor_id == reviewer_id ) \
-            .one_or_none()
+        r = self.get_assessee_object(activity, reviewer_id)
+        # self.session.query( ReviewAssociation ) \
+        #     .filter( ReviewAssociation.activity_id == activity.id ) \
+        #     .filter( ReviewAssociation.assessor_id == reviewer_id ) \
+        #     .one_or_none()
         if r:
             return r.assessee_id
         return r

@@ -7,12 +7,14 @@ if __name__ == '__main__':
     pass
 
 from faker import Faker
+import random
+import pandas as pd
 
 fake = Faker()
-from CanvasHacks.PeerReviewed.Definitions import *
+from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit
 
 from CanvasHacks.PeerReviewed.Submissions import SubmissionFactory
-from tests.factories.CanvasApiFactories import *
+from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_comment_result_factory, submission_result_factory
 
 
 def activity_data_factory():
@@ -42,7 +44,7 @@ def assignment_factory():
     review.activity_link = fake.uri()
     meta = MetaReview( **test_data[ 'metareview' ] )
     meta.id = random.randint( 0, 10000 )
-    return Assignment( initial, review, meta )
+    return Unit( initial, review, meta )
 
 
 def submissions_factory( student1, student2, assignment ):

@@ -29,7 +29,7 @@ class Activity( Model ):
     def is_activity_type( cls, assignment_name ):
         """Given the name of an assignment, determines
         whether it is an instance of this assignment type"""
-        return cls.regex.search( assignment_name.strip().lower(), re.IGNORECASE )
+        return cls.regex.search( assignment_name.strip().lower() )
 
     def __init__( self, **kwargs ):
         # when the activity is due
@@ -220,7 +220,12 @@ class Unit:
         relevant to this unit
         """
         rx = re.compile( r"\bunit {}\b".format( unit_number ) )
-        return [ a for a in assignments if rx.search( a.name.strip().lower() ) ]
+        try:
+            return [ a for a in assignments if rx.search( a.name.strip().lower() ) ]
+        except AttributeError:
+            # Things like discussion forums have a title, not a name
+            return [ a for a in assignments if rx.search( a.title.strip().lower() ) ]
+
 
     def _set_access_code( self, obj ):
         """Some things will have an access code stored

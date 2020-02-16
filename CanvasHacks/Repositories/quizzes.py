@@ -5,6 +5,7 @@ from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.QuizGrading import get_penalty
 from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
+from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
 __author__ = 'adam'
 
@@ -191,7 +192,36 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo ):
+
+class SelectableMixin:
+    """Allows to store a list of column names
+    that have been specially designaged by the user
+    """
+    def _init_selected( self ):
+        try:
+            if len(self.selected) > 0:
+                pass
+        except Exception as e:
+            print(e)
+            self.selected = []
+
+    def select( self, identifier, name=None ):
+        self._init_selected()
+        self.selected.append(identifier)
+
+    def deselect( self, identifier ):
+        self.selected.pop(self.selected.index(identifier))
+
+    def get_selections( self ):
+        self._init_selected()
+        return self.selected
+
+    def reset_selections( self ):
+        self.selected = []
+
+
+
+class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo, SelectableMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):
@@ -254,6 +284,15 @@ class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo ):
         """returns a list of student objects for whom work has been submitted"""
         return [ Student( s ) for s in self.student_ids ]
 
+    def make_question_selection_buttons(self):
+        """Given a repository containing a dataframe and a
+        list of names in question_names, this will allow to select
+        which questions are used for things"""
+        buttons = []
+        for q in self.question_names:
+            b = make_selection_button(q, q, self.get_selections, self.select, self.deselect, '100%' )
+            buttons.append(b)
+
 
 class ReviewRepository( QuizRepository ):
     """Quiz repo specific to needs of reviews.
@@ -279,6 +318,15 @@ class ReviewRepository( QuizRepository ):
     #     """Returns canvasapi questions for the activity"""
     #     print('getting qs')
     #     return self.course.get_quiz(self.activity.quiz_id).get_questions()
+
+    def _fix_forgot_answers(self):
+        def r(v):
+            if v == 'They forgot to do this':
+                return 'Forgot'
+            return v
+
+        for c in self.multiple_choice_names:
+            self.data[c] = self.data.apply(lambda x: r(x[c]), axis=1)
 
     @property
     def essay_questions_names( self ):

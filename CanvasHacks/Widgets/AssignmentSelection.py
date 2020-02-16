@@ -1,6 +1,8 @@
 """
 Created by adam on 2/14/19
 """
+from CanvasHacks.PeerReviewed.Definitions import Unit
+
 __author__ = 'adam'
 from IPython.display import display
 from ipywidgets import widgets
@@ -10,7 +12,7 @@ from CanvasHacks.RequestTools import get_assignments_needing_grading, \
     get_assignments_with_submissions
 
 
-def make_selection_button( item_id, name, get_func, add_func, remove_func ):
+def make_selection_button( item_id, name, get_func, add_func, remove_func, width='50%' ):
     """Creates a single selection button
     style is success if the assignment has been selected
     style is primary if not selected
@@ -21,7 +23,7 @@ def make_selection_button( item_id, name, get_func, add_func, remove_func ):
 
         # Create the button
 
-    layout = widgets.Layout( width='50%' )
+    layout = widgets.Layout( width=width )
     b = widgets.Button( description=name, layout=layout, button_style=get_style( item_id ) )
 
     def callback( change ):
@@ -50,6 +52,10 @@ def make_discussion_chooser( course ):
     environment.CONFIG
     """
     discussions = [ d for d in course.get_discussion_topics() ]
+    # If a particular unit has been selected, just get the component discussions
+    # Othewise, just use all course discussions
+    if environment.CONFIG.unit_number is not None:
+        discussions = environment.CONFIG.unit.find_for_unit(environment.CONFIG.unit_number, discussions)
     buttons = [ ]
     discussions = [ (a.id, a.title) for a in discussions ]
     #     if course_id:
@@ -93,7 +99,7 @@ def make_assignment_button( assignment_id, name, ):
                                   environment.CONFIG.remove_assignment )
 
 
-def make_assignment_chooser():
+def make_assignment_chooser(activity=None):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -103,11 +109,17 @@ def make_assignment_chooser():
     # Get list of all assignments for the courses
     for course_id in environment.CONFIG.course_ids:
         assignments += get_assignments_with_submissions( course_id )
-    print( "{} assignments with submissions".format( len( assignments ) ) )
-    # Make buttons for selecting
     assignments = [ (a[ 'id' ], a[ 'name' ]) for a in assignments ]
+
+    if activity is not None:
+        # If we we're passed an activity, filter the assignments
+        assignments = [a for a in assignments if activity.is_activity_type(a[1])]
+
+    print( "{} assignments with submissions".format( len( assignments ) ) )
     if course_id:
         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
+
+    # Make buttons for selecting
     for assignment_id, assignment_name in assignments:
         buttons.append( make_assignment_button( assignment_id, assignment_name ) )
     # return buttons
@@ -128,6 +140,8 @@ def make_unit_button( unit_number ):
         """
         environment.CONFIG.set_unit_number(unit_number, name)
         environment.CONFIG.initialize_canvas_objs()
+        environment.CONFIG.unit = Unit(environment.CONFIG.course, unit_number)
+
 
     return make_selection_button( unit_number,
                                   name,

@@ -1,10 +1,13 @@
 """
 Created by adam on 12/24/19
 """
+import pandas as pd
 from unittest import TestCase
 
-from tests.factories.PeerReviewedFactories import *
-
+from tests.factories.PeerReviewedFactories import activity_data_factory, test_data_factory
+from CanvasHacks.Models.model import Model
+from CanvasHacks.PeerReviewed.Definitions import Unit, Activity, UnitEndSurvey, Journal, InitialWork, Review, MetaReview, TopicalAssignment, DiscussionReview, DiscussionForum
+import re
 __author__ = 'adam'
 
 if __name__ == '__main__':
@@ -131,3 +134,19 @@ class TestMetaReview( TestCase ):
 #         obj = Assignment( initial, review, meta )
 #
 #         self.assertIsInstance( obj.review, Review )
+
+class TestJournal( TestCase ):
+    def setUp( self ):
+        pass
+        # self.test_data = test_data_factory()
+        # Create the assignment
+        # self.initial = InitialWork( **self.test_data[ 'initial' ] )
+        # self.review = Review( **self.test_data[ 'review' ] )
+        # self.meta = MetaReview( **self.test_data[ 'metareview' ] )
+        # self.obj = Assignment( self.initial, self.review, self.meta )
+
+    def test_is_activity_type( self ):
+        # Create the assignment
+        self.assertTrue( Journal.is_activity_type( 'Journal (week 4)' ) )
+        self.assertFalse( Journal.is_activity_type( 'Unit 24 review' ) )
+

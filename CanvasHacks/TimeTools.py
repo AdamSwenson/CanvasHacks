@@ -33,3 +33,9 @@ def check_is_date(date):
 
 def getDateForMakingFileName():
     return datetime.date.isoformat( datetime.date.today() )
+
+def to_canvas_time(timestamp):
+    return timestamp.tz_convert('utc')
+
+def to_csun_time(timestamp):
+    return timestamp.tz_convert('US/Pacific')
