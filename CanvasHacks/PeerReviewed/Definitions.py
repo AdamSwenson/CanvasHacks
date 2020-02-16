@@ -193,6 +193,10 @@ class Unit:
             # needing a dummy Course object
             self._initialize()
 
+    def __repr__(self):
+        """This way can still use unit in format statements """
+        return self.unit_number
+
     def _initialize( self ):
         # Get all assignments for the course
         assignments = [ a for a in self.course.get_assignments() ]

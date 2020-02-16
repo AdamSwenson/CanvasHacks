@@ -121,10 +121,19 @@ def make_unit_button( unit_number ):
     style is primary if not selected
     """
     name = "Unit {}".format( unit_number )
+
+    def set_callback(unit_number, name=None):
+        """ This is used so that can also initialize all the
+        canvas objects on the configuration
+        """
+        environment.CONFIG.set_unit_number(unit_number, name)
+        environment.CONFIG.initialize_canvas_objs()
+
     return make_selection_button( unit_number,
                                   name,
                                   environment.CONFIG.get_unit_number,
-                                  environment.CONFIG.set_unit_number,
+                                  set_callback,
+                                  # environment.CONFIG.set_unit_number,
                                   environment.CONFIG.reset_unit_number
                                   )
 

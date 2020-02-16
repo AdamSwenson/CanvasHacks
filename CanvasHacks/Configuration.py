@@ -1,9 +1,13 @@
 """
 Created by adam on 1/31/19
 """
+from CanvasHacks.PeerReviewed.Definitions import Unit
+
 __author__ = 'adam'
 import configparser
 import os
+from canvasapi import Canvas
+
 
 CREDENTIALS_FOLDER_PATH = "{}/private"
 LIVE_CREDENTIALS = "{}/canvas-credentials.ini"
@@ -16,6 +20,8 @@ class Configuration( object ):
     assignments = [ ]
     # Which discussions we should grading
     discussions = []
+    # canvas api object
+    course = None
     course_ids = [ ]
     canvas_token = False
     canvas_url_base = False
@@ -24,8 +30,10 @@ class Configuration( object ):
     # Whether in test environment
     is_test = False
     log_folder = False
-    # Number of the unit
+    # a Unit definition object
     unit = None
+    # Number of the unit
+    unit_number = None
     test_course_id = None
 
     @classmethod
@@ -98,17 +106,30 @@ class Configuration( object ):
     # ------------ Unit selection
     @classmethod
     def set_unit_number( cls, unit_number, name=None ):
-        cls.unit = unit_number
+        cls.unit_number = unit_number
+
+    @classmethod
+    def initialize_canvas_objs( cls ):
+        """Sets a canvas, course, and unit object on the config
+        Creates a unit object by downloading from canvas using the first defined course id
+        todo Make this work with multiple courses
+        """
+        COURSE_ID = cls.course_ids[0]
+        # print("Working on course: ", COURSE_ID)
+        cls.canvas = Canvas(cls.canvas_url_base, cls.canvas_token)
+        cls.course = cls.canvas.get_course(COURSE_ID)
+        cls.unit = Unit(cls.course, cls.unit_number)
 
     @classmethod
     def reset_unit_number( cls, dummy_param=None):
         cls.unit = None
+        cls.unit_number = None
 
     @classmethod
     def get_unit_number( cls ):
         """I know, stupid. But it parallels other methods
         so the selection buttons will work the same"""
-        return [cls.unit]
+        return [cls.unit_number]
 
 
 
@@ -215,6 +236,7 @@ class FileBasedConfiguration( Configuration ):
         cls.is_test = False
         # clear out possible test values
         cls.course_ids = []
+        # Set to the stored course ids
         cls.load_section_ids()
         print(" ".join([" LIVE " for _ in range(0, 5)]))
 
