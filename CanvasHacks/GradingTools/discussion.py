@@ -3,7 +3,7 @@ Created by adam on 2/15/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools import grade_credit_no_credit
+from CanvasHacks.GradingTools.nonempty import grade_credit_no_credit
 
 def assign_grades(discussion_repo, num_posts_required):
     """Assigns a provisional grade for the discussion assignment

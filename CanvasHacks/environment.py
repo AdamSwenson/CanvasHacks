@@ -33,10 +33,11 @@ else:
     # Logging should stream
     LOG_FOLDER = None
 
-
+# DB
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
 STUDENT_TABLE_NAME = 'students'
 
+# Logging
 t = "TEST-" if CONFIG.is_test else ""
 STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format(t)
 MESSAGE_LOGNAME = "{}message-log.txt".format(t)
