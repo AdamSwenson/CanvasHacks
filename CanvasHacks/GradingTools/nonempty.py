@@ -4,10 +4,9 @@ Created by adam on 1/29/19
 __author__ = 'adam'
 
 from CanvasHacks.TextProcessing import make_wordbag
-import nltk
 from nltk.corpus import stopwords
 import string
-from CanvasHacks.QuizGrading import get_penalty
+from CanvasHacks.GradingTools.quiz import get_penalty
 
 
 def determine_credit(submissions):

@@ -35,6 +35,10 @@ class Activity( Model ):
         # when the activity is due
         # ": "2013-01-23T23:59:00-07:00"
         self.due_at = None
+        # Set this date if want to give half credit for
+        # assignments turned in after this.
+        # Normally won't be used, unless manually set
+        self.quarter_credit_deadline = None
         # when to lock the activity
         self.lock_at = None
         # // when to unlock the activity
@@ -43,6 +47,15 @@ class Activity( Model ):
         self.unit_number = None
 
         super().__init__( **kwargs )
+
+    @property
+    def last_half_credit_date( self ):
+        """If a quarter credit deadline has been set
+        this will return that value, otherwise it will just
+        use the lock date"""
+        if self.quarter_credit_deadline is not None:
+            return self.quarter_credit_deadline
+        return self.lock_at
 
     @property
     def make_title( self ):
@@ -81,6 +94,7 @@ class TopicalAssignment( Activity, QuizDataMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+        self.grace_period = pd.Timedelta('2 days')
 
 
 class InitialWork( Activity, QuizDataMixin ):
@@ -91,6 +105,7 @@ class InitialWork( Activity, QuizDataMixin ):
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
         super().__init__( **kwargs )
+        self.grace_period = pd.Timedelta('2 days')
 
 
 class Review( Activity, QuizDataMixin ):

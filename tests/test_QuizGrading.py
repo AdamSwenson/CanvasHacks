@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from unittest import TestCase
 
-from CanvasHacks.QuizGrading import get_penalty
+from CanvasHacks.GradingTools.quiz import get_penalty
 
 __author__ = 'adam'
 

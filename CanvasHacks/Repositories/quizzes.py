@@ -3,7 +3,6 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
-from CanvasHacks.QuizGrading import get_penalty
 from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
@@ -122,67 +121,6 @@ def save_to_log_folder( frame ):
     fname = "%s/%s-%s-results.xlsx" % (env.LOG_FOLDER, section, qid)
     print( "Saving to ", fname )
     frame.to_excel( fname )
-
-
-def grade( frame, quiz_data_obj, grace_period=None ):
-    """
-    This handles the actual grading
-
-    quiz_data_obj will have the payload format:
-        "quiz_submissions": [{
-        "attempt": int(attempt),
-        "fudge_points": total_score
-      },
-          "questions": {
-      "QUESTION_ID": {
-        "score": null, // null for no change, or an unsigned decimal
-        "comment": null // null for no change, '' for no comment, or a string
-      }
-    """
-    results = [ ]
-    #     questions = detect_question_columns(frame.columns)
-
-    for i, row in frame.iterrows():
-        fudge_points = 0
-        out = {
-            'student_id': int( row[ 'student_id' ] ),
-            'attempt': int( row[ 'attempt' ] ),
-            'submission_id': int( row[ 'submission_id' ] ),
-            'course_id': int( row[ 'course_id' ] ),
-            'quiz_id': int( row[ 'quiz_id' ] ),
-            'data': { }
-        }
-        # used for computing penalty
-        total_score = 0
-        questions = { }
-
-        for qid, column_name in quiz_data_obj.question_columns:
-            if pd.isnull( row[ column_name ] ):
-                questions[ qid ] = { 'score': 0 }
-            else:
-                questions[ qid ] = { 'score': 1.0 }
-                total_score += 1
-
-        # compute penalty if needed
-        penalty = get_penalty( row[ 'submitted' ], quiz_data_obj.due_date, quiz_data_obj.quarter_credit_date,
-                               grace_period )
-        # will be 0 if not docking
-        fudge_points = total_score * -penalty
-        if penalty > 0:
-            print( 'Student #{}: Submitted on {}; was due {}. Penalized {}'.format( row[ 'student_id' ],
-                                                                                    row[ 'submitted' ],
-                                                                                    quiz_data_obj.due_date, penalty ) )
-
-        out[ 'data' ][ "quiz_submissions" ] = [
-            {
-                "attempt": int( row[ 'attempt' ] ),
-                "fudge_points": fudge_points,
-                "questions": questions
-            }
-        ]
-
-        results.append( out )
-    return results
 
 
 def save_json( grade_data, quiz_data_obj ):
