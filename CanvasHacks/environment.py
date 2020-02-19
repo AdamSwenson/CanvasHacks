@@ -6,16 +6,17 @@ __author__ = 'adam'
 # TEST = True
 TEST = False
 if TEST:
-    print("RUNNING IN TEST MODE")
+    print( "RUNNING IN TEST MODE" )
 
 import os
+
 from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration
 
 ROOT = os.getenv( "HOME" )
 
 # Check whether it is being run on my machine or remotely
-if ROOT[:12] == '/Users/adam':
-    FileBasedConfiguration.load(TEST)
+if ROOT[ :12 ] == '/Users/adam':
+    FileBasedConfiguration.load( TEST )
     CONFIG = FileBasedConfiguration
     TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
     ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
@@ -39,9 +40,14 @@ STUDENT_TABLE_NAME = 'students'
 
 # Logging
 t = "TEST-" if CONFIG.is_test else ""
-STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format(t)
-MESSAGE_LOGNAME = "{}message-log.txt".format(t)
+STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format( t )
+MESSAGE_LOGNAME = "{}message-log.txt".format( t )
 
 # Plotting stuff
-LIKERT_PLOT_ORDER = ['Forgot', 'Strongly disagree', 'Disagree', 'Agree', 'Strongly agree']
-LIKERT_NUM_MAP = {'Forgot' : 0, 'Strongly disagree': 1, 'Disagree': 2, 'Agree': 3, 'Strongly agree': 4}
+LIKERT_PLOT_ORDER = [ 'Forgot', 'Strongly disagree', 'Disagree', 'Agree', 'Strongly agree' ]
+LIKERT_NUM_MAP = { 'Forgot': 0, 'Strongly disagree': 1, 'Disagree': 2, 'Agree': 3, 'Strongly agree': 4 }
+
+# File stuff
+REPORT_KEEP_COLUMNS = [ 'attempt', 'course_id', 'finished_at_date',
+                        'fudge_points', 'id', 'name', 'quiz_id', 'score',
+                        'section_sis_id', 'student_id', 'submission_id', 'user_id', 'workflow_state' ]

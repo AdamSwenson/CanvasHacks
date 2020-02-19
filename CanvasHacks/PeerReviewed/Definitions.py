@@ -123,7 +123,7 @@ class Review( Activity, QuizDataMixin ):
         self.activity_link = None
 
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of content assignment".format( env.CONFIG.unit )
+        self.email_subject = "Unit {} peer-review of content assignment".format( env.CONFIG.unit_number )
         self.email_intro = "Here is another student's assignment for you to review:"
 
 
@@ -137,7 +137,7 @@ class MetaReview( Activity, QuizDataMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} metareview of peer-review".format( env.CONFIG.unit )
+        self.email_subject = "Unit {} metareview of peer-review".format( env.CONFIG.unit_number )
         self.email_intro = "Here is the feedback on your assignment:"
 
 

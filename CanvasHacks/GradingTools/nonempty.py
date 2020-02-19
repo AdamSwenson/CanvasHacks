@@ -6,7 +6,7 @@ __author__ = 'adam'
 from CanvasHacks.TextProcessing import make_wordbag
 from nltk.corpus import stopwords
 import string
-from CanvasHacks.GradingTools.quiz import get_penalty
+from CanvasHacks.GradingTools.penalities import get_penalty
 
 
 def determine_credit(submissions):
@@ -67,7 +67,22 @@ def grade_credit_no_credit( content: str, min_words=2, count_stopwords=True ):
     return len(bag) >= min_words
 
 
+def scored_non_empty(content, max_score, on_empty=None):
+    """
+    Returns a dictionary with key 'score'
+    :param content:
+    :param max_score:
+    :param on_empty: If none, will return no value if empty.
+    :return:
+    """
+    if grade_credit_no_credit(content ):
+        return { 'score': max_score }
+    else:
+        if on_empty is not None:
+            { 'score': on_empty }
 
+        # questions[ qid ] = { 'score': 4.0 }
+        # total_score += 4
 
 
 if __name__ == '__main__':

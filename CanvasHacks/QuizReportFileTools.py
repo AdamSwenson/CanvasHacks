@@ -1,6 +1,12 @@
 """
 Created by adam on 2/10/20
 """
+from CanvasHacks.PeerReviewed.Definitions import Review
+from CanvasHacks.Repositories.quizzes import ReviewRepository, QuizRepository, WorkRepositoryFactory, \
+    drop_columns_from_frame
+from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
+from CanvasHacks.TimeTools import getDateForMakingFileName
+
 __author__ = 'adam'
 
 import json
@@ -8,7 +14,7 @@ import time
 
 import pandas as pd
 
-from CanvasHacks.FileTools import makeDataFileIterator
+from CanvasHacks.FileTools import makeDataFileIterator, create_folder
 from CanvasHacks.RequestTools import *
 
 
@@ -122,6 +128,24 @@ def retrieve_quiz_data(quiz, rest_timeout=60, max_id_attempts=20):
             return download_report(download_url)
 
 
+def save_downloaded_report(activity, frame):
+    """If we've downloaded the report programmatically, this
+    saves it to the expected location
+    """
+    # save to file
+    create_folder(activity.folder_path)
+    try:
+        # if there's a particular section
+        fp = "{}/{}-student-work.csv".format(activity.folder_path, SECTION )
+    except NameError:
+        fp = "{}/{}-{}-student-work.csv".format(activity.folder_path, getDateForMakingFileName(), activity.safe_name )
+
+    try:
+        frame.to_csv(fp)
+    except Exception as e:
+        print("Error saving student work to file ", e)
+
+
 
 # -------------------------- Handle stuff stored in a file on disk
 def get_newest_data( activity ):
@@ -189,6 +213,78 @@ def load_new( activity ):
         print( "{} new records since previous file".format( len( newstuff ) ) )
         return newstuff
 
+
+
+def make_quiz_repo( course, activity, save=True):
+    """Gets all student work data for the activity that's part of the assignment
+    loads it into a QuizRepository or ReviewRepository and
+    returns the repository.
+    This is the main method called to get data
+    """
+    # Get quiz submission objects
+    if isinstance(activity, Review):
+        repo = ReviewRepository(activity, course)
+    else:
+        repo = QuizRepository(activity, course)
+
+    # Download student work
+    # This will work if the 'Create Report' button has been manually clicked
+    student_work_frame = retrieve_quiz_data(repo.quiz)
+
+    if save:
+        # Want to have all the reports be formatted the same
+        # regardless of whether we manually or programmatically
+        # downloaded them. Thus we save before doing anything to them.
+        save_downloaded_report(activity, student_work_frame)
+
+    # Download submissions
+    subRepo = QuizSubmissionRepository(repo.quiz)
+
+    # Doing the combination with submissions after saving to avoid
+    # mismatches of new and old data
+    repo._process(student_work_frame, subRepo.frame)
+
+    return repo
+
+
+def load_activity_data_from_files(activity, course):
+    """Get complete set of data for activity from a bunch of
+    potentially inconsistent files.
+    Created in CAN-41
+    Loads the data into a repository object of the appropriate type
+    """
+    fiter = makeDataFileIterator(activity.folder_path)
+    frames = []
+    try:
+        while True:
+            f = next(fiter)
+            print("loading: ", f)
+            f = pd.read_csv(f)
+            if 'student_id' not in f.columns:
+                f.rename( { 'id': 'student_id' }, axis=1, inplace=True )
+            frames.append(f)
+    except StopIteration:
+        print("Loaded data from {} files".format(len(frames)))
+
+        data = pd.concat(frames, sort=True)
+        print("Loaded {} rows from all files in folder".format(len(f)))
+
+        if 'score_x' in data.columns:
+            # this shouldn't be necessary in future.
+            # Only when were saving sheet plus submissions
+            def fix_score(row):
+                return row[['score', 'score_x', 'score_y']].mean()
+            data.score = data.apply(lambda x: fix_score(x), axis=1)
+            data.drop([ 'score_x', 'score_y'], axis=1, inplace=True)
+
+        repo = WorkRepositoryFactory.make(activity, course)
+        repo.set_question_columns(data)
+        drop_columns_from_frame(data)
+
+        data.drop_duplicates(inplace=True)
+        repo.data = data
+        print("{} rows loaded to repo.data after processing".format(len(repo.data)))
+        return repo
 
 if __name__ == '__main__':
     pass

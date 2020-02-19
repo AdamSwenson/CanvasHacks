@@ -2,9 +2,10 @@
 Created by adam on 12/26/19
 """
 from CanvasHacks import environment as env
-from CanvasHacks.TimeTools import getDateForMakingFileName
 from CanvasHacks.Messaging.SendTools import send_message_to_student
+from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
+from CanvasHacks.TimeTools import getDateForMakingFileName
 
 __author__ = 'adam'
 
@@ -32,69 +33,71 @@ def make_notice( data ):
 
     # data['responses'] = make_prompt_and_response(data['response_list'])
 
-    return """
-    Hi {name},
-    
-    {intro}
-    =======================
-    
-    {responses}
-    
-    =======================
-    {other}
-    
-     Please make sure you read the instructions in {review_assignment_name} before getting started.
-     
-     To complete your review, open the quiz named 
-             {review_assignment_name} 
-             {review_url}
-    and use the access code: 
-            {access_code}
-    
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
-    
-    You may open and look at the peer review assignment as many times as you like.
-    
-    (Apologies for the terrible formatting of this message, Canvas is being annoying).
-    
-    Enjoy,
-    /a
-   
-    """.format( **data )
+    return REVIEW_NOTICE_TEMPLATE.format( **data )
+    # """
+    # Hi {name},
+    #
+    # {intro}
+    # =======================
+    #
+    # {responses}
+    #
+    # =======================
+    # {other}
+    #
+    #  Please make sure you read the instructions in {review_assignment_name} before getting started.
+    #
+    #  To complete your review, open the quiz named
+    #          {review_assignment_name}
+    #          {review_url}
+    # and use the access code:
+    #         {access_code}
+    #
+    # As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}.
+    #
+    # You may open and look at the peer review assignment as many times as you like.
+    #
+    # (Apologies for the terrible formatting of this message, Canvas is being annoying).
+    #
+    # Enjoy,
+    # /a
+    #
+    # """.format( **data )
 
 
 def make_metareview_notice( data ):
-    return """
-    Hi {name},
-    
-    The peer-review responses from the student who read your work are below. Please read them carefully and re-read your original assignment. Then follow the instructions at the bottom of this message to give the reviewer feedback on their review :
-    =======================
-    
-    {responses}
-    
-    =======================
-    {other}
-    
-    Personally, whenever I get critical feedback on something I've written, my first impression is always wrong ---I either think the problems mentioned are more trivial than they are or go in the opposite direction and overinflate every minor thing into something huge. Thus it may be a good idea to take a break before completing the metareview. 
-    
-    When you're ready to complete the metareview and give the reviewer feedback, please make sure you read the instructions in {review_assignment_name} before getting started.
-     
-     To complete your review of thier review, open the quiz named 
-             {review_assignment_name} 
-             {review_url}
-    and use the access code: 
-            {access_code}
-    
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
-    
-    You may open and look at the metareview assignment as many times as you like.
-    
-    (Apologies for the terrible formatting of this message, Canvas is being annoying).
-    
-    Enjoy,
-    /a
-   
-    """.format( **data )
+    return METAREVIEW_NOTICE_TEMPLATE.format( **data )
+    # """
+    # Hi {name},
+    #
+    # The peer-review responses from the student who read your work are below. Please read them carefully and re-read your original assignment. Then follow the instructions at the bottom of this message to give the reviewer feedback on their review :
+    # =======================
+    #
+    # {responses}
+    #
+    # =======================
+    # {other}
+    #
+    # Personally, whenever I get critical feedback on something I've written, my first impression is always wrong ---I either think the problems mentioned are more trivial than they are or go in the opposite direction and overinflate every minor thing into something huge. Thus it may be a good idea to take a break before completing the metareview.
+    #
+    # When you're ready to complete the metareview and give the reviewer feedback, please make sure you read the instructions in {review_assignment_name} before getting started.
+    #
+    #  To complete your review of thier review, open the quiz named
+    #          {review_assignment_name}
+    #          {review_url}
+    # and use the access code:
+    #         {access_code}
+    #
+    # As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}.
+    #
+    # You may open and look at the metareview assignment as many times as you like.
+    #
+    # (Apologies for the terrible formatting of this message, Canvas is being annoying).
+    #
+    # Enjoy,
+    # /a
+    #
+    # """
 
 
 def metareview_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):
@@ -191,7 +194,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
             print( e )
 
 
-class SkaaMessaging:
+class SkaaMessenger:
 
     def __init__( self, activity, student_repository, content_repository ):
         self.student_repository = student_repository
@@ -222,7 +225,8 @@ class SkaaMessaging:
             'due_date': self.activity.string_due_date
         }
 
-        message = make_notice( d )
+        message = self.message_template.format( **d )
+        # message = make_notice( d )
 
         return {
             'student_id': receiving_student.id,
@@ -239,10 +243,11 @@ class SkaaMessaging:
         appropriate notification message to the correct person
         for the assignment
         """
-        messages = []
+        messages = [ ]
         for rev in review_assignments:
+            print( rev )
             message_data = self.prepare_message( rev, other )
-            messages.append(message_data)
+            messages.append( message_data )
 
             if send:
                 m = send_message_to_student( **message_data )
@@ -254,13 +259,42 @@ class SkaaMessaging:
         return messages
 
 
-class FeedbackForMetareviewMessaging( SkaaMessaging ):
+class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
+    """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
+    """
+
+    def __init__( self, activity, student_repository, content_repository ):
+        super().__init__( activity, student_repository, content_repository )
+        self.message_template = REVIEW_NOTICE_TEMPLATE
+
+    def prepare_message( self, review_assignment, other=None ):
+        """This looks up the appropriate data for a review
+        assignment and returns what will be the message body
+        """
+        try:
+            # We are going to send the original work to the assessor
+            # who will do the peer review
+            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
+
+            # The assessee did the work that we want to send
+            # to the assessor
+            content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
+
+            return self._make_message_data( receiving_student, content, other=None )
+
+        except Exception as e:
+            # todo exception handling
+            print( e )
+
+
+class FeedbackForMetareviewMessenger( SkaaMessenger ):
     """Handles sending message containg feedback from the peer reviewer
     to the person who was reviewed
     """
 
     def __init__( self, activity, student_repository, content_repository ):
         super().__init__( activity, student_repository, content_repository )
+        self.message_template = METAREVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -270,11 +304,11 @@ class FeedbackForMetareviewMessaging( SkaaMessaging ):
             # We are going to send the peer review feedback
             # created by the assessor to the student who was
             # assessed in the peer review stage
-            receiving_student = self.studentRepo.get_student( review_assignment.assessee_id )
+            receiving_student = self.student_repository.get_student( review_assignment.assessee_id )
 
             # The assessor did the work that we want to send
             # to the assessee
-            content = self.contentRepo.get_formatted_work_by( review_assignment.assessor_id )
+            content = self.content_repository.get_formatted_work_by( review_assignment.assessor_id )
 
             return self._make_message_data( receiving_student, content, other=None )
 
@@ -283,8 +317,9 @@ class FeedbackForMetareviewMessaging( SkaaMessaging ):
             print( e )
 
 
-class StudentWorkForPeerReviewMessaging( SkaaMessaging ):
-    """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
+class FeedbackFromMetareviewMessenger( SkaaMessenger ):
+    """Sends the contents of the metareview to the student who r
+    did the initial peer review
     """
 
     def __init__( self, activity, student_repository, content_repository ):
@@ -295,13 +330,14 @@ class StudentWorkForPeerReviewMessaging( SkaaMessaging ):
         assignment and returns what will be the message body
         """
         try:
-            # We are going to send the original work to the assessor
-            # who will do the peer review
-            receiving_student = self.studentRepo.get_student( review_assignment.assessor_id )
+            # We are going to send the metareview feedback
+            # created by the assessee to the student who did
+            # the assessing in the peer review stage
+            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
 
-            # The assessee did the work that we want to send
-            # to the assessor
-            content = self.contentRepo.get_formatted_work_by( review_assignment.assessee_id )
+            # The assessor did the work that we want to send
+            # to the assessee
+            content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
             return self._make_message_data( receiving_student, content, other=None )
 

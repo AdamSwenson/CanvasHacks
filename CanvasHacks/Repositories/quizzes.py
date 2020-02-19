@@ -3,6 +3,7 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
+from CanvasHacks.PeerReviewed.Definitions import Review
 from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
@@ -73,13 +74,26 @@ def make_drop_list( columns ):
         If there are columns with a common initial string (e.g., 1.0, 1.0.1, ...) just
         add the common part
     """
-    droppable = [ '1.0' ]
+
+    droppable = [ '1.' ]
     to_drop = [ ]
-    for d in droppable:
-        for c in columns:
-            if c[ :len( d ) ] == d:
+    for c in columns:
+        try:
+            if float( c ):
                 to_drop.append( c )
+        except ValueError:
+            for d in droppable:
+                if c[ :len( d ) ] == d:
+                    to_drop.append( c )
     return to_drop
+
+
+#     to_drop = [ ]
+#     for d in droppable:
+#         for c in columns:
+#             if c[ :len( d ) ] == d:
+#                 to_drop.append( c )
+#     return to_drop
 
 
 # test = [ 'name', 'id', 'sis_id', '1.0', '1.0.1', '1.0.2' ]
@@ -130,33 +144,54 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-
 class SelectableMixin:
     """Allows to store a list of column names
     that have been specially designaged by the user
     """
+
     def _init_selected( self ):
         try:
-            if len(self.selected) > 0:
+            if len( self.selected ) > 0:
                 pass
         except Exception as e:
-            print(e)
-            self.selected = []
+            print( e )
+            self.selected = [ ]
 
     def select( self, identifier, name=None ):
         self._init_selected()
-        self.selected.append(identifier)
+        self.selected.append( identifier )
 
     def deselect( self, identifier ):
-        self.selected.pop(self.selected.index(identifier))
+        self.selected.pop( self.selected.index( identifier ) )
 
     def get_selections( self ):
         self._init_selected()
         return self.selected
 
     def reset_selections( self ):
-        self.selected = []
+        self.selected = [ ]
 
+
+class WorkRepositoryFactory:
+    """Decides what kind of repository is needed
+    and instantiates it"""
+
+    def make( self, activity, course=None ):
+        # Get quiz submission objects
+        if isinstance( activity, Review ):
+            repo = ReviewRepository( activity, course )
+        else:
+            repo = QuizRepository( activity, course )
+        return repo
+
+
+    # def __init__( self, activity, course=None ):
+    #     # Get quiz submission objects
+    #     if isinstance( activity, Review ):
+    #         repo = ReviewRepository( activity, course )
+    #     else:
+    #         repo = QuizRepository( activity, course )
+    #     return repo
 
 
 class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo, SelectableMixin ):
@@ -186,6 +221,16 @@ class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo, SelectableMixin ):
         self._cleanup_data()
         # Store the text column names
         self.set_question_columns( self.data )
+
+    # def _initialize_quiz( self):
+    #     """Downloads the quiz object corresponding to
+    #     the activity. That's where things like number
+    #     of points will be stored"""
+    #     try:
+    #         if self._quiz:
+    #             pass
+    #     except AttributeError:
+    #         self._quiz = self.course.get_quiz(self.activity.quiz_id)
 
     def _cleanup_data( self ):
         """This is abstracted out so it can be
@@ -217,19 +262,36 @@ class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo, SelectableMixin ):
         r = make_prompt_and_response( rs )
         return self._check_empty( r )
 
+    def make_question_selection_buttons( self ):
+        """Given a repository containing a dataframe and a
+        list of names in question_names, this will allow to select
+        which questions are used for things"""
+        buttons = [ ]
+        for q in self.question_names:
+            b = make_selection_button( q, q, self.get_selections, self.select, self.deselect, '100%' )
+            buttons.append( b )
+
+    @property
+    def points_per_question( self ):
+        return self.quiz.points_possible / self.quiz.question_count
+
+    @property
+    def quiz( self ):
+        """Returns the canvasapi.quiz.Quiz object associated
+        with this repository.
+        Automatically initializes it if not set
+        """
+        try:
+            if self._quiz:
+                pass
+        except AttributeError:
+            self._quiz = self.course.get_quiz( self.activity.quiz_id )
+        return self._quiz
+
     @property
     def submitters( self ):
         """returns a list of student objects for whom work has been submitted"""
         return [ Student( s ) for s in self.student_ids ]
-
-    def make_question_selection_buttons(self):
-        """Given a repository containing a dataframe and a
-        list of names in question_names, this will allow to select
-        which questions are used for things"""
-        buttons = []
-        for q in self.question_names:
-            b = make_selection_button(q, q, self.get_selections, self.select, self.deselect, '100%' )
-            buttons.append(b)
 
 
 class ReviewRepository( QuizRepository ):
@@ -257,14 +319,14 @@ class ReviewRepository( QuizRepository ):
     #     print('getting qs')
     #     return self.course.get_quiz(self.activity.quiz_id).get_questions()
 
-    def _fix_forgot_answers(self):
-        def r(v):
+    def _fix_forgot_answers( self ):
+        def r( v ):
             if v == 'They forgot to do this':
                 return 'Forgot'
             return v
 
         for c in self.multiple_choice_names:
-            self.data[c] = self.data.apply(lambda x: r(x[c]), axis=1)
+            self.data[ c ] = self.data.apply( lambda x: r( x[ c ] ), axis=1 )
 
     @property
     def essay_questions_names( self ):

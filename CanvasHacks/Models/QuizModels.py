@@ -41,6 +41,14 @@ class QuizDataMixin:
         if not, it tries to make it into one"""
         return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
 
+    @property
+    def keep_columns( self ):
+        """Returns a list of report column names which
+        should not be dropped from the frame"""
+        cols = [c[1] for c in self.question_columns]
+        cols += env.REPORT_KEEP_COLUMNS
+        return cols
+
 
 class QuizData(Model, QuizDataMixin):
     """Holds the data which defines the properties of a

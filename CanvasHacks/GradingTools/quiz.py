@@ -1,62 +1,14 @@
 """
 Created by adam on 5/6/19
 """
-from CanvasHacks.UtilityDecorators import ensure_timestamps
+from CanvasHacks.GradingTools.nonempty import grade_credit_no_credit
+from CanvasHacks.GradingTools.penalities import get_penalty
+from CanvasHacks.Repositories.quizzes import QuizRepository
 
 __author__ = 'adam'
 
 import pandas as pd
 
-
-@ensure_timestamps
-def get_penalty( submitted_date, due_date, last_half_credit_date, grace_period=None ):
-    """
-    last_half_credit_date: Last moment they could receive half credit. If the assignment hasn't closed, submissions after this will be given 0.25 credit.
-    grace_period: Should be a pd.Timedelta object, e.g., pd.Timedelta('1 day').
-    """
-    assert(isinstance(submitted_date, pd.Timestamp))
-
-    if grace_period is not None:
-        assert(isinstance(grace_period, pd.Timedelta))
-        due_date += grace_period
-        last_half_credit_date += grace_period
-    # Check if full credit
-    if submitted_date <= due_date:
-        return 0
-    # if it was submitted after due date but before the quarter credit date
-    # i.e, the first exam, it gets half
-    if submitted_date <= last_half_credit_date:
-        return .5
-    # if it was after the half credit date, it gets quarter credit
-    return .25
-
-#
-# test_cases = [
-#     {
-#         # full credit case
-#         'submitted': '2019-02-22 07:59:00',
-#         'due': '2019-02-23 07:59:00',
-#         'half': '2019-03-01 07:59:00',
-#         'expect': 0
-#     },
-#     {
-#         # half credit case
-#         'submitted': '2019-02-24 07:59:00',
-#         'due': '2019-02-23 07:59:00',
-#         'half': '2019-03-01 07:59:00',
-#         'expect': .5
-#     },
-#     {
-#         # quarter credit case
-#         'submitted': '2019-03-02 07:59:00',
-#         'due': '2019-02-23 07:59:00',
-#         'half': '2019-03-01 07:59:00',
-#         'expect': .25
-#     },
-# ]
-#
-# for t in test_cases:
-#     assert (get_penalty(t['submitted'], t['due'], t['half']) == t['expect'])
 
 if __name__ == '__main__':
     pass
@@ -64,7 +16,7 @@ if __name__ == '__main__':
 
 class QuizGrader:
 
-    def __init__( self, work_repo, submission_repo, grade_func=None):
+    def __init__( self, work_repo: QuizRepository, submission_repo, grade_func=None ):
         """
         :param grade_func: Function or method to use to determine grade
         """
@@ -81,6 +33,31 @@ class QuizGrader:
         for i, row in self.work_repo.data.iterrows():
             self.graded.append(self._grade_row(row))
         return self.graded
+
+    def _get_score( self, content, on_empty=None ):
+        """
+        The method which calculates the points received for
+        a given question
+        :param content:
+        :return:
+        """
+        if grade_credit_no_credit(content):
+            # if pd.isnull( row[ column_name ] ):
+            return self.work_repo.points_per_question
+        elif on_empty is not None:
+            return on_empty
+
+    def _get_fudge_points( self,  row, total_score ):
+        """Calculates the amount for canvas to subtract or add to the total score"""
+        # compute penalty if needed
+        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
+
+        if penalty > 0:
+            print(self._penalty_message( penalty, row ))
+
+        # will be 0 if not docking for lateness
+        fudge_points = total_score * -penalty
+        return fudge_points
 
     def _grade_row(self, row):
         fudge_points = 0
@@ -99,22 +76,34 @@ class QuizGrader:
         # Grade on emptiness
         # todo This should use credit_no_credit from GradingTools.nonempty
         for qid, column_name in self.work_repo.question_columns:
-            if pd.isnull( row[ column_name ] ):
-                questions[ qid ] = { 'score': 0 }
-            else:
-                questions[ qid ] = { 'score': 1.0 }
-                total_score += 1
-                # questions[ qid ] = { 'score': 4.0 }
-                # total_score += 4
+            content = row[ column_name ]
+            pts = self._get_score(content)
+            questions[ qid ] = { 'score': pts }
+            total_score += pts
+            # if grade_credit_no_credit(content):
+            #     # if pd.isnull( row[ column_name ] ):
+            #     pts = self.work_repo.points_per_question
+            #     questions[ qid ] = { 'score': pts }
+            #     total_score += pts
+            # else:
+            #     # todo test whether I need this and if this causes the problem w people getting 0s
+            #     # questions[ qid ] = { 'score': 0 }
+            #     pass
+            #     # questions[ qid ] = { 'score': 4.0 }
+            #     # total_score += 4
 
         # compute penalty if needed
-        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
-
         # will be 0 if not docking for lateness
-        fudge_points = total_score * -penalty
+        fudge_points = self._get_fudge_points(row, total_score)
 
-        if penalty > 0:
-            print(self._penalty_message( penalty, row ))
+
+        # # compute penalty if needed
+        # penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
+        #
+        # # fudge_points = total_score * -penalty
+        #
+        # if penalty > 0:
+        #     print(self._penalty_message( penalty, row ))
 
         out[ 'data' ][ "quiz_submissions" ] = [
             {

@@ -116,10 +116,12 @@ class AssociationRepository:
         self.session.commit()
         return ra
 
-    def get_associations( self, activity ):
+    def get_associations( self, activity=None ):
         """Returns all review assignments for the activity
         Leaving activity as a param even though it is now a property of the object
         so test methods can call on its own """
+        if activity is None:
+            activity = self.activity
         return self.session.query( ReviewAssociation ) \
             .filter( ReviewAssociation.activity_id == activity.id ) \
             .all()
@@ -136,6 +138,9 @@ class AssociationRepository:
             .filter( ReviewAssociation.assessee_id == student_id ) \
             .one_or_none()
 
+    @property
+    def data( self):
+        return self.get_associations()
 
     def get_assessor( self, activity, submitter_id ):
         """Returns the id of the student assigned to review the submitter
