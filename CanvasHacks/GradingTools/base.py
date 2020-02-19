@@ -27,5 +27,10 @@ class IGrader(StoreMixin):
         """
         raise NotImplementedError
 
+    @property
+    def activity( self ):
+        return self.work_repo.activity
+
+
 if __name__ == '__main__':
     pass

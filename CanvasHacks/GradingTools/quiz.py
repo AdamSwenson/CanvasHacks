@@ -2,7 +2,7 @@
 Created by adam on 5/6/19
 """
 from CanvasHacks.GradingTools.base import IGrader
-from CanvasHacks.GradingTools.nonempty import grade_credit_no_credit
+from CanvasHacks.GradingTools.nonempty import receives_credit
 from CanvasHacks.GradingTools.penalities import get_penalty
 from CanvasHacks.Repositories.quizzes import QuizRepository
 from CanvasHacks.Repositories.submissions import ISubmissionRepo
@@ -11,12 +11,11 @@ __author__ = 'adam'
 
 import pandas as pd
 
-
 if __name__ == '__main__':
     pass
 
 
-class QuizGrader(IGrader):
+class QuizGrader( IGrader ):
 
     def __init__( self, work_repo: QuizRepository, submission_repo: ISubmissionRepo, grade_func=None, **kwargs ):
         """
@@ -25,11 +24,7 @@ class QuizGrader(IGrader):
         self.grade_func = grade_func
         self.work_repo = work_repo
         self.submission_repo = submission_repo
-        super().__init__(**kwargs)
-
-    @property
-    def activity( self ):
-        return self.work_repo.activity
+        super().__init__( **kwargs )
 
     def grade( self ):
         """
@@ -39,7 +34,7 @@ class QuizGrader(IGrader):
         """
         self.graded = [ ]
         for i, row in self.work_repo.data.iterrows():
-            self.graded.append(self._grade_row(row))
+            self.graded.append( self._grade_row( row ) )
         return self.graded
 
     def _get_score( self, content, on_empty=None ):
@@ -49,25 +44,26 @@ class QuizGrader(IGrader):
         :param content:
         :return:
         """
-        if grade_credit_no_credit(content):
+        if receives_credit( content ):
             # if pd.isnull( row[ column_name ] ):
             return self.work_repo.points_per_question
         elif on_empty is not None:
             return on_empty
 
-    def _get_fudge_points( self,  row, total_score ):
+    def _get_fudge_points( self, row, total_score ):
         """Calculates the amount for canvas to subtract or add to the total score"""
         # compute penalty if needed
-        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
+        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date,
+                               self.activity.grace_period )
 
         if penalty > 0:
-            print(self._penalty_message( penalty, row ))
+            print( self._penalty_message( penalty, row ) )
 
         # will be 0 if not docking for lateness
         fudge_points = total_score * -penalty
         return fudge_points
 
-    def _grade_row(self, row):
+    def _grade_row( self, row ):
         fudge_points = 0
         out = {
             'student_id': int( row[ 'student_id' ] ),
@@ -85,10 +81,10 @@ class QuizGrader(IGrader):
         # todo This should use credit_no_credit from GradingTools.nonempty
         for qid, column_name in self.work_repo.question_columns:
             content = row[ column_name ]
-            pts = self._get_score(content)
+            pts = self._get_score( content )
             questions[ qid ] = { 'score': pts }
             total_score += pts
-            # if grade_credit_no_credit(content):
+            # if receives_credit(content):
             #     # if pd.isnull( row[ column_name ] ):
             #     pts = self.work_repo.points_per_question
             #     questions[ qid ] = { 'score': pts }
@@ -102,8 +98,7 @@ class QuizGrader(IGrader):
 
         # compute penalty if needed
         # will be 0 if not docking for lateness
-        fudge_points = self._get_fudge_points(row, total_score)
-
+        fudge_points = self._get_fudge_points( row, total_score )
 
         # # compute penalty if needed
         # penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
@@ -125,8 +120,6 @@ class QuizGrader(IGrader):
     def _penalty_message( self, penalty, row ):
         stem = 'Student #{}: Submitted on {}; was due {}. Penalized {}'
         return stem.format( row[ 'student_id' ], row[ 'submitted' ], self.activity.due_at, penalty )
-
-
 
 
 def grade( frame, quiz_data_obj, grace_period=None ):

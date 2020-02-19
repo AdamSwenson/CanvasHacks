@@ -34,7 +34,7 @@ def new_determine_journal_credit(activity, submissionRepo):
     results = []
     for submission in submissionRepo.data:
         if submission.body is not None:
-            credit = grade_credit_no_credit(submission.body)
+            credit = receives_credit( submission.body )
             if credit:
                 score = 100
             # Now check whether need to penalize for lateness
@@ -48,7 +48,7 @@ def new_determine_journal_credit(activity, submissionRepo):
     return results
 
 
-def grade_credit_no_credit( content: str, min_words=2, count_stopwords=True ):
+def receives_credit( content: str, min_words=2, count_stopwords=True ):
     """
     Given a piece of text written by a student, determines
     whether to assign credit or no credit
@@ -75,7 +75,7 @@ def scored_non_empty(content, max_score, on_empty=None):
     :param on_empty: If none, will return no value if empty.
     :return:
     """
-    if grade_credit_no_credit(content ):
+    if receives_credit( content ):
         return { 'score': max_score }
     else:
         if on_empty is not None:
