@@ -194,7 +194,7 @@ class WorkRepositoryFactory:
     #     return repo
 
 
-class QuizRepository( QuizDataMixin, IRepo, StudentWorkRepo, SelectableMixin ):
+class QuizRepository( QuizDataMixin, StudentWorkRepo, SelectableMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):

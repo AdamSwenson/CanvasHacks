@@ -1,9 +1,11 @@
 """
 Created by adam on 5/6/19
 """
+from CanvasHacks.GradingTools.base import IGrader
 from CanvasHacks.GradingTools.nonempty import grade_credit_no_credit
 from CanvasHacks.GradingTools.penalities import get_penalty
 from CanvasHacks.Repositories.quizzes import QuizRepository
+from CanvasHacks.Repositories.submissions import ISubmissionRepo
 
 __author__ = 'adam'
 
@@ -14,21 +16,27 @@ if __name__ == '__main__':
     pass
 
 
-class QuizGrader:
+class QuizGrader(IGrader):
 
-    def __init__( self, work_repo: QuizRepository, submission_repo, grade_func=None ):
+    def __init__( self, work_repo: QuizRepository, submission_repo: ISubmissionRepo, grade_func=None, **kwargs ):
         """
         :param grade_func: Function or method to use to determine grade
         """
         self.grade_func = grade_func
         self.work_repo = work_repo
         self.submission_repo = submission_repo
+        super().__init__(**kwargs)
 
     @property
     def activity( self ):
         return self.work_repo.activity
 
     def grade( self ):
+        """
+
+        todo: Add logging of details of how grade assigned
+        :return:
+        """
         self.graded = [ ]
         for i, row in self.work_repo.data.iterrows():
             self.graded.append(self._grade_row(row))

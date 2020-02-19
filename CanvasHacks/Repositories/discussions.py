@@ -7,7 +7,7 @@ from CanvasHacks.UploadGradeTools import upload_credit
 __author__ = 'adam'
 
 
-class DiscussionRepository( IRepo, StudentWorkRepo ):
+class DiscussionRepository( StudentWorkRepo ):
     """Manages the data for one discussion assignment"""
 
     def __init__( self, course, topic_id ):

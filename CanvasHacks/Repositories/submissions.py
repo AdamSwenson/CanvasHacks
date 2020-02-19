@@ -10,7 +10,20 @@ from CanvasHacks.Repositories.IRepositories import IRepo
 __author__ = 'adam'
 
 
-class SubmissionRepository( IRepo ):
+class ISubmissionRepo( IRepo ):
+
+    def download( self ):
+        raise NotImplementedError
+
+    @property
+    def frame( self ):
+        raise NotImplementedError
+
+    def get_by_student_id( self, student_id ):
+        raise NotImplementedError
+
+
+class SubmissionRepository( ISubmissionRepo ):
     """Downloads and stores canvasapi.Submission objects
     NB, for many operations on quiz assignments, will need
     to use QuizSubmission objects. That's not this repo
@@ -33,7 +46,7 @@ class SubmissionRepository( IRepo ):
 
     @property
     def ungraded_submissions( self ):
-        return [s for s in self.data if s.workflow_state != 'graded']
+        return [ s for s in self.data if s.workflow_state != 'graded' ]
 
     @property
     def frame( self ):
@@ -43,11 +56,11 @@ class SubmissionRepository( IRepo ):
             # Iterating through list of canvasapi.Submission objects
             s.append( { 'course_id': int( r.course_id ),
                         'quiz_id': int( r.assignment_id ),
-                        'student_id': int( r.user_id),
-                        'user_id' : int(r.user_id),
+                        'student_id': int( r.user_id ),
+                        'user_id': int( r.user_id ),
                         'submission_id': int( r.id ),
                         'attempt': r.attempt,
-                        'grade' : r.grade,
+                        'grade': r.grade,
                         'score': r.score,
                         'workflow_state': r.workflow_state,
                         'late': r.late
@@ -66,16 +79,16 @@ class SubmissionRepository( IRepo ):
             if s.id == submission_id:
                 return s
 
-    def get_by_student_id( self, student_id): #, attempt=None ):
+    def get_by_student_id( self, student_id ):  # , attempt=None ):
         for s in self.data:
             if s.id == student_id:
                 # if attempt is None:
                 #     return s
                 # elif s.attempt == attempt:
-                    return s
+                return s
 
 
-class QuizSubmissionRepository(IRepo):
+class QuizSubmissionRepository( ISubmissionRepo ):
 
     def __init__( self, quiz: canvasapi.quiz.Quiz ):
         """
@@ -88,7 +101,7 @@ class QuizSubmissionRepository(IRepo):
 
     def download( self ):
         """Downloads and stores submission objects as a list in self.data"""
-        self.data = [s for s in self.quiz.get_submissions()]
+        self.data = [ s for s in self.quiz.get_submissions() ]
         print( "Downloaded {} submissions for quiz id {}".format( len( self.data ), self.quiz.id ) )
 
     @property
@@ -99,8 +112,8 @@ class QuizSubmissionRepository(IRepo):
             # Iterating through list of canvasapi.Submission objects
             s.append( { 'course_id': int( r.course_id ),
                         'quiz_id': int( r.quiz_id ),
-                        'student_id': int( r.user_id),
-                        'user_id' : int(r.user_id),
+                        'student_id': int( r.user_id ),
+                        'user_id': int( r.user_id ),
                         'submission_id': int( r.submission_id ),
                         'attempt': r.attempt,
                         'score': r.score,
@@ -108,9 +121,8 @@ class QuizSubmissionRepository(IRepo):
                         } )
         return pd.DataFrame( s )
 
-
     def get_by_student_id( self, student_id, attempt=None ):
-        return [d for d in self.data if d.user_id == student_id and d.attempt == attempt][0]
+        return [ d for d in self.data if d.user_id == student_id and d.attempt == attempt ][ 0 ]
 
 
 if __name__ == '__main__':
