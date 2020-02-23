@@ -9,8 +9,39 @@ import string
 from CanvasHacks.GradingTools.penalities import get_penalty
 
 
+class IGradingMethod:
+
+    def grade( self, content ):
+        raise NotImplementedError
+
+
+class CreditForNonEmpty(IGradingMethod):
+    """Returns full credit for a sufficiently non-empty answer"""
+
+    def __init__(self,  min_words=2, count_stopwords=True):
+        # self.score = 100
+        self.min_words = min_words
+        self.count_stopwords = count_stopwords
+
+    def grade( self, content ):
+        """Returns the pct credit as an integer"""
+        # Aliasing the pct int to leave room for
+        # alternative output could go here
+
+        return self.grade_pct_int(content)
+
+    def grade_pct_int( self, content ):
+        """Returns the pct credit as an integer
+        Returns nothing if not getting any credit"""
+        credit = receives_credit(content, self.min_words, self.count_stopwords)
+        if credit:
+            return 100
+
+
 def determine_credit(submissions):
-    """Adds submissions of zero length to the no-credit list.
+    """
+    OLD
+    Adds submissions of zero length to the no-credit list.
     Adds others to the credit list.
     Returns a dictionary with keys credit and nocredit, with the lists as values
     """
@@ -27,9 +58,11 @@ def determine_credit(submissions):
 
 
 def new_determine_journal_credit(activity, submissionRepo):
-    """Determines how much credit potentially late credit/no credit
+    """
+    OLD
+    Determines how much credit potentially late credit/no credit
     assignments should recieve.
-    Created in CAN-24
+    Created in CAN-24; moved into JournalGrader in CAN-40
     """
     results = []
     for submission in submissionRepo.data:

@@ -14,7 +14,6 @@ class IGrader(StoreMixin):
         self.graded = [ ]
         self.handle_kwargs(**kwargs)
 
-
     def grade( self ):
         """Carry out grading on internally stored data
         from the repos it holds"""

@@ -3,6 +3,8 @@ Objects which define the parameters/ values for the entire assignment
 
 Created by adam on 12/24/19
 """
+from CanvasHacks.GradingTools.nonempty import CreditForNonEmpty
+from CanvasHacks.GradingTools.penalities import HalfLate
 
 __author__ = 'adam'
 import re
@@ -184,6 +186,10 @@ class Journal( Activity ):
     def __init__( self, **kwargs ):
         self.grace_period = pd.Timedelta('2 days')
         super().__init__( **kwargs )
+        # The object which will be used to penalize late assignments
+        self.penalizer = HalfLate(self.due_at, self.grace_period)
+        # The object which will be used to assign the score
+        self.grade_method = CreditForNonEmpty()
 
 
 class Unit:
