@@ -36,7 +36,7 @@ REVIEW_NOTICE_TEMPLATE = """
    
     """
 
-
+# Used to notify the author that it is time to do the metareview
 METAREVIEW_NOTICE_TEMPLATE = """
     Hi {name},
     
@@ -69,8 +69,8 @@ METAREVIEW_NOTICE_TEMPLATE = """
    
     """
 
+# Used to send metareview responsese by author to reviewer
 METAREVIEW_CONTENT_TEMPLATE = """
-
  Hi {name},
     
     {intro}

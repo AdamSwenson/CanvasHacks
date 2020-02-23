@@ -9,7 +9,7 @@ if __name__ == '__main__':
 from faker import Faker
 import random
 import pandas as pd
-
+import pytz
 fake = Faker()
 from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit
 
@@ -17,10 +17,15 @@ from CanvasHacks.PeerReviewed.Submissions import SubmissionFactory
 from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_comment_result_factory, submission_result_factory
 
 
-def activity_data_factory():
+def activity_data_factory(name=None):
     return {
-        'open_at': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=None ) ),
-        'due_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None ) ),
+        'name' : fake.word() if name is None else name,
+        'access_code' : fake.word(),
+        'email_intro': fake.text(),
+        'email_subject': fake.text(),
+        'html_url': fake.url(),
+        'open_at': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=pytz.utc ) ),
+        'due_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
         'completion_points': random.randint( 0, 1000 ),
         'max_points': random.randint( 0, 1000 ),
     }

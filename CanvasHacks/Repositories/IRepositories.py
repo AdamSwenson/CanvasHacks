@@ -56,5 +56,14 @@ class StudentWorkRepo( IRepo ):
     #     raise NotImplementedError
 
 
+class ContentRepository:
+    """Defines methods of repositories which
+    return the content of student work
+    """
+
+    def get_formatted_work_by( self, student_id ):
+        raise NotImplementedError
+
+
 if __name__ == '__main__':
     pass

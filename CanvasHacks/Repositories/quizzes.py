@@ -15,7 +15,7 @@ from CanvasHacks import environment as env
 import json
 
 from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
-
+from CanvasHacks.Repositories.IRepositories import ContentRepository
 
 def process_work( work_frame, submissions_frame ):
     try:
@@ -194,7 +194,7 @@ class WorkRepositoryFactory:
     #     return repo
 
 
-class QuizRepository( QuizDataMixin, StudentWorkRepo, SelectableMixin ):
+class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, SelectableMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):

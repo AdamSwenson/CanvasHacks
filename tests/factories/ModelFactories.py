@@ -16,7 +16,10 @@ from CanvasHacks.Models.student import Student
 
 
 def student_factory():
-    return Student(student_id=random.randint( 11111, 999999 ), name=fake.name())
+    name = "{}, {}".format(fake.last_name(), fake.first_name())
+    s = Student(student_id=random.randint( 11111, 999999 ), name=name)
+    s.sortable_name=name
+    return s
 
 
 
