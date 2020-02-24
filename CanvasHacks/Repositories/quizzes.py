@@ -293,6 +293,15 @@ class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, Selecta
         """returns a list of student objects for whom work has been submitted"""
         return [ Student( s ) for s in self.student_ids ]
 
+    @property
+    def submitter_ids( self ):
+        """Returns a list of canvas ids of students who have submitted the assignment"""
+        # try:
+        return list(set(self.data.reset_index().student_id.tolist()))
+        # except (ValueError, KeyError):
+
+
+
 
 class ReviewRepository( QuizRepository ):
     """Quiz repo specific to needs of reviews.

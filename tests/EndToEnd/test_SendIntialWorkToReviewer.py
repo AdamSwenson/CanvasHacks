@@ -6,7 +6,8 @@ import unittest
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from tests.TestingBase import TestingBase
-from unittest.mock import MagicMock, patch
+
+from CanvasHacks.SkaaSteps.SendInitialWorkToReviewer import SendInitialWorkToReviewer
 
 
 class TestOnTimeSubmissions( unittest.TestCase, TestingBase ):
@@ -22,6 +23,13 @@ class TestOnTimeSubmissions( unittest.TestCase, TestingBase ):
         """Check that each student receives the expected message
         containing the correct student's submission
         """
+        # Load initial content assignment data
+
+        # create review assignments
+
+        # send
+
+
         self.fail()
 
 

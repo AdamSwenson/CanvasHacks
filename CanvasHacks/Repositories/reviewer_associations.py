@@ -6,7 +6,11 @@ Created by adam on 12/28/19
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.review_association import ReviewAssociation
 from CanvasHacks.PeerReviewed.Definitions import Activity
+import CanvasHacks.environment as env
+from CanvasHacks.TimeTools import getDateForMakingFileName
 
+import pandas as pd
+import datetime
 __author__ = 'adam'
 import numpy as np
 import random
@@ -44,9 +48,40 @@ def force_to_ids(list_of_students):
 
 
 
+def make_review_audit_file(associationRepo, studentRepo, unit):
+    """Stores all review assignments to a csv file
+    for easier auditing
+    """
+    # Make audit file
+    review_audit = []
+    for rev in associationRepo.get_associations(unit.review):
+        print(rev.assessor_id, rev.assessee_id)
+        assessor = studentRepo.get_student(rev.assessor_id)
+        assessee = studentRepo.get_student(rev.assessee_id)
+        print(assessor)
+
+        review_audit.append({
+            'activity' : unit.review.name,
+            'assessor_name' : assessor.short_name,
+            'assessor_sis_id': assessor.sis_user_id,
+            'assessor_canvas_id': assessor.id,
+            'assessee_name' : assessee.short_name,
+            'assessee_sis_id': assessee.sis_user_id,
+            'assessee_canvas_id': assessee.id,
+            'timestamp': datetime.datetime.now().isoformat()
+        })
+
+    review_audit = pd.DataFrame(review_audit)
+
+    fp = "{}/{}-Unit{}-peer review assignments.csv".format(env.LOG_FOLDER, getDateForMakingFileName(), env.CONFIG.unit )
+    review_audit.to_csv(fp)
+    print("Audit file saved to {}".format(fp))
+    # review_audit
+
+
 class AssociationRepository:
 
-    def __init__( self, dao: SqliteDAO, activity: Activity ):
+    def __init__( self, dao: SqliteDAO, activity: Activity):
         """
         Create a repository to handle review assignments for a
         particular activity
@@ -103,6 +138,8 @@ class AssociationRepository:
             a = self._create_association( self.activity, assessor_id=s1, assessee_id=s2 )
             assocs.append(a)
         print( '{} Review associations created for {} submitters and stored in db'.format(len(assocs), len( submitters ) ) )
+
+        # make_review_audit_file(self, self.student_repository)
         # return assocs
 
     def _create_association( self, activity, assessor_id, assessee_id ):

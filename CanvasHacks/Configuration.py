@@ -186,6 +186,7 @@ class FileBasedConfiguration( Configuration ):
         cls.load_section_ids()
         cls.load_excluded_users()
         cls.initialize_canvas_objs()
+        cls.semester_name = cls.configuration['names'].get('SEMESTER')
 
     @classmethod
     def load_section_ids( cls ):

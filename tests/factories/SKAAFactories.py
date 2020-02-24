@@ -22,7 +22,7 @@ import random
 def answer_essay_survey_questions( questions):
     # make answers
     answers = []
-    for q in essay_questions:
+    for q in questions:
         answers.append({
             'id' : q.id,
             'answer': "\n".join([fake.paragraph() for _ in range(0,5)])

@@ -36,6 +36,7 @@ class ConversationMessageSender(ISender):
             'force_new': True
         }
 
+    @log_message
     def send( self, student_id, subject, body ):
         """Sends a new message to the student.
        Returns the result object which will contain the conversation id
@@ -46,7 +47,7 @@ class ConversationMessageSender(ISender):
         return send_post_request( self.url, d )
 
 
-
+# ---------------------- old
 
 def make_conversation_data( student_id, subject, body ):
     """Creates the request data to be sent to canvas"""
