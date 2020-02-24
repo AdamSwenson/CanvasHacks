@@ -4,7 +4,9 @@ Created by adam on 5/6/19
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
-from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
+from CanvasHacks.QuizReportFileTools import NewQuizReportFileLoader, AllQuizReportFileLoader, LoaderFactory
+from CanvasHacks.Repositories.IRepositories import StudentWorkRepo, SelectableMixin
+from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
 __author__ = 'adam'
@@ -144,39 +146,18 @@ def save_json( grade_data, quiz_data_obj ):
         json.dump( grade_data, fpp )
 
 
-class SelectableMixin:
-    """Allows to store a list of column names
-    that have been specially designaged by the user
-    """
-
-    def _init_selected( self ):
-        try:
-            if len( self.selected ) > 0:
-                pass
-        except Exception as e:
-            print( e )
-            self.selected = [ ]
-
-    def select( self, identifier, name=None ):
-        self._init_selected()
-        self.selected.append( identifier )
-
-    def deselect( self, identifier ):
-        self.selected.pop( self.selected.index( identifier ) )
-
-    def get_selections( self ):
-        self._init_selected()
-        return self.selected
-
-    def reset_selections( self ):
-        self.selected = [ ]
-
-
 class WorkRepositoryFactory:
     """Decides what kind of repository is needed
     and instantiates it"""
 
-    def make( self, activity, course=None ):
+    @staticmethod
+    def make( activity, course=None, only_new=False, **kwargs ):
+        # Get the object which will handle loading data
+        if only_new:
+            loader = NewQuizReportFileLoader(activity, course)
+        else:
+            loader = AllQuizReportFileLoader( activity, course)
+
         # Get quiz submission objects
         if isinstance( activity, Review ):
             repo = ReviewRepository( activity, course )
@@ -185,13 +166,40 @@ class WorkRepositoryFactory:
         return repo
 
 
-    # def __init__( self, activity, course=None ):
-    #     # Get quiz submission objects
-    #     if isinstance( activity, Review ):
-    #         repo = ReviewRepository( activity, course )
-    #     else:
-    #         repo = QuizRepository( activity, course )
-    #     return repo
+class WorkRepositoryLoaderFactory:
+    """Decides what kind of repository is needed
+    and instantiates it after loading data into it
+
+    Replaces make_quiz_repo
+    """
+
+    @staticmethod
+    def make( activity, course=None, only_new=False, **kwargs ):
+        # Get the object which will handle loading data
+        loader = LoaderFactory.make(download=True, only_new=only_new)
+        # if only_new:
+        #     loader = NewQuizReportFileLoader
+        # else:
+        #     loader = AllQuizReportFileLoader
+
+        # Get quiz submission objects
+        if isinstance( activity, Review ):
+            repo = ReviewRepository( activity, course )
+        else:
+            repo = QuizRepository( activity, course )
+
+        student_work_frame = loader(**kwargs)
+
+        # Download submissions
+        subRepo = QuizSubmissionRepository( repo.quiz )
+
+        # Doing the combination with submissions after saving to avoid
+        # mismatches of new and old data
+        repo._process( student_work_frame, subRepo.frame )
+
+        return repo
+
+
 
 
 class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, SelectableMixin ):

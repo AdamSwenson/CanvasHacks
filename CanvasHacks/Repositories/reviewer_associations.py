@@ -56,8 +56,8 @@ def make_review_audit_file(associationRepo, studentRepo, unit):
     review_audit = []
     for rev in associationRepo.get_associations(unit.review):
         print(rev.assessor_id, rev.assessee_id)
-        assessor = studentRepo.get_student(rev.assessor_id)
-        assessee = studentRepo.get_student(rev.assessee_id)
+        assessor = studentRepo.get_student_record( rev.assessor_id )
+        assessee = studentRepo.get_student_record( rev.assessee_id )
         print(assessor)
 
         review_audit.append({

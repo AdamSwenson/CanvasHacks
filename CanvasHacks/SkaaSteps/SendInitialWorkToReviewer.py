@@ -2,8 +2,10 @@
 Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.PeerReviewed.Notifications import StudentWorkForPeerReviewMessenger
 from CanvasHacks.QuizReportFileTools import make_quiz_repo
+from CanvasHacks.Repositories.quizzes import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository, make_review_audit_file
 from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -24,44 +26,29 @@ class SendInitialWorkToReviewer(IStep):
         """
         super().__init__(**kwargs)
         self._initialize()
-        # self.course = env.CONFIG.course if course is None else course
-        # self.unit = env.CONFIG.unit if unit is None else unit
-        # self.is_test = env.CONFIG.is_test if is_test is None else is_test
-        # self.send = send
-        #
-        # self.studentRepo = StudentRepository(self.course)
-        # self.studentRepo.download()
-        #
-        # self.db_filepath = "{}/{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, env.CONFIG.semester_name, self.unit.unit_number)
-        #
-        # self._initialize_db()
-        # self.associationRepo = AssociationRepository(self.dao, self.unit.review)
-    #
-    # def _initialize_db( self ):
-    #     if env.CONFIG.is_test:
-    #         # testing: in memory db
-    #         self.dao = SqliteDAO()
-    #         print("Connected to testing db")
-    #     else:
-    #         # real: file db
-    #         self.dao = SqliteDAO(self.db_filepath)
-    #         self.dao.initialize_db_file()
-    #         print("Connected to REAL db. {}".format(self.db_filepath))
 
-    def run(self):
-        self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
-        # Check if new submitters, bail if not
-        # todo
+    def run(self, only_new=True):
 
-        # Assign reviewers to each submitter and store in db
-        self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
+        try:
+            self.work_repo = WorkRepositoryLoaderFactory.make(self.unit.initial_work, self.course, only_new)
+            # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
-        if not self.is_test:
-            make_review_audit_file(self.associationRepo, self.unit )
+            # Assign reviewers to each submitter and store in db
+            self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
 
-        msgr = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo )
-        msgr.notify(self.associationRepo.data, self.send)
+            if not self.is_test:
+                make_review_audit_file(self.associationRepo, self.unit )
+
+            # Send the work to the reviewers
+            msgr = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo )
+            msgr.notify(self.associationRepo.data, self.send)
+
+        except NoNewSubmissions:
+            # Check if new submitters, bail if not
+            print("No new submissions")
+            # todo Log run failure
+
 
 
 if __name__ == '__main__':

@@ -109,7 +109,7 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
         try:
             # We are going to send the original work to the assessor
             # who will do the peer review
-            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
+            receiving_student = self.student_repository.get_student_record( review_assignment.assessor_id )
 
             # The assessee did the work that we want to send
             # to the assessor
@@ -139,7 +139,7 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
             # We are going to send the peer review feedback
             # created by the assessor to the student who was
             # assessed in the peer review stage
-            receiving_student = self.student_repository.get_student( review_assignment.assessee_id )
+            receiving_student = self.student_repository.get_student_record( review_assignment.assessee_id )
 
             # The assessor did the work that we want to send
             # to the assessee
@@ -169,7 +169,7 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
             # We are going to send the metareview feedback
             # created by the assessee to the student who did
             # the assessing in the peer review stage
-            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
+            receiving_student = self.student_repository.get_student_record( review_assignment.assessor_id )
 
             # The assessor did the work that we want to send
             # to the assessee
@@ -216,7 +216,7 @@ def metareview_send_message_to_reviewers( review_assignments, studentRepo, conte
     with open( log_file, 'a' ) as f:
         for rev in review_assignments:
             try:
-                assessee = studentRepo.get_student( rev.assessee_id )
+                assessee = studentRepo.get_student_record( rev.assessee_id )
 
                 content = contentRepo.get_formatted_work_by( rev.assessor_id )
 
@@ -266,7 +266,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
 
     for rev in review_assignments:
         try:
-            assessor = studentRepo.get_student( rev.assessor_id )
+            assessor = studentRepo.get_student_record( rev.assessor_id )
 
             content = contentRepo.get_formatted_work( rev.assessee_id )
 

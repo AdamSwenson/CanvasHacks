@@ -4,6 +4,12 @@ Assigns a randomly selected reviewer and sends them the work
 """
 import unittest
 
+from unittest.mock import MagicMock, patch
+
+
+import CanvasHacks.globals
+CanvasHacks.globals.use_api = False
+
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from tests.TestingBase import TestingBase
 
@@ -19,10 +25,32 @@ class TestOnTimeSubmissions(TestingBase ):
         self.config_for_test()
         self.dao = SqliteDAO()
 
-    def test_sends_correctly( self ):
+        self.course = MagicMock()
+        self.unit = MagicMock()
+
+    @patch('CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository')
+    @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.StudentWorkForPeerReviewMessenger')
+    @patch('from CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.AssociationRepository')
+    @patch('from CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory')
+    def test_sends_correctly( self, workLoaderMock, assocRepoMock, messengerMock, studentRepoMock ):
         """Check that each student receives the expected message
         containing the correct student's submission
         """
+        self.fail()
+        testdata = []
+        workLoaderMock.make = MagicMock(return_value=testdata)
+
+        assocRepoMock.assign_reviewers = MagicMock()
+        assocRepoMock.notify = MagicMock()
+
+        studentRepoMock.download = MagicMock()
+
+        obj = SendInitialWorkToReviewer(self.course, self.unit, is_test=True)
+
+        # call
+        obj.run()
+
+
         # Load initial content assignment data
 
         # create review assignments

@@ -1,13 +1,12 @@
 """
 Created by adam on 2/23/20
 """
+from CanvasHacks.Repositories.quizzes import WorkRepositoryLoaderFactory
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
-
+from CanvasHacks.PeerReviewed.Notifications import FeedbackForMetareviewMessenger
 __author__ = 'adam'
 
 
-class FeedbackForMetareviewMessaging( object ):
-    pass
 
 
 class SendReviewToReviewee(IStep):
@@ -22,10 +21,18 @@ class SendReviewToReviewee(IStep):
         super().__init__(**kwargs)
         self._initialize()
 
-    def run(self):
+    def run(self, only_new=True):
 
-        msgr = FeedbackForMetareviewMessaging(self.unit.metareview, self.studentRepo, self.work_repo )
-        msgr.notify(self.associationRepo.data, self.send)
+        try:
+            self.work_repo = WorkRepositoryLoaderFactory.make(self.unit.peer_review, self.course, only_new)
+            # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
+
+            msgr = FeedbackForMetareviewMessenger(self.unit.metareview, self.studentRepo, self.work_repo )
+            messages = msgr.notify(self.associationRepo.data, self.send)
+            # todo logging of sent messages somewhere
+
+        except Exception as e:
+            print(e)
 
 
 

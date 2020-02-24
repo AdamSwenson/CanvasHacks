@@ -67,3 +67,31 @@ class ContentRepository:
 
 if __name__ == '__main__':
     pass
+
+
+class SelectableMixin:
+    """Allows to store a list of column names
+    that have been specially designated by the user
+    """
+
+    def _init_selected( self ):
+        try:
+            if len( self.selected ) > 0:
+                pass
+        except Exception as e:
+            print( e )
+            self.selected = [ ]
+
+    def select( self, identifier, name=None ):
+        self._init_selected()
+        self.selected.append( identifier )
+
+    def deselect( self, identifier ):
+        self.selected.pop( self.selected.index( identifier ) )
+
+    def get_selections( self ):
+        self._init_selected()
+        return self.selected
+
+    def reset_selections( self ):
+        self.selected = [ ]

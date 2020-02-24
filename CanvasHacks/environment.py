@@ -2,10 +2,11 @@
 Created by adam on 9/14/18
 """
 __author__ = 'adam'
-
+import CanvasHacks.globals
+# global TEST
 # TEST = True
-TEST = False
-if TEST:
+# TEST = False
+if CanvasHacks.globals.TEST:
     print( "RUNNING IN TEST MODE" )
 
 import os
@@ -16,7 +17,7 @@ ROOT = os.getenv( "HOME" )
 
 # Check whether it is being run on my machine or remotely
 if ROOT[ :12 ] == '/Users/adam':
-    FileBasedConfiguration.load( TEST )
+    FileBasedConfiguration.load( CanvasHacks.globals.TEST )
     CONFIG = FileBasedConfiguration
     TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
     ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder

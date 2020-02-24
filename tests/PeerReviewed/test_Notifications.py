@@ -132,7 +132,7 @@ class TestSkaaMessenger(TestCase, TestingBase):
     #     # like content and who gets what will be tested in
     #     # tests for child classes
     #     self.assertTrue(self.contentRepo.get_formatted_work_by.called, "Content repo method called")
-    #     self.assertTrue(self.studentRepo.get_student.called, "Student repo method called")
+    #     self.assertTrue(self.studentRepo.get_student_record.called, "Student repo method called")
     #     # Returned expected stuff
     #     self.assertTrue( len( result ) == 1, "Something was returned" )
     #     # Sender method called
