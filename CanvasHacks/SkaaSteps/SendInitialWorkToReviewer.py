@@ -49,19 +49,20 @@ class SendInitialWorkToReviewer(IStep):
     #         print("Connected to REAL db. {}".format(self.db_filepath))
 
     def run(self):
-        self.initial_work_repo = make_quiz_repo(self.course, self.unit.initial_work)
+        self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
         # Check if new submitters, bail if not
         # todo
 
         # Assign reviewers to each submitter and store in db
-        self.associationRepo.assign_reviewers( self.initial_work_repo.submitter_ids)
+        self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
 
         if not self.is_test:
             make_review_audit_file(self.associationRepo, self.unit )
 
-        msgr = StudentWorkForPeerReviewMessenger(self.unit.review, self.studentRepo, self.initial_work_repo )
+        msgr = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo )
         msgr.notify(self.associationRepo.data, self.send)
+
 
 if __name__ == '__main__':
     pass

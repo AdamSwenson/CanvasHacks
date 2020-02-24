@@ -10,7 +10,7 @@ from tests.TestingBase import TestingBase
 from CanvasHacks.SkaaSteps.SendInitialWorkToReviewer import SendInitialWorkToReviewer
 
 
-class TestOnTimeSubmissions( unittest.TestCase, TestingBase ):
+class TestOnTimeSubmissions(TestingBase ):
     """Checks that works properly on first run after
     deadline on work that has been submitted
     """
@@ -41,7 +41,7 @@ class TestOnTimeSubmissions( unittest.TestCase, TestingBase ):
         self.fail()
 
 
-class TestLateSubmissions( unittest.TestCase ):
+class TestLateSubmissions( TestingBase ):
     """Checks that works properly on subsequent runs after the
     initial assignments have been sent out
 

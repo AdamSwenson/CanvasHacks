@@ -5,9 +5,9 @@ from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
 __author__ = 'adam'
 
-if __name__ == '__main__':
-    pass
 
+class FeedbackForMetareviewMessaging( object ):
+    pass
 
 
 class SendReviewToReviewee(IStep):
@@ -23,4 +23,11 @@ class SendReviewToReviewee(IStep):
         self._initialize()
 
     def run(self):
-        pass
+
+        msgr = FeedbackForMetareviewMessaging(self.unit.metareview, self.studentRepo, self.work_repo )
+        msgr.notify(self.associationRepo.data, self.send)
+
+
+
+if __name__ == '__main__':
+    pass

@@ -203,11 +203,11 @@ def make_notice( data ):
     """
     return REVIEW_NOTICE_TEMPLATE.format( **data )
 
-
+# old
 def make_metareview_notice( data ):
     return METAREVIEW_NOTICE_TEMPLATE.format( **data )
 
-
+# old
 def metareview_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):
     # # Load list of ReviewAssociation objects representing who reviews whom
     # review_assigns = associationRepo.get_associations(activity)

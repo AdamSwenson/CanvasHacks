@@ -12,6 +12,7 @@ if __name__ == '__main__':
 Created by adam on 2/22/20
 """
 from unittest import TestCase
+from tests.TestingBase import TestingBase
 from unittest.mock import MagicMock, patch
 
 from faker import Faker
@@ -19,7 +20,7 @@ from faker import Faker
 from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE
 from CanvasHacks.PeerReviewed.Definitions import *
 from CanvasHacks.Repositories.students import StudentRepository
-from tests.TestingBase import TestingBase
+
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     pass
 
 
-class TestFeedbackFromMetareviewMessenger( TestCase, TestingBase ):
+class TestFeedbackFromMetareviewMessenger( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
