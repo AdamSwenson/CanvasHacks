@@ -4,13 +4,14 @@ Created by adam on 1/18/20
 __author__ = 'adam'
 
 from sqlalchemy import Column, Integer
-from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.ext.declarative import declarative_base
 
 from CanvasHacks import environment as env
 from CanvasHacks.Models.model import Model
 from CanvasHacks.Models.student import Student
 
-Base = declarative_base()
+from CanvasHacks.DAOs.sqlite_dao import Base
+# Base = declarative_base()
 
 
 class ReviewAssociation( Base, Model ):

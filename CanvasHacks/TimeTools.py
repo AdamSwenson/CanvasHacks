@@ -2,7 +2,7 @@
 Created by adam on 2/10/20
 """
 import datetime
-
+import pytz
 import pandas as pd
 
 __author__ = 'adam'
@@ -30,6 +30,8 @@ def check_is_date(date):
        if not, it tries to make it into one"""
     return date if isinstance( date, pd.Timestamp ) else pd.to_datetime( date )
 
+def current_utc_timestamp():
+    return datetime.datetime.now(tz=pytz.utc)
 
 def getDateForMakingFileName():
     return datetime.date.isoformat( datetime.date.today() )

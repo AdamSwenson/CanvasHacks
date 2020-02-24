@@ -3,8 +3,10 @@ Created by adam on 1/18/20
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
-from CanvasHacks.Models.review_association import Base
+Base = declarative_base()
+# from CanvasHacks.Models.review_association import Base
 
 __author__ = 'adam'
 
