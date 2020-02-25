@@ -40,8 +40,9 @@ class SendInitialWorkToReviewer( IStep ):
                 make_review_audit_file( self.associationRepo, self.unit )
 
             # Send the work to the reviewers
-            self.messenger = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo )
+            self.messenger = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo, self.statusRepo )
             self.messenger.notify( self.associationRepo.data, self.send )
+
 
         except NoNewSubmissions:
             # Check if new submitters, bail if not

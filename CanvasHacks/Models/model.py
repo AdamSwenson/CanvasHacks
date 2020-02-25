@@ -14,6 +14,8 @@ class Model(object):
             except AttributeError as e:
                 print("Problem setting {} to {} \n".format(key, value), e)
 
+
+
     #
     # for k in kwargs.keys():
     #         # print(k, kwargs[k])

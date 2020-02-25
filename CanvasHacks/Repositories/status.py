@@ -2,8 +2,9 @@
 Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
-from CanvasHacks.Models.status_record import StatusRecord
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Models.status_record import ComplexStatusRecord, StatusRecord
+from CanvasHacks.PeerReviewed.Definitions import Unit, Activity
+from CanvasHacks.Repositories.IRepositories import IRepo
 
 __author__ = 'adam'
 
@@ -11,7 +12,79 @@ if __name__ == '__main__':
     pass
 
 
-class StatusRepository:
+class StatusRepository(IRepo):
+
+    def __init__( self, dao: SqliteDAO, activity: Activity):
+        """
+        Create a repository to handle events for a
+        particular activity
+        """
+        self.activity = activity
+        self.session = dao.session
+
+    def get_or_create_record( self, student_or_id ):
+        """Keeping the 2 required methods separate in
+        case have some use to do them separately
+        """
+        record = self.get_record(student_or_id)
+        if record is None:
+            record = self.create_record(student_or_id)
+        return record
+
+    def get_record( self, student_or_id ):
+        """
+        Returns the record for the student for this assignment or none
+        if no record has been created yet
+        :param student_or_id:
+        :return:
+        """
+        student_id = self._handle_id(student_or_id)
+        return self.session.query( StatusRecord )\
+            .filter( StatusRecord.activity_id == self.activity.id ) \
+            .filter( StatusRecord.student_id == student_id ) \
+            .one_or_none()
+
+    def create_record( self, student_or_id ):
+        """Creates and returns a record for the student on the activity.
+        It does not set the submitted or notified values
+        """
+        student_id = self._handle_id(student_or_id)
+        rec = StatusRecord( student_id=student_id, activity_id=self.activity.id )
+        self.session.add( rec )
+        # todo Consider bulk commits if slow
+        self.session.commit()
+        return rec
+
+    def record_opened( self, student, time_to_record=None ):
+        """Record that the student was notified that the activity
+         is available
+        """
+        record = self.get_or_create_record(student)
+        record.record_opened( time_to_record )
+        self.session.commit()
+
+    def record_submitted( self, student, time_to_record=None):
+        """Record that the student has submitted
+        the activity
+        """
+        record = self.get_or_create_record(student)
+        record.record_submission(time_to_record)
+        self.session.commit()
+
+    def record_sent_feedback( self, student, time_to_record=None ):
+        """Records when the student was sent feedback on their work
+        So, for the content assignment, this would be called after
+        the reviewer submits the review.
+        todo NOthing uses this yet
+        """
+        record = self.get_or_create_record(student)
+        record.record_sent_results(time_to_record)
+        self.session.commit()
+
+
+
+class ComplexStatusRepository:
+    """This likely won't be used. Keeping it until done simplifying"""
 
     def __init__( self, dao: SqliteDAO, unit: Unit):
         """
@@ -46,8 +119,8 @@ class StatusRepository:
         Returns all existing records for the unit
         :return: list of StatusReord objects
         """
-        return self.session.query( StatusRecord ) \
-            .filter( StatusRecord.content_assignment_id == self.content_assignment_id ) \
+        return self.session.query( ComplexStatusRecord ) \
+            .filter( ComplexStatusRecord.content_assignment_id == self.content_assignment_id ) \
             .all()
 
     def get_student_record( self, student_or_id ):
@@ -58,14 +131,14 @@ class StatusRepository:
         :return:
         """
         student_id = self._handle_id(student_or_id)
-        return self.session.query( StatusRecord ) \
-            .filter( StatusRecord.content_assignment_id == self.content_assignment_id ) \
-            .filter(StatusRecord.student_id == student_id)\
+        return self.session.query( ComplexStatusRecord ) \
+            .filter( ComplexStatusRecord.content_assignment_id == self.content_assignment_id ) \
+            .filter( ComplexStatusRecord.student_id == student_id )\
             .one_or_none()
 
     def create_record( self, student_or_id ):
         student_id = self._handle_id(student_or_id)
-        reviewer_rec = StatusRecord(student_id=student_id, content_assignment_id=self.content_assignment_id )
+        reviewer_rec = ComplexStatusRecord( student_id=student_id, content_assignment_id=self.content_assignment_id )
         self.session.add( reviewer_rec )
         # commit here?
         return reviewer_rec

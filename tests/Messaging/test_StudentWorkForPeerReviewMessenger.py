@@ -38,7 +38,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         self.studentRepo.get_student = MagicMock( return_value=self.reviewer )
         self.contentRepo = ContentRepositoryMock()
         self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
-
+        self.statusRepository = MagicMock()
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
 
     def test_prepare_message( self ):
@@ -68,7 +68,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     def test_notify( self, sendMock ):
         sendMock.return_value = 'this would be the result of sending'
-        self.obj = StudentWorkForPeerReviewMessenger( self.activity, self.studentRepo, self.contentRepo )
+        self.obj = StudentWorkForPeerReviewMessenger( self.activity, self.studentRepo, self.contentRepo, self.statusRepository )
 
         # Call
         result = self.obj.notify( [ self.review_assign ], send=True )
@@ -93,3 +93,6 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         # We are sending the content assignment out for review, so the
         #  receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
+
+        self.statusRepository.record_opened.assert_called()
+        self.statusRepository.record_opened.assert_called_with(self.reviewer.id)

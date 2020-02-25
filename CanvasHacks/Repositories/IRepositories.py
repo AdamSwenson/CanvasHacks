@@ -34,6 +34,24 @@ class IRepo( StoreMixin ):
         return uids
 
 
+    def _handle_id( self, object_or_int ):
+        """
+        Takes either a object or the int value of their id
+        and returns the id
+        :param object_or_int:
+        :return: int
+        """
+        try:
+            return int(object_or_int)
+        except TypeError:
+            try:
+                # in case we have a student object w id stored like this
+                return object_or_int.student_id
+            except AttributeError:
+                return object_or_int.id
+
+
+
 class StudentWorkRepo( IRepo ):
     """Parent class for any repository which holds
     student data and can provide a formatted version

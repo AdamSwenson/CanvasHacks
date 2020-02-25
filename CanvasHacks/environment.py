@@ -44,6 +44,7 @@ else:
 # DB
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
 STATUS_TABLE_NAME = 'status'
+COMPLEX_STATUS_TABLE_NAME = 'complexstatus'
 STUDENT_TABLE_NAME = 'students'
 
 # Logging

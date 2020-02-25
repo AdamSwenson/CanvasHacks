@@ -2,10 +2,13 @@
 Created by adam on 12/26/19
 """
 from CanvasHacks import environment as env
+from CanvasHacks.Logging import MessageLogger
 from CanvasHacks.Messaging.SendTools import send_message_to_student, ConversationMessageSender
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE, \
     METAREVIEW_CONTENT_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
+from CanvasHacks.PeerReviewed.Definitions import Activity
+from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.TimeTools import getDateForMakingFileName
 
 __author__ = 'adam'
@@ -16,12 +19,22 @@ if __name__ == '__main__':
 
 class SkaaMessenger:
 
-    def __init__( self, activity, student_repository, content_repository ):
+    def __init__( self, activity: Activity, student_repository, content_repository, status_repository: StatusRepository = None ):
+        """
+
+        :param activity:
+        :param student_repository:
+        :param content_repository:
+        :param status_repository:
+        """
         self.student_repository = student_repository
         self.content_repository = content_repository
         self.activity = activity
         # Object responsible for actually sending message
         self.sender = ConversationMessageSender()
+        # Objec in charge of logging statuses
+        self.status_repository = status_repository
+        self.logger = MessageLogger()
 
     def _make_message_data( self, receiving_student, content, other=None ):
         """
@@ -86,6 +99,11 @@ class SkaaMessenger:
                 messages.append( m )
                 # todo Add logging here so all outgoing messages are written to file
                 # m = send_message_to_student( **message_data )
+                # Record status change (not to log)
+                if self.status_repository is not None:
+                    # For the peer review, the reviewer will be marked as notified
+                    # For the metareview the author will be marked as notified
+                    self.status_repository.record_opened( message_data[ 'student_id' ] )
                 print( m )
             else:
                 # For test runs
@@ -99,8 +117,8 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
     """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
     """
 
-    def __init__( self, activity, student_repository, content_repository ):
-        super().__init__( activity, student_repository, content_repository )
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+        super().__init__( activity, student_repository, content_repository, status_repository )
         self.message_template = REVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
@@ -128,8 +146,8 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
     to the person who was reviewed
     """
 
-    def __init__( self, activity, student_repository, content_repository ):
-        super().__init__( activity, student_repository, content_repository )
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+        super().__init__( activity, student_repository, content_repository, status_repository )
         self.message_template = METAREVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
@@ -158,8 +176,8 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     did the initial peer review
     """
 
-    def __init__( self, activity, student_repository, content_repository ):
-        super().__init__( activity, student_repository, content_repository )
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+        super().__init__( activity, student_repository, content_repository, status_repository )
         self.message_template = METAREVIEW_CONTENT_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):

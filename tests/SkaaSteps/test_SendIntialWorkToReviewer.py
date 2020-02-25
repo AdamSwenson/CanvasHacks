@@ -33,11 +33,12 @@ class TestCallsAllExpected(TestingBase ):
         self.unit = unit_factory()
         # self.unit.components.append(review)
 
+    @patch('CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository')
     @patch('CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository')
     @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.StudentWorkForPeerReviewMessenger')
     @patch('CanvasHacks.SkaaSteps.ISkaaSteps.AssociationRepository')
     @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory')
-    def test_run( self, workLoaderMock, assocRepoMock, messengerMock, studentRepoMock ):
+    def test_run( self, workLoaderMock, assocRepoMock, messengerMock, studentRepoMock, statusRepoMock):
         """Check that each student receives the expected message
         containing the correct student's submission
         """
@@ -66,7 +67,9 @@ class TestCallsAllExpected(TestingBase ):
         obj.messenger.notify.assert_called()
         obj.messenger.notify.assert_called_with(obj.associationRepo.data, send)
 
-
+        # obj.statusRepo.record_opened.assert_called()
+        # obj.statusRepo.record_opened.assert_called_with(submitter_ids[0])
+        # obj.statusRepo.record_opened.assert_called_with(submitter_ids[1])
 
 class TestOnTimeSubmissions(TestingBase ):
     """

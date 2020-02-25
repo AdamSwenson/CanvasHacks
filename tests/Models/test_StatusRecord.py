@@ -11,7 +11,7 @@ from faker import Faker
 fake = Faker()
 import datetime
 import pytz
-from CanvasHacks.Models.status_record import StatusRecord
+from CanvasHacks.Models.status_record import ComplexStatusRecord
 from CanvasHacks.TimeTools import current_utc_timestamp
 
 
@@ -36,26 +36,26 @@ class TestStatusRecord( TestingBase ):
         self.activity_id = fake.random.randint(1111, 99999)
 
     def test_initial_record_creation( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.session.add( rec )
         self.session.commit()
 
-        self.assertIsInstance(rec, StatusRecord)
+        self.assertIsInstance( rec, ComplexStatusRecord )
 
         # Check
-        r = self.session.query( StatusRecord ) \
-            .filter( StatusRecord.content_assignment_id == self.activity_id ) \
+        r = self.session.query( ComplexStatusRecord ) \
+            .filter( ComplexStatusRecord.content_assignment_id == self.activity_id ) \
             .all()
         self.assertEqual(len(r), 1, "One record returned")
         self.assertEqual(r[0].student_id, self.target_student.id)
         self.assertEqual(r[0].content_assignment_id, self.activity_id)
 
     def test_is_under_review( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.session.add( rec )
         self.session.commit()
 
-        self.assertIsInstance(rec, StatusRecord)
+        self.assertIsInstance( rec, ComplexStatusRecord )
         self.assertFalse(rec.is_under_review())
 
         rec.reviewed_by = self.reviewing_student.id
@@ -63,7 +63,7 @@ class TestStatusRecord( TestingBase ):
 
     def test_add_reviewee( self ):
         # prep
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.reviewer_of is None)
         self.assertTrue(rec.reviewer_assigned_on is None)
 
@@ -76,7 +76,7 @@ class TestStatusRecord( TestingBase ):
 
     def test_add_reviewer( self ):
         # prep
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.reviewed_by is None)
 
         # call
@@ -86,7 +86,7 @@ class TestStatusRecord( TestingBase ):
         self.assertEqual(rec.reviewed_by, self.reviewing_student.id)
 
     def test_record_content_assignment_submission_no_date_provided( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.content_assignment_submitted is None)
 
         # call
@@ -97,7 +97,7 @@ class TestStatusRecord( TestingBase ):
         self.assertEqual(rec.content_assignment_submitted.tzinfo, pytz.utc, "Timestamp is utc")
 
     def test_record_content_assignment_submission_date_provided( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.content_assignment_submitted is None)
 
         submission_ts = current_utc_timestamp()
@@ -111,7 +111,7 @@ class TestStatusRecord( TestingBase ):
         self.assertEqual(rec.content_assignment_submitted, submission_ts, "Passed-in timestamp set")
 
     def test_record_sending_metareview_results( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.metareview_results_on is None)
 
         # call
@@ -122,7 +122,7 @@ class TestStatusRecord( TestingBase ):
         self.assertEqual(rec.metareview_results_on.tzinfo, pytz.utc, "Timestamp is utc")
 
     def test_record_sending_review_results( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.review_results_on is None)
 
         # call
@@ -133,7 +133,7 @@ class TestStatusRecord( TestingBase ):
         self.assertEqual(rec.review_results_on.tzinfo, pytz.utc, "Timestamp is utc")
 
     def test_record_wait_notification( self ):
-        rec = StatusRecord(student_id=self.target_student.id, content_assignment_id=self.activity_id )
+        rec = ComplexStatusRecord( student_id=self.target_student.id, content_assignment_id=self.activity_id )
         self.assertTrue(rec.wait_notification_on is None)
 
         # call

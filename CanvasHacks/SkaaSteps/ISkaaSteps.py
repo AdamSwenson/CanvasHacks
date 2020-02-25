@@ -3,6 +3,7 @@ Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
+from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
 
 __author__ = 'adam'
@@ -34,13 +35,13 @@ class IStep:
             # This is likely to happen during testing
             print(e)
 
-
     def _initialize( self ):
         """Creates and populates all relevant repositories and db access points"""
         self.studentRepo = StudentRepository( self.course )
         self.studentRepo.download()
         self._initialize_db()
         self.associationRepo = AssociationRepository( self.dao, self.unit.review )
+        self.statusRepo = StatusRepository(self.dao, self.unit.review)
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:

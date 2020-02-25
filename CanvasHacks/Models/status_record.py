@@ -14,7 +14,74 @@ from CanvasHacks.TimeTools import current_utc_timestamp
 
 
 class StatusRecord( Base, Model ):
+    """
+    Keeps track of when an activity was made available to a
+    student and when they submitted it.
+
+    NB, No need for recording when a wait notification is sent.
+    That can go in the logs for auditing
+    """
     __tablename__ = env.STATUS_TABLE_NAME
+    # Id of the relevant activity
+    activity_id = Column(Integer, primary_key=True, nullable=False)
+
+    # The student whom this record concerns
+    student_id = Column( Integer, primary_key=True, nullable=False )
+
+    # When this student submitted the activity
+    submitted = Column( DATETIME, nullable=True )
+
+    # When the student was notified this was available
+    # e.g., for metareview, this would be immediately after review submitted
+    # by other party
+    notified = Column( DATETIME, nullable=True )
+
+    # When the student was sent feedback on the assignment, if
+    # applicable.
+    # On the content assignment, this would be when they were
+    # sent the peer review feedback
+    results = Column(DATETIME, nullable=True)
+
+    def record_submission( self, time_to_record=None ):
+        """
+        Called to record the timestamp of when this student submitted
+        their content assignment
+        :param time_to_record:
+        :return:
+        """
+        if time_to_record is None:
+            time_to_record = current_utc_timestamp()
+        self.submitted = time_to_record
+
+    def record_opened( self, time_to_record=None ):
+        """
+        Called to record the timestamp of when this student was
+        notified that the activity was available.
+        With activities like peer review, this is also the
+        time that they were sent someone else's work
+        :param time_to_record:
+        :return:
+        """
+        if time_to_record is None:
+            time_to_record = current_utc_timestamp()
+        self.notified = time_to_record
+
+    def record_sent_results( self, time_to_record=None ):
+        """
+        Called to record the timestamp of when they were sent
+        feedback on the assignment
+        :param time_to_record:
+        :return:
+        """
+
+        if time_to_record is None:
+            time_to_record = current_utc_timestamp()
+        self.results = time_to_record
+
+
+
+class ComplexStatusRecord( Base, Model ):
+    __tablename__ = env.COMPLEX_STATUS_TABLE_NAME
     # The student whom this record concerns
     student_id = Column( Integer, primary_key=True, nullable=False )
 
@@ -128,8 +195,6 @@ class StatusRecord( Base, Model ):
         if sent_time is None:
             sent_time = current_utc_timestamp()
         self.wait_notification_on = sent_time
-
-
 
 
 if __name__ == '__main__':
