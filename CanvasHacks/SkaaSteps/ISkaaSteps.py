@@ -28,8 +28,12 @@ class IStep:
         self.is_test = env.CONFIG.is_test if is_test is None else is_test
         self.send = send
 
-        self.db_filepath = "{}/{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, env.CONFIG.semester_name,
-                                                                     self.unit.unit_number )
+        try:
+            self.db_filepath = "{}/{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, env.CONFIG.semester_name, self.unit.unit_number )
+        except AttributeError as e:
+            # This is likely to happen during testing
+            print(e)
+
 
     def _initialize( self ):
         """Creates and populates all relevant repositories and db access points"""

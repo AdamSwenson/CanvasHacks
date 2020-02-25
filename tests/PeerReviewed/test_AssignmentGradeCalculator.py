@@ -18,7 +18,7 @@ from tests.factories.ModelFactories import *
 class TestAssignmentGradeCalculator( TestCase ):
     def setUp( self ):
         # Create the assignment
-        self.assignment = assignment_factory()
+        self.assignment = unit_factory()
 
         self.student1 = student_factory()
         self.student2 = student_factory()
@@ -82,7 +82,7 @@ class TestAssignmentGradeCalculator( TestCase ):
 class TestAssignmentGradeCalculatorAbarrentCases( TestCase ):
     def setUp( self ):
         # Create the assignment
-        self.assignment = assignment_factory()
+        self.assignment = unit_factory()
 
         self.student1 = student_factory()
         self.student2 = student_factory()

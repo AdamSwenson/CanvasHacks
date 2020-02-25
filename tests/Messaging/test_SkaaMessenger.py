@@ -1,8 +1,7 @@
 """
 Created by adam on 12/26/19
 """
-from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from faker import Faker
 
@@ -10,7 +9,7 @@ from tests.TestingBase import TestingBase
 
 fake = Faker()
 
-from CanvasHacks.PeerReviewed.Notifications import *
+from CanvasHacks.Messaging.Messengers import *
 from CanvasHacks.PeerReviewed.Definitions import *
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.ModelFactories import student_factory
@@ -19,20 +18,17 @@ from tests.factories.RepositoryMocks import ContentRepositoryMock
 
 __author__ = 'adam'
 
-if __name__ == '__main__':
-    pass
-
 
 def prompt_response_factory( number=3 ):
     return [ { 'prompt': fake.sentence(), 'response': fake.paragraph() } for _ in range( 0, number ) ]
 
+#
+# class TestMake_conversation_data( TestCase ):
+#     def test_make_conversation_data( self ):
+#         self.fail()
 
-class TestMake_conversation_data( TestCase ):
-    def test_make_conversation_data( self ):
-        self.fail()
 
-
-class TestStudentNotices( TestCase ):
+class TestStudentNotices( TestingBase ):
 
     def test_make_prompt_and_response( self ):
         w = prompt_response_factory()
@@ -40,16 +36,17 @@ class TestStudentNotices( TestCase ):
 
         self.assertTrue( len( j ) > 1, "Created string is non empty" )
 
-    def test_make_notice( self ):
-        w = prompt_response_factory()
-        d = { 'name': fake.name(),
-              'response_list': w,
-              'review_assignment_name': fake.job(),
-              'access_code': fake.slug()
-              }
-        j = make_notice(d)
-        # self.assertEquals(  j, 1, "Created string is non empty" )
-        self.assertTrue( len( j ) > 1, "Created string is non empty" )
+
+    # def test_make_notice( self ):
+    #     w = prompt_response_factory()
+    #     d = { 'name': fake.name(),
+    #           'response_list': w,
+    #           'review_assignment_name': fake.job(),
+    #           'access_code': fake.slug()
+    #           }
+    #     j = make_notice(d)
+    #     # self.assertEquals(  j, 1, "Created string is non empty" )
+    #     self.assertTrue( len( j ) > 1, "Created string is non empty" )
 
 
 # def make_expected_message_data(activity, template, receiving_student, content, other=None):
@@ -74,7 +71,7 @@ class TestStudentNotices( TestCase ):
 #     message = template.format( **d )
 
 
-class TestSkaaMessenger(TestCase, TestingBase):
+class TestSkaaMessenger(TestingBase):
 
     def setUp(self):
         self.config_for_test()
@@ -112,7 +109,7 @@ class TestSkaaMessenger(TestCase, TestingBase):
 
     # @patch('CanvasHacks.PeerReviewed.Notifications.ConversationMessageSender')
     # def test_notify( self, senderMock ):
-    #     self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.authors_work)
+    #     self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.work)
     #     review_assign = MagicMock( assessor_id=self.receiving_student.id )
     #
     #     # parent class doesn't define message_template

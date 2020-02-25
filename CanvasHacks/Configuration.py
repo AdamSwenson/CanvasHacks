@@ -132,6 +132,33 @@ class Configuration( object ):
         so the selection buttons will work the same"""
         return [cls.unit_number]
 
+    @classmethod
+    def load_section_ids( cls ):
+        try:
+            for v in cls.configuration[ 'sections' ].values():
+                cls.add_course_id( int(v) )
+        except:
+            pass
+
+    # --------------- Test vs live
+    @classmethod
+    def set_test( cls ):
+        """Tells to set all variables to test settings"""
+        cls.is_test = True
+        # set course id
+        test_id = cls.configuration['testing'].get('TEST_COURSE_ID')
+        cls.course_ids = [int(test_id)]
+        print(" ".join([" TEST " for _ in range(0, 5)]))
+
+    @classmethod
+    def set_live( cls ):
+        """Set all variables to live setting"""
+        cls.is_test = False
+        # clear out possible test values
+        cls.course_ids = []
+        # Set to the stored course ids
+        cls.load_section_ids()
+        print(" ".join([" LIVE " for _ in range(0, 5)]))
 
 
 class InteractiveConfiguration( Configuration ):
@@ -149,6 +176,14 @@ class InteractiveConfiguration( Configuration ):
         if event[ 'type' ] == 'change' and event[ 'name' ] == 'value':
             v = event[ 'new' ]
             cls.add_canvas_url_base( v )
+
+    @classmethod
+    def set_test( cls ):
+        cls.is_test = True
+
+    @classmethod
+    def set_live( cls ):
+        cls.is_test = False
 
 
 class FileBasedConfiguration( Configuration ):
@@ -189,14 +224,6 @@ class FileBasedConfiguration( Configuration ):
         cls.semester_name = cls.configuration['names'].get('SEMESTER')
 
     @classmethod
-    def load_section_ids( cls ):
-        try:
-            for v in cls.configuration[ 'sections' ].values():
-                cls.add_course_id( int(v) )
-        except:
-            pass
-
-    @classmethod
     def load_local_filepaths( cls ):
         root = os.getenv( "HOME" )
         cls.archive_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'STUDENT_WORK_ARCHIVE_FOLDER' ))
@@ -222,27 +249,6 @@ class FileBasedConfiguration( Configuration ):
             print("Will ignore work by users: ", cls.excluded_users)
         except:
             pass
-
-    # --------------- Test vs live
-    @classmethod
-    def set_test( cls ):
-        """Tells to set all variables to test settings"""
-        cls.is_test = True
-        # set course id
-        test_id = cls.configuration['testing'].get('TEST_COURSE_ID')
-        cls.course_ids = [int(test_id)]
-        print(" ".join([" TEST " for _ in range(0, 5)]))
-
-    @classmethod
-    def set_live( cls ):
-        """Set all variables to live setting"""
-        cls.is_test = False
-        # clear out possible test values
-        cls.course_ids = []
-        # Set to the stored course ids
-        cls.load_section_ids()
-        print(" ".join([" LIVE " for _ in range(0, 5)]))
-
 
 if __name__ == '__main__':
     FileBasedConfiguration.load()

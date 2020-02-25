@@ -2,9 +2,8 @@
 Created by adam on 2/10/20
 """
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
-from CanvasHacks.Repositories.quizzes import WorkRepositoryFactory, \
-    drop_columns_from_frame, WorkRepositoryLoaderFactory
-from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
+# from CanvasHacks.Loaders.quiz import drop_columns_from_frame
+from CanvasHacks.Processors.quiz import drop_columns_from_frame
 from CanvasHacks.TimeTools import getDateForMakingFileName
 
 __author__ = 'adam'
@@ -129,7 +128,7 @@ def retrieve_quiz_data( quiz, rest_timeout=60, max_id_attempts=20 ):
             return download_report( download_url )
 
 
-def save_downloaded_report( activity, frame ):
+def save_downloaded_report( activity, frame, SECTION=False ):
     """If we've downloaded the report programmatically, this
     saves it to the expected location
     """
@@ -217,39 +216,6 @@ def load_new( activity ):
         return newstuff
 
 
-def make_quiz_repo( course, activity, save=True ):
-    """Gets all student work data for the activity that's part of the assignment
-    loads it into a QuizRepository or ReviewRepository and
-    returns the repository.
-    This is the main method called to get data
-    """
-    # Get quiz submission objects
-    repo = WorkRepositoryFactory.make( activity, course )
-    # if isinstance(activity, Review):
-    #     repo = ReviewRepository(activity, course)
-    # else:
-    #     repo = QuizRepository(activity, course)
-
-    # Download student work
-    # This will work if the 'Create Report' button has been manually clicked
-    student_work_frame = retrieve_quiz_data( repo.quiz )
-
-    if save:
-        # Want to have all the reports be formatted the same
-        # regardless of whether we manually or programmatically
-        # downloaded them. Thus we save before doing anything to them.
-        save_downloaded_report( activity, student_work_frame )
-
-    # Download submissions
-    subRepo = QuizSubmissionRepository( repo.quiz )
-
-    # Doing the combination with submissions after saving to avoid
-    # mismatches of new and old data
-    repo._process( student_work_frame, subRepo.frame )
-
-    return repo
-
-
 def load_activity_data_from_files( activity, course ):
     """Get complete set of data for activity from a bunch of
     potentially inconsistent files.
@@ -281,145 +247,19 @@ def load_activity_data_from_files( activity, course ):
             data.score = data.apply( lambda x: fix_score( x ), axis=1 )
             data.drop( [ 'score_x', 'score_y' ], axis=1, inplace=True )
 
-        repo = WorkRepositoryFactory.make( activity, course )
-        repo.set_question_columns( data )
+        # todo this stuff that's been commented out is probably essential to something (had to comment out in CAN-44 to prevent circular imports)
+        # repo = WorkRepositoryFactory.make( activity, course )
+        # repo.set_question_columns( data )
         drop_columns_from_frame( data )
 
         data.drop_duplicates( inplace=True )
-        repo.data = data
-        print( "{} rows loaded to repo.data after processing".format( len( repo.data ) ) )
-        return repo
-
-
-class INewLoader:
-    """Interface for any class which ingests data and returns
-    what hasn't been acted upon yet
-    """
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        raise NotImplementedError
-
-    @staticmethod
-    def _check_empty( data ):
-        """
-        Should be called on what's been loaded before returning
-        it.
-        :raises NoNewSubmissions
-        """
-        if len( data ) == 0:
-            raise NoNewSubmissions
-
-
-class IAllLoader:
-    """Interface for any class which loads all existing
-    data for the quiz"""
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        raise NotImplementedError
-
-
-
-class LoaderFactory:
-    """Decides which loader to use"""
-
-    @staticmethod
-    def make( download=True, only_new=False, **kwargs ):
-        if download and only_new:
-            return NewQuizReportDownloadLoader
-
-        if download:
-            return AllQuizReportDownloader
-
-        # We're just to load from file
-        if only_new and only_new:
-            return NewQuizReportFileLoader
-
-        return AllQuizReportFileLoader
-
-
-
-class AllQuizReportFileLoader( IAllLoader ):
-    """Loads all records for quiz"""
-
-    # def __init__( self, course, activity ):
-    #     self.course = course
-    #     self.activity = activity
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        # course = self.course if course is None else course
-        # activity = self.activity if activity is None else activity
-
-        return load_activity_data_from_files( activity, course )
-
-
-class AllQuizReportDownloader( INewLoader ):
-
-    @staticmethod
-    def load( activity, course=None, save=True, **kwargs ):
-        student_work_frame = retrieve_quiz_data( activity )
-
-        if save:
-            # Want to have all the reports be formatted the same
-            # regardless of whether we manually or programmatically
-            # downloaded them. Thus we save before doing anything to them.
-            save_downloaded_report( activity, student_work_frame )
-
-        return student_work_frame
-
-
-class NewQuizReportFileLoader( INewLoader ):
-    """
-    Loads latest data from files
-
-    todo
-    """
-
-    # def __init__( self, course, activity ):
-    #     self.course = course
-    #     self.activity = activity
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        """
-        Returns all new records
-        :param course:
-        :param activity:
-        :return: DataFrame
-        :raises: NoNewSubmissions
-        """
-        data = load_new( activity )
-        NewQuizReportFileLoader._check_empty( data )
-        return data
-
-
-class NewQuizReportDownloadLoader( INewLoader ):
-    """
-    Downloads latest report and returns what's new without
-    storing report
-
-    todo
-    """
-
-    # def __init__( self, course, activity ):
-    #     self.course = course
-    #     self.activity = activity
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        """
-        Returns all new records
-        :param course:
-        :param activity:
-        :return: DataFrame
-        :raises: NoNewSubmissions
-        """
-        data = load_new( activity )
-        NewQuizReportDownloadLoader._check_empty( data )
+        # repo.data = data
+        # print( "{} rows loaded to repo.data after processing".format( len( repo.data ) ) )
+        # return repo
         return data
 
 
 if __name__ == '__main__':
     pass
+
+

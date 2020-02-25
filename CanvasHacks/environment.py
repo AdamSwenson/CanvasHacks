@@ -15,25 +15,31 @@ from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfigu
 
 ROOT = os.getenv( "HOME" )
 
-# Check whether it is being run on my machine or remotely
-if ROOT[ :12 ] == '/Users/adam':
-    FileBasedConfiguration.load( CanvasHacks.globals.TEST )
-    CONFIG = FileBasedConfiguration
-    TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
-    ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
-    JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
-    LOG_FOLDER = FileBasedConfiguration.log_folder
-    DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
+if CanvasHacks.globals.use_api:
+    # Check whether it is being run on my machine or remotely
+    if ROOT[ :12 ] == '/Users/adam':
+        FileBasedConfiguration.load( CanvasHacks.globals.TEST )
+        CONFIG = FileBasedConfiguration
+        TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
+        ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
+        JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
+        LOG_FOLDER = FileBasedConfiguration.log_folder
+        DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
 
-    TOKEN = FileBasedConfiguration.canvas_token
-    URL_BASE = FileBasedConfiguration.canvas_url_base
+        TOKEN = FileBasedConfiguration.canvas_token
+        URL_BASE = FileBasedConfiguration.canvas_url_base
 
+    else:
+        CONFIG = InteractiveConfiguration
+        TOKEN = InteractiveConfiguration.canvas_token
+        URL_BASE = InteractiveConfiguration.canvas_url_base
+        # Logging should stream
+        LOG_FOLDER = None
 else:
+    # Testing without api access
     CONFIG = InteractiveConfiguration
-    TOKEN = InteractiveConfiguration.canvas_token
-    URL_BASE = InteractiveConfiguration.canvas_url_base
-    # Logging should stream
-    LOG_FOLDER = None
+    if CanvasHacks.globals.TEST:
+        CONFIG.is_test = CanvasHacks.globals.TEST
 
 # DB
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"

@@ -1,7 +1,6 @@
 """
 Created by adam on 2/23/20
 """
-from unittest import TestCase
 
 __author__ = 'adam'
 
@@ -11,7 +10,6 @@ if __name__ == '__main__':
 """
 Created by adam on 2/22/20
 """
-from unittest import TestCase
 from tests.TestingBase import TestingBase
 from unittest.mock import MagicMock, patch
 
@@ -25,7 +23,7 @@ from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
-from CanvasHacks.PeerReviewed.Notifications import FeedbackFromMetareviewMessenger
+from CanvasHacks.Messaging.Messengers import FeedbackFromMetareviewMessenger
 
 fake = Faker()
 
@@ -45,12 +43,14 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         # student recieiving the message
         self.author = student_factory()
         self.reviewer = student_factory()
-        self.authors_work = fake.text()
+
+        # This would be metareview feedback on the review
+        self.work = fake.text()
 
         self.studentRepo = StudentRepository()
         self.studentRepo.get_student = MagicMock( return_value=self.reviewer )
         self.contentRepo = ContentRepositoryMock()
-        self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.authors_work )
+        self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
 
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
 
@@ -67,10 +67,15 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
-        expected_content = obj._make_message_content( self.authors_work, None, self.reviewer )
+        expected_content = obj._make_message_content( self.work, None, self.reviewer )
         self.assertEqual( expected_content, message_data[ 'body' ], "Expected message body" )
 
-    @patch( 'CanvasHacks.PeerReviewed.Notifications.ConversationMessageSender.send' )
+        # Super important: makes sure going to right person
+        # This is for the metareview, so the receipient should be the REVIEWER
+        self.studentRepo.get_student.assert_called_with(self.reviewer.id )
+
+
+    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     def test_notify( self, sendMock ):
         sendMock.return_value = 'taco'
         self.obj = FeedbackFromMetareviewMessenger( self.activity, self.studentRepo, self.contentRepo )
@@ -90,8 +95,11 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.reviewer.id, "Sent to reviewer" )
         self.assertEqual(kwargs['subject'], self.activity.email_subject, "Sent with expected subject line")
-        d = self.obj._make_template_input( self.authors_work, None, self.reviewer )
+        d = self.obj._make_template_input( self.work, None, self.reviewer )
         b = METAREVIEW_CONTENT_TEMPLATE.format(**d)
         self.assertEqual(kwargs['body'], b, "Sent with expected body")
 
+        # Super important: makes sure going to right person
+        # This is for the metareview, so the receipient should be the REVIEWER
+        self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 

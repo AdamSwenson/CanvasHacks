@@ -1,10 +1,12 @@
 """
 Created by adam on 5/6/19
 """
+from CanvasHacks.Loaders.quiz import LoaderFactory, AllQuizReportFileLoader, NewQuizReportFileLoader
 from CanvasHacks.Models.QuizModels import QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
-from CanvasHacks.QuizReportFileTools import NewQuizReportFileLoader, AllQuizReportFileLoader, LoaderFactory
+from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
+from CanvasHacks.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
 from CanvasHacks.Repositories.IRepositories import StudentWorkRepo, SelectableMixin
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
@@ -13,43 +15,8 @@ __author__ = 'adam'
 
 import pandas as pd
 
-from CanvasHacks import environment as env
-import json
-
-from CanvasHacks.PeerReviewed.Notifications import make_prompt_and_response
+from CanvasHacks.Messaging.Messengers import make_prompt_and_response
 from CanvasHacks.Repositories.IRepositories import ContentRepository
-
-def process_work( work_frame, submissions_frame ):
-    try:
-        v = work_frame[ 'student_id' ]
-    except KeyError:
-        work_frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
-    # merge it with matching rows from the submissions frame
-    frame = pd.merge( work_frame, submissions_frame, how='left', on=[ 'student_id', 'attempt' ] )
-    try:
-        # Try to sort it on student names if possible
-        frame.set_index( 'name', inplace=True )
-        frame.sort_index( inplace=True )
-    except KeyError:
-        pass
-    return frame
-
-
-def load_student_work( csv_filepath, submissions ):
-    """Loads and processes a csv file containing all student work for the assignment
-    submissions: DataFrame containing student submission objects
-    NB, process_work has been refactored out in CAN-11 but load_student_work
-    is still here for legacy uses
-    """
-    f = pd.read_csv( csv_filepath )
-    return process_work( f, submissions )
-    # # rename id so will be able to join
-    # f.rename( { 'id': 'student_id' }, axis=1, inplace=True )
-    # # merge it with matching rows from the submissions frame
-    # f = pd.merge( f, submissions, how='left', on=[ 'student_id', 'attempt' ] )
-    # f.set_index( 'name', inplace=True )
-    # f.sort_index( inplace=True )
-    # return f
 
 
 # def detect_question_columns(columns):
@@ -63,31 +30,8 @@ def load_student_work( csv_filepath, submissions ):
 # assert(detect_question_columns(test) == [ "1785114: \nWhat is an example of persuasive advertising?"])
 # Limit to just the final attempts
 
-def remove_non_final_attempts( frame ):
-    """Can only be ran after submission has been added?"""
-    frame.dropna( subset=[ 'submission_id' ], inplace=True )
-
 
 #     return frame[pd.notnull(frame['submission_id'])]
-
-def make_drop_list( columns ):
-    """The canvas exports will have some annoying fields
-        These should be added to the droppable list
-        If there are columns with a common initial string (e.g., 1.0, 1.0.1, ...) just
-        add the common part
-    """
-
-    droppable = [ '1.' ]
-    to_drop = [ ]
-    for c in columns:
-        try:
-            if float( c ):
-                to_drop.append( c )
-        except ValueError:
-            for d in droppable:
-                if c[ :len( d ) ] == d:
-                    to_drop.append( c )
-    return to_drop
 
 
 #     to_drop = [ ]
@@ -102,50 +46,6 @@ def make_drop_list( columns ):
 # assert (make_drop_list( test ) == [ '1.0', '1.0.1', '1.0.2' ])
 
 
-def drop_columns_from_frame( frame ):
-    to_drop = make_drop_list( frame.columns )
-    frame.drop( to_drop, axis=1, inplace=True )
-    print( "Removed: ", to_drop )
-
-
-def check_responses( row, question_columns ):
-    score = 0
-    for c in question_columns:
-        try:
-            if pd.isnull( row[ c ] ):
-                raise Exception
-
-            # No credit for 1 word answers
-            if len( row[ c ] ) < 2:
-                raise Exception
-
-            # If we made it past the tests, increment the score
-            score += 1
-        except Exception:
-            pass
-
-    return score
-
-
-def add_graded_total_field( frame, question_columns ):
-    frame[ 'graded_total' ] = frame.apply( lambda r: check_responses( r, question_columns ), axis=1 )
-
-
-def save_to_log_folder( frame ):
-    section = frame.iloc[ 0 ][ 'section' ]
-    qid = frame.iloc[ 0 ][ 'quiz_id' ]
-    fname = "%s/%s-%s-results.xlsx" % (env.LOG_FOLDER, section, qid)
-    print( "Saving to ", fname )
-    frame.to_excel( fname )
-
-
-def save_json( grade_data, quiz_data_obj ):
-    fpath = "%s/%s-%s-all-submissions.json" % (env.LOG_FOLDER, quiz_data_obj.course_id, quiz_data_obj.id)
-    # save submissions
-    with open( fpath, 'w' ) as fpp:
-        json.dump( grade_data, fpp )
-
-
 class WorkRepositoryFactory:
     """Decides what kind of repository is needed
     and instantiates it"""
@@ -154,9 +54,9 @@ class WorkRepositoryFactory:
     def make( activity, course=None, only_new=False, **kwargs ):
         # Get the object which will handle loading data
         if only_new:
-            loader = NewQuizReportFileLoader(activity, course)
+            loader = NewQuizReportFileLoader( activity, course )
         else:
-            loader = AllQuizReportFileLoader( activity, course)
+            loader = AllQuizReportFileLoader( activity, course )
 
         # Get quiz submission objects
         if isinstance( activity, Review ):
@@ -176,7 +76,7 @@ class WorkRepositoryLoaderFactory:
     @staticmethod
     def make( activity, course=None, only_new=False, **kwargs ):
         # Get the object which will handle loading data
-        loader = LoaderFactory.make(download=True, only_new=only_new)
+        loader = LoaderFactory.make( download=True, only_new=only_new )
         # if only_new:
         #     loader = NewQuizReportFileLoader
         # else:
@@ -188,7 +88,7 @@ class WorkRepositoryLoaderFactory:
         else:
             repo = QuizRepository( activity, course )
 
-        student_work_frame = loader(**kwargs)
+        student_work_frame = loader( **kwargs )
 
         # Download submissions
         subRepo = QuizSubmissionRepository( repo.quiz )
@@ -198,8 +98,6 @@ class WorkRepositoryLoaderFactory:
         repo._process( student_work_frame, subRepo.frame )
 
         return repo
-
-
 
 
 class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, SelectableMixin ):
@@ -305,10 +203,8 @@ class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, Selecta
     def submitter_ids( self ):
         """Returns a list of canvas ids of students who have submitted the assignment"""
         # try:
-        return list(set(self.data.reset_index().student_id.tolist()))
+        return list( set( self.data.reset_index().student_id.tolist() ) )
         # except (ValueError, KeyError):
-
-
 
 
 class ReviewRepository( QuizRepository ):
@@ -387,3 +283,36 @@ class ReviewRepository( QuizRepository ):
 
 if __name__ == '__main__':
     pass
+
+
+def make_quiz_repo( course, activity, save=True ):
+    """Gets all student work data for the activity that's part of the assignment
+    loads it into a QuizRepository or ReviewRepository and
+    returns the repository.
+    This is the main method called to get data
+    """
+    # Get quiz submission objects
+    # repo = WorkRepositoryFactory.make( activity, course )
+    if isinstance(activity, Review):
+        repo = ReviewRepository(activity, course)
+    else:
+        repo = QuizRepository(activity, course)
+
+    # Download student work
+    # This will work if the 'Create Report' button has been manually clicked
+    student_work_frame = retrieve_quiz_data( repo.quiz )
+
+    if save:
+        # Want to have all the reports be formatted the same
+        # regardless of whether we manually or programmatically
+        # downloaded them. Thus we save before doing anything to them.
+        save_downloaded_report( activity, student_work_frame )
+
+    # Download submissions
+    subRepo = QuizSubmissionRepository( repo.quiz )
+
+    # Doing the combination with submissions after saving to avoid
+    # mismatches of new and old data
+    repo._process( student_work_frame, subRepo.frame )
+
+    return repo

@@ -84,6 +84,7 @@ class SkaaMessenger:
             if send:
                 m = self.sender.send( **message_data )
                 messages.append( m )
+                # todo Add logging here so all outgoing messages are written to file
                 # m = send_message_to_student( **message_data )
                 print( m )
             else:
@@ -109,7 +110,7 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
         try:
             # We are going to send the original work to the assessor
             # who will do the peer review
-            receiving_student = self.student_repository.get_student_record( review_assignment.assessor_id )
+            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
 
             # The assessee did the work that we want to send
             # to the assessor
@@ -139,7 +140,7 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
             # We are going to send the peer review feedback
             # created by the assessor to the student who was
             # assessed in the peer review stage
-            receiving_student = self.student_repository.get_student_record( review_assignment.assessee_id )
+            receiving_student = self.student_repository.get_student( review_assignment.assessee_id )
 
             # The assessor did the work that we want to send
             # to the assessee
@@ -169,7 +170,7 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
             # We are going to send the metareview feedback
             # created by the assessee to the student who did
             # the assessing in the peer review stage
-            receiving_student = self.student_repository.get_student_record( review_assignment.assessor_id )
+            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
 
             # The assessor did the work that we want to send
             # to the assessee
