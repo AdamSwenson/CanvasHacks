@@ -3,7 +3,7 @@ Created by adam on 2/24/20
 """
 import pandas as pd
 
-from CanvasHacks.Loaders.ILoaders import IAllLoader, INewLoader
+from CanvasHacks.Loaders.interfaces import IAllLoader, INewLoader
 from CanvasHacks.Processors.quiz import process_work
 from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, retrieve_quiz_data, save_downloaded_report, \
     load_new
@@ -36,7 +36,7 @@ class AllQuizReportFileLoader( IAllLoader ):
     """Loads all records for quiz"""
 
     @staticmethod
-    def load( activity, course=None, **kwargs ):
+    def load( activity, course, **kwargs ):
         # course = self.course if course is None else course
         # activity = self.activity if activity is None else activity
         # pass
@@ -67,7 +67,7 @@ class NewQuizReportFileLoader( INewLoader ):
     """
 
     @staticmethod
-    def load( activity, course=None, **kwargs ):
+    def load( activity, course, **kwargs ):
         """
         Returns all new records
         :param course:
@@ -97,6 +97,9 @@ class NewQuizReportDownloadLoader( INewLoader ):
         :return: DataFrame
         :raises: NoNewSubmissions
         """
+        # quiz = AllQuizReportDownloader.get_quiz( course, activity )
+        # student_work_frame = retrieve_quiz_data( quiz )
+
         data = load_new( activity )
         NewQuizReportDownloadLoader._check_empty( data )
         return data

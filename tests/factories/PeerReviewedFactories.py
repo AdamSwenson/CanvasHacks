@@ -47,12 +47,15 @@ def unit_factory(course=None, unit_number=None):
     test_data = test_data_factory()
     initial = InitialWork( **test_data[ 'initial' ] )
     initial.id = random.randint( 0, 10000 )
+    initial.quiz_id = initial.id
     review = Review( **test_data[ 'review' ] )
     review.id = random.randint( 0, 10000 )
+    review.quiz_id = review.id
     review.access_code = fake.ean8()
     review.activity_link = fake.uri()
     meta = MetaReview( **test_data[ 'metareview' ] )
     meta.id = random.randint( 0, 10000 )
+    meta.quiz_id = meta.id
     unit = Unit( course, unit_number )
     unit.components = [initial, review, meta]
     return unit

@@ -134,11 +134,12 @@ def save_downloaded_report( activity, frame, SECTION=False ):
     """
     # save to file
     create_folder( activity.folder_path )
-    try:
-        # if there's a particular section
-        fp = "{}/{}-student-work.csv".format( activity.folder_path, SECTION )
-    except NameError:
-        fp = "{}/{}-{}-student-work.csv".format( activity.folder_path, getDateForMakingFileName(), activity.safe_name )
+    fp = "{}/{}-{}-student-work.csv".format( activity.folder_path, getDateForMakingFileName(), activity.safe_name )
+    # try:
+    #     # if there's a particular section
+    #     fp = "{}/{}-student-work.csv".format( activity.folder_path, SECTION )
+    # except NameError:
+    #     fp = "{}/{}-{}-student-work.csv".format( activity.folder_path, getDateForMakingFileName(), activity.safe_name )
 
     try:
         frame.to_csv( fp )

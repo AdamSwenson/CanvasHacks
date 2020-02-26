@@ -19,6 +19,8 @@ class SendMetareviewToReviewer(IStep):
         :param send: Whether to actually send the messages
         """
         super().__init__(course, unit, is_test, send, **kwargs)
+        # The activity whose results we are going to be doing something with
+        self.activity = unit.metareview
         self._initialize()
 
     def run(self, only_new=True):

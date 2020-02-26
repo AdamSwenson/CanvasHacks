@@ -22,9 +22,11 @@ class SendInitialWorkToReviewer( IStep ):
         :param send: Whether to actually send the messages
         """
         super().__init__( course, unit, is_test, send, **kwargs )
+        # The activity whose results we are going to be doing something with
+        self.activity = unit.initial_work
         self._initialize()
 
-    def run( self, only_new=True ):
+    def run( self, only_new=False ):
         """
         Loads content assignments, assigns reviewers, and sends formatted
         work to reviewer

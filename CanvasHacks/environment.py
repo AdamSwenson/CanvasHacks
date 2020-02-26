@@ -40,6 +40,7 @@ else:
     CONFIG = InteractiveConfiguration
     if CanvasHacks.globals.TEST:
         CONFIG.is_test = CanvasHacks.globals.TEST
+    LOG_FOLDER = None
 
 # DB
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"

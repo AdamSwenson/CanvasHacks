@@ -30,7 +30,8 @@ class IStep:
         self.send = send
 
         try:
-            self.db_filepath = "{}/{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, env.CONFIG.semester_name, self.unit.unit_number )
+            t = 'TEST-' if env.CONFIG.is_test else ""
+            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
         except AttributeError as e:
             # This is likely to happen during testing
             print(e)
@@ -40,14 +41,19 @@ class IStep:
         self.studentRepo = StudentRepository( self.course )
         self.studentRepo.download()
         self._initialize_db()
-        self.associationRepo = AssociationRepository( self.dao, self.unit.review )
-        self.statusRepo = StatusRepository(self.dao, self.unit.review)
+        self.associationRepo = AssociationRepository( self.dao, self.activity)
+        self.statusRepo = StatusRepository(self.dao, self.activity)
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:
+            # For special testing
+            self.dao = SqliteDAO( self.db_filepath )
+            self.dao.initialize_db_file()
+            print( "Connected to TEST db file. {}".format( self.db_filepath ) )
+
             # testing: in memory db
-            self.dao = SqliteDAO()
-            print( "Connected to testing db" )
+            # self.dao = SqliteDAO()
+            # print( "Connected to testing db" )
         else:
             # real: file db
             self.dao = SqliteDAO( self.db_filepath )

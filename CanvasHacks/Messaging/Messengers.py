@@ -20,7 +20,8 @@ if __name__ == '__main__':
 
 class SkaaMessenger:
 
-    def __init__( self, activity: Activity, student_repository, content_repository, status_repository: StatusRepository = None ):
+    def __init__( self, activity: Activity, student_repository, content_repository,
+                  status_repository: StatusRepository = None ):
         """
 
         :param activity:
@@ -121,7 +122,7 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
     """
     message_template = REVIEW_NOTICE_TEMPLATE
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
         super().__init__( activity, student_repository, content_repository, status_repository )
         # self.message_template = REVIEW_NOTICE_TEMPLATE
 
@@ -143,7 +144,7 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
-            raise MessageDataCreationError(review_assignment)
+            raise MessageDataCreationError( review_assignment )
 
 
 class FeedbackForMetareviewMessenger( SkaaMessenger ):
@@ -151,7 +152,7 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
     to the person who was reviewed
     """
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
         super().__init__( activity, student_repository, content_repository, status_repository )
         self.message_template = METAREVIEW_NOTICE_TEMPLATE
 
@@ -174,8 +175,7 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
-            raise MessageDataCreationError(review_assignment)
-
+            raise MessageDataCreationError( review_assignment )
 
 
 class FeedbackFromMetareviewMessenger( SkaaMessenger ):
@@ -183,7 +183,7 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     did the initial peer review
     """
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
+    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
         super().__init__( activity, student_repository, content_repository, status_repository )
         self.message_template = METAREVIEW_CONTENT_TEMPLATE
 
@@ -206,8 +206,7 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
-            raise MessageDataCreationError(review_assignment)
-
+            raise MessageDataCreationError( review_assignment )
 
 
 # --------------------------------------- OLD
@@ -231,9 +230,11 @@ def make_notice( data ):
     """
     return REVIEW_NOTICE_TEMPLATE.format( **data )
 
+
 # old
 def make_metareview_notice( data ):
     return METAREVIEW_NOTICE_TEMPLATE.format( **data )
+
 
 # old
 def metareview_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):

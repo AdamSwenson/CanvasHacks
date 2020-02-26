@@ -42,5 +42,18 @@ class RunLogger( TextLogger ):
         }
         cls.write( cls.entry_template.format( **d ) )
 
+    @classmethod
+    def log_review_feedback_distributed( cls, assigned_activity, message, time_to_record=None ):
+        if time_to_record is None:
+            time_to_record = current_utc_timestamp()
+        d = {
+            'activity_name': assigned_activity.name,
+            'time': time_to_record,
+            'message': message
+        }
+        cls.write( cls.entry_template.format( **d ) )
+
+
+
 if __name__ == '__main__':
     pass

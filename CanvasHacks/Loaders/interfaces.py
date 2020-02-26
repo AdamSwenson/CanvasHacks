@@ -17,16 +17,15 @@ class ILoader:
         """
         return course.get_quiz( activity.quiz_id )
 
+    @staticmethod
+    def load( activity, course=None, **kwargs ):
+        raise NotImplementedError
 
 
 class INewLoader(ILoader):
     """Interface for any class which ingests data and returns
     what hasn't been acted upon yet
     """
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        raise NotImplementedError
 
     @staticmethod
     def _check_empty( data ):
@@ -42,7 +41,7 @@ class INewLoader(ILoader):
 class IAllLoader(ILoader):
     """Interface for any class which loads all existing
     data for the quiz"""
-
-    @staticmethod
-    def load( activity, course=None, **kwargs ):
-        raise NotImplementedError
+    pass
+    # @staticmethod
+    # def load( activity, course=None, **kwargs ):
+    #     raise NotImplementedError
