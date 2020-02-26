@@ -2,7 +2,8 @@
 Created by adam on 12/26/19
 """
 from CanvasHacks import environment as env
-from CanvasHacks.Logging import MessageLogger
+from CanvasHacks.Errors.messaging import MessageDataCreationError
+from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import send_message_to_student, ConversationMessageSender
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE, \
     METAREVIEW_CONTENT_TEMPLATE
@@ -95,16 +96,18 @@ class SkaaMessenger:
             # messages.append( message_data )
 
             if send:
-                m = self.sender.send( **message_data )
-                messages.append( m )
-                # todo Add logging here so all outgoing messages are written to file
                 # m = send_message_to_student( **message_data )
+                m = self.sender.send( **message_data )
+                # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
+                # self.logger.write(m)
+
+                messages.append( m )
                 # Record status change (not to log)
                 if self.status_repository is not None:
                     # For the peer review, the reviewer will be marked as notified
                     # For the metareview the author will be marked as notified
                     self.status_repository.record_opened( message_data[ 'student_id' ] )
-                print( m )
+                print( "Message sent", m )
             else:
                 # For test runs
                 messages.append( message_data )
@@ -116,10 +119,11 @@ class SkaaMessenger:
 class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
     """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
     """
+    message_template = REVIEW_NOTICE_TEMPLATE
 
     def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None  ):
         super().__init__( activity, student_repository, content_repository, status_repository )
-        self.message_template = REVIEW_NOTICE_TEMPLATE
+        # self.message_template = REVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -139,6 +143,7 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
+            raise MessageDataCreationError(review_assignment)
 
 
 class FeedbackForMetareviewMessenger( SkaaMessenger ):
@@ -169,6 +174,8 @@ class FeedbackForMetareviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
+            raise MessageDataCreationError(review_assignment)
+
 
 
 class FeedbackFromMetareviewMessenger( SkaaMessenger ):
@@ -199,6 +206,8 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
         except Exception as e:
             # todo exception handling
             print( e )
+            raise MessageDataCreationError(review_assignment)
+
 
 
 # --------------------------------------- OLD

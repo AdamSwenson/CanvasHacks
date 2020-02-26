@@ -51,6 +51,7 @@ STUDENT_TABLE_NAME = 'students'
 t = "TEST-" if CONFIG.is_test else ""
 STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format( t )
 MESSAGE_LOGNAME = "{}message-log.txt".format( t )
+RUN_LOGNAME = "{}run-log.txt".format(t)
 
 # Plotting stuff
 LIKERT_PLOT_ORDER = [ 'Forgot', 'Strongly disagree', 'Disagree', 'Agree', 'Strongly agree' ]

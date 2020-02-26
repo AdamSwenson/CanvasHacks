@@ -1,7 +1,8 @@
 """
 Created by adam on 2/9/20
 """
-from CanvasHacks.Logging import log_message
+from CanvasHacks.Errors.messaging import MessageSendError
+from CanvasHacks.Logging.decorators import log_message
 from CanvasHacks.RequestTools import send_post_request
 
 __author__ = 'adam'
@@ -15,6 +16,11 @@ class ISender:
     messages to students"""
 
     def send( self ):
+        """
+        Handles sending through whatever channel
+        :return:
+        :raises MessageSendError which wraps the server's error
+        """
         raise NotImplementedError
 
 
@@ -42,9 +48,12 @@ class ConversationMessageSender(ISender):
        Returns the result object which will contain the conversation id
        if needed for future use
        """
-        d = self.make_conversation_data( student_id, subject, body )
+        try:
+            d = self.make_conversation_data( student_id, subject, body )
 
-        return send_post_request( self.url, d )
+            return send_post_request( self.url, d )
+        except Exception as e:
+            raise MessageSendError(e)
 
 
 # ---------------------- old

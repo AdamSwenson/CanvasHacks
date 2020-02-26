@@ -6,6 +6,9 @@ __author__ = 'adam'
 from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.Repositories.IRepositories import ContentRepository
 from CanvasHacks.Models.model import StoreMixin
+from faker import Faker
+fake = Faker()
+
 if __name__ == '__main__':
     pass
 
@@ -29,5 +32,9 @@ class ContentRepositoryMock(ContentRepository, StoreMixin):
         self.handle_kwargs(**kwargs)
 
     def get_formatted_work_by( self, student_id ):
-        return self.formatted_work
+        return self.testText.get(student_id)
+        # return [a[1] for a in self.testText if a[0] == student_id][0]
+
+    def create_test_content( self, student_ids ):
+        self.testText = { sid : fake.paragraph() for sid in student_ids}
 

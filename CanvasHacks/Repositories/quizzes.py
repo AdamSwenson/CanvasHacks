@@ -88,7 +88,7 @@ class WorkRepositoryLoaderFactory:
         else:
             repo = QuizRepository( activity, course )
 
-        student_work_frame = loader( **kwargs )
+        student_work_frame = loader.load(activity, course, **kwargs )
 
         # Download submissions
         subRepo = QuizSubmissionRepository( repo.quiz )

@@ -4,8 +4,9 @@ Created by adam on 2/24/20
 import pandas as pd
 
 from CanvasHacks.Loaders.ILoaders import IAllLoader, INewLoader
-from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, retrieve_quiz_data, save_downloaded_report, load_new
 from CanvasHacks.Processors.quiz import process_work
+from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, retrieve_quiz_data, save_downloaded_report, \
+    load_new
 
 __author__ = 'adam'
 
@@ -45,8 +46,9 @@ class AllQuizReportFileLoader( IAllLoader ):
 class AllQuizReportDownloader( INewLoader ):
 
     @staticmethod
-    def load( activity, course=None, save=True, **kwargs ):
-        student_work_frame = retrieve_quiz_data( activity )
+    def load( activity, course, save=True, **kwargs ):
+        quiz = AllQuizReportDownloader.get_quiz( course, activity )
+        student_work_frame = retrieve_quiz_data( quiz )
 
         if save:
             # Want to have all the reports be formatted the same
@@ -115,5 +117,3 @@ def load_student_work( csv_filepath, submissions ):
     # f.set_index( 'name', inplace=True )
     # f.sort_index( inplace=True )
     # return f
-
-

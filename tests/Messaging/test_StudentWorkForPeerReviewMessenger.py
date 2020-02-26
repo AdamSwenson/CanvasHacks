@@ -65,8 +65,9 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         #  receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
+    @patch('CanvasHacks.Messaging.Messengers.MessageLogger')
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
-    def test_notify( self, sendMock ):
+    def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'this would be the result of sending'
         self.obj = StudentWorkForPeerReviewMessenger( self.activity, self.studentRepo, self.contentRepo, self.statusRepository )
 
@@ -96,3 +97,5 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
 
         self.statusRepository.record_opened.assert_called()
         self.statusRepository.record_opened.assert_called_with(self.reviewer.id)
+
+        self.obj.logger.write.assert_called()

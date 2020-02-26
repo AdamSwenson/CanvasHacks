@@ -8,8 +8,18 @@ __author__ = 'adam'
 if __name__ == '__main__':
     pass
 
+class ILoader:
 
-class INewLoader:
+    @staticmethod
+    def get_quiz( course, activity ):
+        """Returns the canvasapi.quiz.Quiz object associated
+        with this repository.
+        """
+        return course.get_quiz( activity.quiz_id )
+
+
+
+class INewLoader(ILoader):
     """Interface for any class which ingests data and returns
     what hasn't been acted upon yet
     """
@@ -29,7 +39,7 @@ class INewLoader:
             raise NoNewSubmissions
 
 
-class IAllLoader:
+class IAllLoader(ILoader):
     """Interface for any class which loads all existing
     data for the quiz"""
 
