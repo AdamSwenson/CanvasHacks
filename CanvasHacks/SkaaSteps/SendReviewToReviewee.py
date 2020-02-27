@@ -1,7 +1,7 @@
 """
 Created by adam on 2/23/20
 """
-from CanvasHacks.Repositories.quizzes import WorkRepositoryLoaderFactory
+from Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 from CanvasHacks.Messaging.Messengers import FeedbackForMetareviewMessenger
 from CanvasHacks.Logging.run_data import RunLogger

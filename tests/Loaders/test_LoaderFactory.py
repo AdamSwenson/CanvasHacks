@@ -3,17 +3,86 @@ Created by adam on 2/24/20
 """
 # import CanvasHacks.globals
 # CanvasHacks.globals.use_api = False
+from unittest.mock import MagicMock
 
-from CanvasHacks.Loaders.quiz import NewQuizReportDownloadLoader, LoaderFactory, NewQuizReportFileLoader, AllQuizReportFileLoader, AllQuizReportDownloader
+from CanvasHacks.Loaders.assignment import AssignmentDownloadLoader
+from CanvasHacks.Loaders.factories import LoaderFactory, QuizLoaderFactory
+from CanvasHacks.Loaders.quiz import AllQuizReportDownloader, AllQuizReportFileLoader, NewQuizReportDownloadLoader, \
+    NewQuizReportFileLoader
+from factories.PeerReviewedFactories import unit_factory
 from tests.TestingBase import TestingBase
-from unittest import TestCase
 
 __author__ = 'adam'
 
 
-class TestLoaderFactory( TestingBase):
+class TestLoaderFactory( TestingBase ):
 
-    def setUp(self):
+    def setUp( self ):
+        self.config_for_test()
+        self.course = MagicMock()
+        self.unit = unit_factory()
+
+    def test_returns_assignment_loader( self ):
+        r = LoaderFactory.make( is_quiz=False )
+        self.assertEqual( r, AssignmentDownloadLoader )
+
+    # Tests to make sure quiz loader passes correct loader up
+    # to the main loader factory
+
+    def test_make_download_new( self ):
+        download = True
+        only_new = True
+
+        # call
+        result = LoaderFactory.make( download, only_new )
+
+        # check
+        self.assertEqual( result, NewQuizReportDownloadLoader )
+
+    def test_make_download_all( self ):
+        download = True
+        only_new = False
+
+        # call
+        result = LoaderFactory.make( download, only_new )
+
+        # check
+        self.assertEqual( result, AllQuizReportDownloader )
+
+    def test_make_file_new( self ):
+        download = False
+        only_new = True
+
+        # call
+        result = LoaderFactory.make( download, only_new )
+
+        # check
+        self.assertEqual( result, NewQuizReportFileLoader )
+
+    def test_make_file_all( self ):
+        download = False
+        only_new = False
+
+        # call
+        result = LoaderFactory.make( download, only_new )
+
+        # check
+        self.assertEqual( result, AllQuizReportFileLoader )
+
+
+class TestAssignmentLoaderFactory( TestingBase ):
+
+    def setUp( self ):
+        self.config_for_test()
+
+    def test_returns_assignment_loader( self ):
+        r = LoaderFactory.make( is_quiz=False )
+        self.assertEqual(r, AssignmentDownloadLoader, "Returns the AssignmentDownloadLoader")
+
+
+class TestQuizLoaderFactory( TestingBase ):
+
+    def setUp( self ):
         self.config_for_test()
 
     def test_make_download_new( self ):
@@ -21,37 +90,37 @@ class TestLoaderFactory( TestingBase):
         only_new = True
 
         # call
-        result = LoaderFactory.make(download, only_new)
+        result = QuizLoaderFactory.make( download, only_new )
 
         # check
-        self.assertEqual(result, NewQuizReportDownloadLoader)
+        self.assertEqual( result, NewQuizReportDownloadLoader )
 
     def test_make_download_all( self ):
         download = True
         only_new = False
 
         # call
-        result = LoaderFactory.make(download, only_new)
+        result = LoaderFactory.make( download, only_new )
 
         # check
-        self.assertEqual(result, AllQuizReportDownloader)
+        self.assertEqual( result, AllQuizReportDownloader )
 
     def test_make_file_new( self ):
         download = False
         only_new = True
 
         # call
-        result = LoaderFactory.make(download, only_new)
+        result = LoaderFactory.make( download, only_new )
 
         # check
-        self.assertEqual(result, NewQuizReportFileLoader)
+        self.assertEqual( result, NewQuizReportFileLoader )
 
     def test_make_file_all( self ):
         download = False
         only_new = False
 
         # call
-        result = LoaderFactory.make(download, only_new)
+        result = LoaderFactory.make( download, only_new )
 
         # check
-        self.assertEqual(result, AllQuizReportFileLoader)
+        self.assertEqual( result, AllQuizReportFileLoader )

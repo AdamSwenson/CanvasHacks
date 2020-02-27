@@ -7,9 +7,8 @@ from CanvasHacks import environment as env
 import pandas as pd
 from CanvasHacks.Models.model import Model
 
-
-class QuizDataMixin:
-    """ Methods for handling data downloaded for quiz type assignments """
+class StoredDataFileMixin:
+    """Standard methods for accessing data stored in files"""
 
     @property
     def safe_name( self ):
@@ -20,6 +19,20 @@ class QuizDataMixin:
     def folder_path(self):
         # ssafename = "".join([n for n in self.name if n != ':'])
         return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.safe_name)
+
+
+class QuizDataMixin:
+    """ Methods for handling data downloaded for quiz type assignments """
+    #
+    # @property
+    # def safe_name( self ):
+    #     """Returns a name that won't f up the file path"""
+    #     return "".join([n for n in self.name if n != ':'])
+    #
+    # @property
+    # def folder_path(self):
+    #     # ssafename = "".join([n for n in self.name if n != ':'])
+    #     return "{}/{}-{}".format(env.ARCHIVE_FOLDER, self.course_id, self.safe_name)
 
     def set_question_columns(self, results_frame):
         """Finds the question columns in a results frame

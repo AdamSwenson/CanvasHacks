@@ -3,7 +3,7 @@ Created by adam on 10/1/19
 """
 import CanvasHacks.environment as env
 from CanvasHacks.Models.student import Student
-from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'
 

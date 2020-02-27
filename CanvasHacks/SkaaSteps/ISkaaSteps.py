@@ -9,7 +9,7 @@ from CanvasHacks.Repositories.students import StudentRepository
 __author__ = 'adam'
 
 from CanvasHacks import environment as env
-
+import CanvasHacks.testglobals
 if __name__ == '__main__':
     pass
 
@@ -46,19 +46,32 @@ class IStep:
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:
-            # For special testing
-            self.dao = SqliteDAO( self.db_filepath )
-            self.dao.initialize_db_file()
-            print( "Connected to TEST db file. {}".format( self.db_filepath ) )
+            try:
+                if CanvasHacks.testglobals.TEST_WITH_FILE_DB:
+                    # testing: file db
+                    self._initialize_file_db()
+                    print( "Connected to TEST db file. {}".format( self.db_filepath ) )
+                else:
+                    # testing: in memory db
+                    self._initialize_memory_db()
+            except (NameError, AttributeError) as e:
+                print(e)
+                # The variable might not be defined under in any
+                # number of circumstances. So default to the in-memory db
+                self._initialize_memory_db()
 
-            # testing: in memory db
-            # self.dao = SqliteDAO()
-            # print( "Connected to testing db" )
         else:
             # real: file db
-            self.dao = SqliteDAO( self.db_filepath )
-            self.dao.initialize_db_file()
+            self._initialize_file_db()
             print( "Connected to REAL db. {}".format( self.db_filepath ) )
+
+    def _initialize_file_db( self ):
+        self.dao = SqliteDAO( self.db_filepath )
+        self.dao.initialize_db_file()
+
+    def _initialize_memory_db( self ):
+        self.dao = SqliteDAO()
+        print( "Connected to in-memory testing db" )
 
     def run( self ):
         raise NotImplementedError

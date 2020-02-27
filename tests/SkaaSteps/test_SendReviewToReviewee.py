@@ -2,8 +2,8 @@
 Created by adam on 2/22/20
 """
 __author__ = 'adam'
-import CanvasHacks.globals
-CanvasHacks.globals.use_api = False
+import CanvasHacks.testglobals
+CanvasHacks.testglobals.use_api = False
 import unittest
 from unittest.mock import MagicMock, patch
 from tests.TestingBase import TestingBase

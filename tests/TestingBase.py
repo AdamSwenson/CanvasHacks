@@ -7,10 +7,10 @@ from factories.ModelFactories import make_students
 
 __author__ = 'adam'
 
-import CanvasHacks.globals
+import CanvasHacks.testglobals
 
-CanvasHacks.globals.TEST = True
-CanvasHacks.globals.use_api = False
+CanvasHacks.testglobals.TEST = True
+CanvasHacks.testglobals.use_api = False
 
 from CanvasHacks import environment as env
 

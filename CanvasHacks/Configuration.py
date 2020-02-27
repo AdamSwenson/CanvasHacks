@@ -8,6 +8,9 @@ import configparser
 import os
 from canvasapi import Canvas
 
+# Needed for managing some test cases
+import CanvasHacks.testglobals
+
 
 CREDENTIALS_FOLDER_PATH = "{}/private"
 LIVE_CREDENTIALS = "{}/canvas-credentials.ini"
@@ -149,6 +152,8 @@ class Configuration( object ):
         test_id = cls.configuration['testing'].get('TEST_COURSE_ID')
         cls.course_ids = [int(test_id)]
         print(" ".join([" TEST " for _ in range(0, 5)]))
+        # Set on the global variable (which is only used in certain tests)
+        CanvasHacks.testglobals.TEST = True
 
     @classmethod
     def set_live( cls ):
@@ -159,6 +164,8 @@ class Configuration( object ):
         # Set to the stored course ids
         cls.load_section_ids()
         print(" ".join([" LIVE " for _ in range(0, 5)]))
+        # Set on the global variable (which is only used in certain tests)
+        CanvasHacks.testglobals.TEST = False
 
 
 class InteractiveConfiguration( Configuration ):

@@ -14,24 +14,6 @@ if __name__ == '__main__':
     pass
 
 
-class LoaderFactory:
-    """Decides which loader to use"""
-
-    @staticmethod
-    def make( download=True, only_new=False, **kwargs ):
-        if download and only_new:
-            return NewQuizReportDownloadLoader
-
-        if download:
-            return AllQuizReportDownloader
-
-        # We're just to load from file
-        if only_new and only_new:
-            return NewQuizReportFileLoader
-
-        return AllQuizReportFileLoader
-
-
 class AllQuizReportFileLoader( IAllLoader ):
     """Loads all records for quiz"""
 

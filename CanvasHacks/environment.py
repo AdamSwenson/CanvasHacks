@@ -2,23 +2,26 @@
 Created by adam on 9/14/18
 """
 __author__ = 'adam'
-import CanvasHacks.globals
-# global TEST
-# TEST = True
-# TEST = False
-if CanvasHacks.globals.TEST:
+import os
+import CanvasHacks.testglobals
+
+if CanvasHacks.testglobals.TEST:
     print( "RUNNING IN TEST MODE" )
 
-import os
+# Putting this here for an easy place to manually
+# toggle, since that usually only needs to happen when
+# testing against server.
+CanvasHacks.testglobals.TEST_WITH_FILE_DB = True
+
 
 from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration
 
 ROOT = os.getenv( "HOME" )
 
-if CanvasHacks.globals.use_api:
+if CanvasHacks.testglobals.use_api:
     # Check whether it is being run on my machine or remotely
     if ROOT[ :12 ] == '/Users/adam':
-        FileBasedConfiguration.load( CanvasHacks.globals.TEST )
+        FileBasedConfiguration.load( CanvasHacks.testglobals.TEST )
         CONFIG = FileBasedConfiguration
         TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
         ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
@@ -38,8 +41,8 @@ if CanvasHacks.globals.use_api:
 else:
     # Testing without api access
     CONFIG = InteractiveConfiguration
-    if CanvasHacks.globals.TEST:
-        CONFIG.is_test = CanvasHacks.globals.TEST
+    if CanvasHacks.testglobals.TEST:
+        CONFIG.is_test = CanvasHacks.testglobals.TEST
     LOG_FOLDER = None
 
 # DB
@@ -52,7 +55,7 @@ STUDENT_TABLE_NAME = 'students'
 t = "TEST-" if CONFIG.is_test else ""
 STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format( t )
 MESSAGE_LOGNAME = "{}message-log.txt".format( t )
-RUN_LOGNAME = "{}run-log.txt".format(t)
+RUN_LOGNAME = "{}run-log.txt".format( t )
 
 # Plotting stuff
 LIKERT_PLOT_ORDER = [ 'Forgot', 'Strongly disagree', 'Disagree', 'Agree', 'Strongly agree' ]

@@ -1,13 +1,14 @@
 """
 Created by adam on 1/27/20
 """
-from CanvasHacks.Repositories.IRepositories import IRepo, StudentWorkRepo
+from CanvasHacks.Repositories.interfaces import IRepo
+from CanvasHacks.Repositories.mixins import StudentWorkMixin
 from CanvasHacks.UploadGradeTools import upload_credit
 
 __author__ = 'adam'
 
 
-class DiscussionRepository( StudentWorkRepo ):
+class DiscussionRepository( StudentWorkMixin ):
     """Manages the data for one discussion assignment"""
 
     def __init__( self, course, topic_id ):

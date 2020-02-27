@@ -4,23 +4,11 @@ Created by adam on 1/18/20
 import canvasapi
 import pandas as pd
 
+import CanvasHacks.environment as env
 from CanvasHacks.DownloadProcessingTools import extract_body
-from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 
 __author__ = 'adam'
-
-
-class ISubmissionRepo( IRepo ):
-
-    def download( self ):
-        raise NotImplementedError
-
-    @property
-    def frame( self ):
-        raise NotImplementedError
-
-    def get_by_student_id( self, student_id ):
-        raise NotImplementedError
 
 
 class SubmissionRepository( ISubmissionRepo ):
@@ -56,6 +44,7 @@ class SubmissionRepository( ISubmissionRepo ):
             # Iterating through list of canvasapi.Submission objects
             s.append( { 'course_id': int( r.course_id ),
                         'quiz_id': int( r.assignment_id ),
+                        'activity_id': int( r.assignment_id ),
                         'student_id': int( r.user_id ),
                         'user_id': int( r.user_id ),
                         'submission_id': int( r.id ),
@@ -86,6 +75,58 @@ class SubmissionRepository( ISubmissionRepo ):
                 #     return s
                 # elif s.attempt == attempt:
                 return s
+
+
+class AssignmentSubmissionRepository( SubmissionRepository ):
+    body_column_name = 'body'
+
+    def __init__( self, assignment: canvasapi.assignment.Assignment ):
+        """
+
+        :param assignment: Canvas api assignment object for use in downloading
+        """
+        self.assignment = assignment
+        self.download()
+        self._remove_ignored_users()
+
+    def _remove_ignored_users( self, users=None ):
+        """
+        Removes all records from data, for each in a list of
+        users, either given as a param, or the excluded_users
+        list stored on env.CONFIG
+        :param users:
+        :return:
+        """
+        users = users if users is not None else env.CONFIG.excluded_users
+        prelen = len( self.data )
+
+        # Remove them
+        self.data = [ s for s in self.data if s.user_id not in users ]
+
+        removed = prelen - len( self.data )
+        if removed > 0:
+            print( "Removed {} records belonging to users in the excluded list".format( removed ))
+
+    @property
+    def frame( self ):
+        """Returns the submissions as a dataframe"""
+        s = [ ]
+        for r in self.data:
+            # Iterating through list of canvasapi.Submission objects
+            s.append( { 'course_id': int( r.course_id ),
+                        'activity_id': int( r.assignment_id ),
+                        'student_id': int( r.user_id ),
+                        'user_id': int( r.user_id ),
+                        'submission_id': int( r.id ),
+                        'attempt': r.attempt,
+                        'grade': r.grade,
+                        'score': r.score,
+                        'workflow_state': r.workflow_state,
+                        'late': r.late,
+                        self.body_column_name: r.body
+                        } )
+
+        return pd.DataFrame( s )
 
 
 class QuizSubmissionRepository( ISubmissionRepo ):

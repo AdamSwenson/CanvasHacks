@@ -8,8 +8,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
-import CanvasHacks.globals
-CanvasHacks.globals.use_api = False
+import CanvasHacks.testglobals
+CanvasHacks.testglobals.use_api = False
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from tests.TestingBase import TestingBase

@@ -4,7 +4,7 @@ Created by adam on 2/23/20
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.status_record import ComplexStatusRecord, StatusRecord
 from CanvasHacks.PeerReviewed.Definitions import Unit, Activity
-from CanvasHacks.Repositories.IRepositories import IRepo
+from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'
 

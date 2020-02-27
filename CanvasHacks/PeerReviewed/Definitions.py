@@ -12,7 +12,7 @@ import re
 import canvasapi
 import pandas as pd
 from CanvasHacks import environment as env
-from CanvasHacks.Models.QuizModels import QuizDataMixin
+from CanvasHacks.Models.QuizModels import StoredDataFileMixin, QuizDataMixin
 from CanvasHacks.Models.model import Model
 from CanvasHacks.TimeTools import utc_string_to_local_dt, check_is_date
 
@@ -49,6 +49,16 @@ class Activity( Model ):
         self.unit_number = None
 
         super().__init__( **kwargs )
+
+    @property
+    def is_quiz_type( self ):
+        """Returns whether this is the sort of assignment
+        that uses a quiz report or not
+        """
+        try:
+            return self.quiz_id > 0
+        except AttributeError:
+            return False
 
     @property
     def last_half_credit_date( self ):
@@ -89,7 +99,7 @@ class Activity( Model ):
     #     return {'assign' self.make_title
 
 
-class TopicalAssignment( Activity, QuizDataMixin ):
+class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
     title_base = 'Topical assignment'
 
     regex = re.compile( r"\btopical assignment\b" )
@@ -99,7 +109,7 @@ class TopicalAssignment( Activity, QuizDataMixin ):
         self.grace_period = pd.Timedelta('2 days')
 
 
-class InitialWork( Activity, QuizDataMixin ):
+class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
     title_base = "Content assignment"
 
     regex = re.compile( r"\bcontent assignment\b" )
@@ -110,7 +120,7 @@ class InitialWork( Activity, QuizDataMixin ):
         self.grace_period = pd.Timedelta('2 days')
 
 
-class Review( Activity, QuizDataMixin ):
+class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review component of the
      assignment """
     title_base = "Peer review"
@@ -129,7 +139,7 @@ class Review( Activity, QuizDataMixin ):
         self.email_intro = "Here is another student's assignment for you to review:"
 
 
-class MetaReview( Activity, QuizDataMixin ):
+class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     """The review review"""
     """Representation of the peer review of 
     another student's submission"""
@@ -153,7 +163,7 @@ class DiscussionForum( Activity ):
         super().__init__( **kwargs )
 
 
-class DiscussionReview( Activity, QuizDataMixin ):
+class DiscussionReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
 

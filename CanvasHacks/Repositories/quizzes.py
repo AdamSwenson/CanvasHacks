@@ -1,13 +1,12 @@
 """
 Created by adam on 5/6/19
 """
-from CanvasHacks.Loaders.quiz import LoaderFactory, AllQuizReportFileLoader, NewQuizReportFileLoader
-from CanvasHacks.Models.QuizModels import QuizDataMixin
+from CanvasHacks.Models.QuizModels import StoredDataFileMixin, QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
 from CanvasHacks.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
-from CanvasHacks.Repositories.IRepositories import StudentWorkRepo, SelectableMixin
+from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
@@ -16,7 +15,7 @@ __author__ = 'adam'
 import pandas as pd
 
 from CanvasHacks.Messaging.Messengers import make_prompt_and_response
-from CanvasHacks.Repositories.IRepositories import ContentRepository
+from CanvasHacks.Repositories.interfaces import IContentRepository
 
 
 # def detect_question_columns(columns):
@@ -46,61 +45,7 @@ from CanvasHacks.Repositories.IRepositories import ContentRepository
 # assert (make_drop_list( test ) == [ '1.0', '1.0.1', '1.0.2' ])
 
 
-class WorkRepositoryFactory:
-    """Decides what kind of repository is needed
-    and instantiates it"""
-
-    @staticmethod
-    def make( activity, course=None, only_new=False, **kwargs ):
-        # Get the object which will handle loading data
-        if only_new:
-            loader = NewQuizReportFileLoader( activity, course )
-        else:
-            loader = AllQuizReportFileLoader( activity, course )
-
-        # Get quiz submission objects
-        if isinstance( activity, Review ):
-            repo = ReviewRepository( activity, course )
-        else:
-            repo = QuizRepository( activity, course )
-        return repo
-
-
-class WorkRepositoryLoaderFactory:
-    """Decides what kind of repository is needed
-    and instantiates it after loading data into it
-
-    Replaces make_quiz_repo
-    """
-
-    @staticmethod
-    def make( activity, course=None, only_new=False, **kwargs ):
-        # Get the object which will handle loading data
-        loader = LoaderFactory.make( download=True, only_new=only_new )
-        # if only_new:
-        #     loader = NewQuizReportFileLoader
-        # else:
-        #     loader = AllQuizReportFileLoader
-
-        # Get quiz submission objects
-        if isinstance( activity, Review ):
-            repo = ReviewRepository( activity, course )
-        else:
-            repo = QuizRepository( activity, course )
-
-        student_work_frame = loader.load(activity, course, **kwargs )
-
-        # Download submissions
-        subRepo = QuizSubmissionRepository( repo.quiz )
-
-        # Doing the combination with submissions after saving to avoid
-        # mismatches of new and old data
-        repo._process( student_work_frame, subRepo.frame )
-
-        return repo
-
-
-class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, SelectableMixin ):
+class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, StudentWorkMixin, SelectableMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):
@@ -108,7 +53,7 @@ class QuizRepository( ContentRepository, QuizDataMixin, StudentWorkRepo, Selecta
         self.activity = activity
         self.question_columns = [ ]
 
-    def _process( self, work_frame, submissions ):
+    def process( self, work_frame, submissions ):
         self.submissions = submissions
         if not isinstance( submissions, pd.DataFrame ):
             submissions_frame = pd.DataFrame( submissions )
@@ -313,6 +258,6 @@ def make_quiz_repo( course, activity, save=True ):
 
     # Doing the combination with submissions after saving to avoid
     # mismatches of new and old data
-    repo._process( student_work_frame, subRepo.frame )
+    repo.process( student_work_frame, subRepo.frame )
 
     return repo

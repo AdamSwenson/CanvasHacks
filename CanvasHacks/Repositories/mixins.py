@@ -1,23 +1,19 @@
 """
-Created by adam on 10/1/19
+Created by adam on 2/26/20
 """
 __author__ = 'adam'
 
 import pandas as pd
 
-from CanvasHacks.Models.model import StoreMixin
+if __name__ == '__main__':
+    pass
 
 
-class IRepo( StoreMixin ):
-    """Parent class for all repositories.
-    All will store data in the data attribute,
-    but this does not constrain how the data is stored.
-    Some use a dataframe, others use a dictionary
+class StudentWorkMixin:
+    """Parent class for any repository which holds
+    student data and can provide a formatted version
+    for sending via email etc
     """
-
-    def download( self ):
-        raise NotImplementedError
-
     @property
     def student_ids( self ):
         if isinstance( self.data, dict ):
@@ -33,7 +29,6 @@ class IRepo( StoreMixin ):
         uids.sort()
         return uids
 
-
     def _handle_id( self, object_or_int ):
         """
         Takes either a object or the int value of their id
@@ -42,24 +37,13 @@ class IRepo( StoreMixin ):
         :return: int
         """
         try:
-            return int(object_or_int)
+            return int( object_or_int )
         except TypeError:
             try:
                 # in case we have a student object w id stored like this
                 return object_or_int.student_id
             except AttributeError:
                 return object_or_int.id
-
-
-
-class StudentWorkRepo( IRepo ):
-    """Parent class for any repository which holds
-    student data and can provide a formatted version
-    for sending via email etc
-    """
-
-    def get_formatted_work( self, student_id ):
-        raise NotImplementedError
 
     def _check_empty( self, work ):
         """Checks whether the work is empty and
@@ -72,19 +56,6 @@ class StudentWorkRepo( IRepo ):
 
     # def store_results( self, results_list ):
     #     raise NotImplementedError
-
-
-class ContentRepository:
-    """Defines methods of repositories which
-    return the content of student work
-    """
-
-    def get_formatted_work_by( self, student_id ):
-        raise NotImplementedError
-
-
-if __name__ == '__main__':
-    pass
 
 
 class SelectableMixin:

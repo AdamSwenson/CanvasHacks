@@ -5,7 +5,7 @@ from CanvasHacks.GradingTools.base import IGrader
 from CanvasHacks.GradingTools.nonempty import receives_credit
 from CanvasHacks.GradingTools.penalities import get_penalty
 from CanvasHacks.Repositories.quizzes import QuizRepository
-from CanvasHacks.Repositories.submissions import ISubmissionRepo
+from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 
 __author__ = 'adam'
 

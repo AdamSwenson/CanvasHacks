@@ -5,11 +5,13 @@ from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.Errors.review_pairings import AllAssigned, NoAvailablePartner
 from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Messaging.Messengers import StudentWorkForPeerReviewMessenger
-from CanvasHacks.Repositories.quizzes import WorkRepositoryLoaderFactory
+# from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Logging.review_pairings import make_review_audit_file
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
 __author__ = 'adam'
+
+from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 
 
 class SendInitialWorkToReviewer( IStep ):

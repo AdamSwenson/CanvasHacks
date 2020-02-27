@@ -4,7 +4,7 @@ Created by adam on 2/22/20
 __author__ = 'adam'
 
 from CanvasHacks.Repositories.students import StudentRepository
-from CanvasHacks.Repositories.IRepositories import ContentRepository
+from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Models.model import StoreMixin
 from faker import Faker
 fake = Faker()
@@ -26,7 +26,7 @@ class StudentRepositoryMock(StudentRepository, StoreMixin):
         return self.student_name
 
 
-class ContentRepositoryMock(ContentRepository, StoreMixin):
+class ContentRepositoryMock( IContentRepository, StoreMixin ):
 
     def __init__( self, **kwargs ):
         self.handle_kwargs(**kwargs)

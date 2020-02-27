@@ -12,6 +12,8 @@ TEST = False
 use_api = True
 """Whether to interact with the server during testing"""
 
+TEST_WITH_FILE_DB = False
+"""Whether to connect to a file based db. If false, we use an in-memory db"""
 
 
 if __name__ == '__main__':
