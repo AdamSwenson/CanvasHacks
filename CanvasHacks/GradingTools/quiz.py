@@ -101,7 +101,7 @@ class QuizGrader( IGrader ):
         fudge_points = self._get_fudge_points( row, total_score )
 
         # # compute penalty if needed
-        # penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
+        # penalty = get_penalty( row[ 'submitted' ], self.activity_inviting_to_complete.due_at, self.activity_inviting_to_complete.last_half_credit_date, self.activity_inviting_to_complete.grace_period )
         #
         # # fudge_points = total_score * -penalty
         #

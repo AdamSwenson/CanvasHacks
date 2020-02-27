@@ -4,11 +4,11 @@ Created by adam on 12/26/19
 from CanvasHacks import environment as env
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
-from CanvasHacks.Messaging.SendTools import send_message_to_student, ConversationMessageSender
-from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE, \
-    METAREVIEW_CONTENT_TEMPLATE
+from CanvasHacks.Messaging.SendTools import ConversationMessageSender, send_message_to_student
+from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE, \
+    REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.PeerReviewed.Definitions import Activity
+from CanvasHacks.PeerReviewed.Definitions import Unit
 from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.TimeTools import getDateForMakingFileName
 
@@ -20,18 +20,18 @@ if __name__ == '__main__':
 
 class SkaaMessenger:
 
-    def __init__( self, activity: Activity, student_repository, content_repository,
-                  status_repository: StatusRepository = None ):
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
         """
-
-        :param activity:
+        :param unit:
         :param student_repository:
         :param content_repository:
         :param status_repository:
         """
+        self.unit = unit
         self.student_repository = student_repository
         self.content_repository = content_repository
-        self.activity = activity
+        # self.activity_inviting_to_complete = activity_inviting_to_complete
         # Object responsible for actually sending message
         self.sender = ConversationMessageSender()
         # Objec in charge of logging statuses
@@ -47,7 +47,7 @@ class SkaaMessenger:
 
         return {
             'student_id': receiving_student.id,
-            'subject': self.activity.email_subject,
+            'subject': self.activity_inviting_to_complete.email_subject,
             'body': message
         }
 
@@ -63,7 +63,7 @@ class SkaaMessenger:
         This is abstracted out to make testing easier
         """
         d = {
-            'intro': self.activity.email_intro,
+            'intro': self.activity_inviting_to_complete.email_intro,
 
             'name': get_first_name( receiving_student ),
 
@@ -74,10 +74,10 @@ class SkaaMessenger:
             'other': other,
 
             # Add code and link to do reviewing assignment
-            'review_assignment_name': self.activity.name,
-            'access_code': self.activity.access_code,
-            'review_url': self.activity.html_url,
-            'due_date': self.activity.string_due_date
+            'review_assignment_name': self.activity_inviting_to_complete.name,
+            'access_code': self.activity_inviting_to_complete.access_code,
+            'review_url': self.activity_inviting_to_complete.html_url,
+            'due_date': self.activity_inviting_to_complete.string_due_date
         }
         return d
 
@@ -105,9 +105,11 @@ class SkaaMessenger:
                 messages.append( m )
                 # Record status change (not to log)
                 if self.status_repository is not None:
+                    self.status_repository.record( message_data[ 'student_id' ] )
+                    # if isinstance(self.content_repository.activity, Metareview):
                     # For the peer review, the reviewer will be marked as notified
                     # For the metareview the author will be marked as notified
-                    self.status_repository.record_opened( message_data[ 'student_id' ] )
+                    # self.status_repository.record_opened( message_data[ 'student_id' ] )
                 print( "Message sent", m )
             else:
                 # For test runs
@@ -117,13 +119,16 @@ class SkaaMessenger:
         return messages
 
 
-class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
+class PeerReviewInvitationMessenger( SkaaMessenger ):
     """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
     """
     message_template = REVIEW_NOTICE_TEMPLATE
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
-        super().__init__( activity, student_repository, content_repository, status_repository )
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
+        self.activity_inviting_to_complete = unit.review
+
+        super().__init__( unit, student_repository, content_repository, status_repository )
         # self.message_template = REVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
@@ -147,14 +152,19 @@ class StudentWorkForPeerReviewMessenger( SkaaMessenger ):
             raise MessageDataCreationError( review_assignment )
 
 
-class FeedbackForMetareviewMessenger( SkaaMessenger ):
+class MetareviewInvitationMessenger( SkaaMessenger ):
     """Handles sending message containg feedback from the peer reviewer
     to the person who was reviewed
     """
+    message_template = METAREVIEW_NOTICE_TEMPLATE
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
-        super().__init__( activity, student_repository, content_repository, status_repository )
-        self.message_template = METAREVIEW_NOTICE_TEMPLATE
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
+        # The activity_inviting_to_complete we are notifying about
+        self.activity_inviting_to_complete = unit.metareview
+
+        super().__init__( unit, student_repository, content_repository, status_repository )
+        # self.
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -182,10 +192,19 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     """Sends the contents of the metareview to the student who r
     did the initial peer review
     """
+    message_template = METAREVIEW_CONTENT_TEMPLATE
 
-    def __init__( self, activity, student_repository, content_repository, status_repository: StatusRepository = None ):
-        super().__init__( activity, student_repository, content_repository, status_repository )
-        self.message_template = METAREVIEW_CONTENT_TEMPLATE
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
+
+        # todo This will cause errors because the make messages assumes we're notifying about a subsequent assignment
+
+        self.activity_inviting_to_complete = None
+
+        super().__init__( unit, student_repository, content_repository, status_repository )
+
+        self.subject = "Feedback on your peer review"
+        self.intro = "Here is the feedback the author gave on your peer review. "
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -201,7 +220,26 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
             # to the assessee
             content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
-            return self._make_message_data( receiving_student, content, other=None )
+            d = {
+                'intro': self.intro,
+
+                'name': get_first_name( receiving_student ),
+
+                # Formatted work for sending
+                'responses': content,
+
+                # Add any materials from me
+                'other': "",
+            }
+
+            body = self.message_template.format( **d )
+
+            # can't use the usual self.make_message_data because won't have all the expected fields
+            return {
+                'student_id': receiving_student.id,
+                'subject': self.subject,
+                'body': body
+            }
 
         except Exception as e:
             # todo exception handling
@@ -239,7 +277,7 @@ def make_metareview_notice( data ):
 # old
 def metareview_send_message_to_reviewers( review_assignments, studentRepo, contentRepo, activity, send=False ):
     # # Load list of ReviewAssociation objects representing who reviews whom
-    # review_assigns = associationRepo.get_associations(activity)
+    # review_assigns = associationRepo.get_associations(activity_inviting_to_complete)
     # print("loaded {} student reviewer assignments".format(len(review_assigns)))
     log_file = "{}/{}-metareview-message-log.txt".format( env.LOG_FOLDER, getDateForMakingFileName() )
     with open( log_file, 'a' ) as f:
@@ -290,7 +328,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
     # THIS IS UNUSABLE. MUST FIX ERROR
 
     # # Load list of ReviewAssociation objects representing who reviews whom
-    # review_assigns = associationRepo.get_associations(activity)
+    # review_assigns = associationRepo.get_associations(activity_inviting_to_complete)
     # print("loaded {} student reviewer assignments".format(len(review_assigns)))
 
     for rev in review_assignments:

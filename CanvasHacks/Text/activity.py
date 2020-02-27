@@ -1,5 +1,5 @@
 """
-Defines types of activity with respect to features of
+Defines types of activity_inviting_to_complete with respect to features of
 the text we'd expect
 Created by adam on 2/25/20
 """
@@ -14,7 +14,7 @@ class ITextType:
 
 class AuthorActivity(ITextType):
     """
-    An activity where they are to discuss an author
+    An activity_inviting_to_complete where they are to discuss an author
     or authors
     """
 

@@ -137,9 +137,9 @@ def save_downloaded_report( activity, frame, SECTION=False ):
     fp = "{}/{}-{}-student-work.csv".format( activity.folder_path, getDateForMakingFileName(), activity.safe_name )
     # try:
     #     # if there's a particular section
-    #     fp = "{}/{}-student-work.csv".format( activity.folder_path, SECTION )
+    #     fp = "{}/{}-student-work.csv".format( activity_inviting_to_complete.folder_path, SECTION )
     # except NameError:
-    #     fp = "{}/{}-{}-student-work.csv".format( activity.folder_path, getDateForMakingFileName(), activity.safe_name )
+    #     fp = "{}/{}-{}-student-work.csv".format( activity_inviting_to_complete.folder_path, getDateForMakingFileName(), activity_inviting_to_complete.safe_name )
 
     try:
         frame.to_csv( fp )
@@ -218,7 +218,7 @@ def load_new( activity ):
 
 
 def load_activity_data_from_files( activity, course ):
-    """Get complete set of data for activity from a bunch of
+    """Get complete set of data for activity_inviting_to_complete from a bunch of
     potentially inconsistent files.
     Created in CAN-41
     Loads the data into a repository object of the appropriate type
@@ -249,7 +249,7 @@ def load_activity_data_from_files( activity, course ):
             data.drop( [ 'score_x', 'score_y' ], axis=1, inplace=True )
 
         # todo this stuff that's been commented out is probably essential to something (had to comment out in CAN-44 to prevent circular imports)
-        # repo = WorkRepositoryFactory.make( activity, course )
+        # repo = WorkRepositoryFactory.make( activity_inviting_to_complete, course )
         # repo.set_question_columns( data )
         drop_columns_from_frame( data )
 

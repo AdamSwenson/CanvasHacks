@@ -20,7 +20,7 @@ class AllQuizReportFileLoader( IAllLoader ):
     @staticmethod
     def load( activity, course, **kwargs ):
         # course = self.course if course is None else course
-        # activity = self.activity if activity is None else activity
+        # activity_inviting_to_complete = self.activity_inviting_to_complete if activity_inviting_to_complete is None else activity_inviting_to_complete
         # pass
         return load_activity_data_from_files( activity, course )
 
@@ -30,7 +30,7 @@ class AllQuizReportDownloader( INewLoader ):
     @staticmethod
     def load( activity, course, save=True, **kwargs ):
         quiz = AllQuizReportDownloader.get_quiz( course, activity )
-        student_work_frame = retrieve_quiz_data( quiz )
+        student_work_frame = retrieve_quiz_data( quiz, **kwargs )
 
         if save:
             # Want to have all the reports be formatted the same
@@ -79,7 +79,7 @@ class NewQuizReportDownloadLoader( INewLoader ):
         :return: DataFrame
         :raises: NoNewSubmissions
         """
-        # quiz = AllQuizReportDownloader.get_quiz( course, activity )
+        # quiz = AllQuizReportDownloader.get_quiz( course, activity_inviting_to_complete )
         # student_work_frame = retrieve_quiz_data( quiz )
 
         data = load_new( activity )

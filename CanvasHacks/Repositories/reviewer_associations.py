@@ -49,7 +49,7 @@ class AssociationRepository:
     def __init__( self, dao: SqliteDAO, activity: Activity):
         """
         Create a repository to handle review assignments for a
-        particular activity
+        particular activity_inviting_to_complete
         """
         self.activity = activity
         self.session = dao.session
@@ -137,7 +137,7 @@ class AssociationRepository:
             # print(assessor)
 
             review_audit.append({
-                'activity' : self.activity.name,
+                'activity_inviting_to_complete' : self.activity.name,
                 'assessor_name' : assessor.short_name,
                 'assessor_sis_id': assessor.sis_user_id,
                 'assessor_canvas_id': assessor.id,
@@ -151,7 +151,7 @@ class AssociationRepository:
     def _create_association( self, activity, assessor_id, assessee_id ):
         """Creates a ReviewAssociation object for the given students and
         saves it to the db
-        Leaving activity as a param even though it is now a property of the object
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own
         """
         ra = ReviewAssociation( activity_id=activity.id, assessor_id=int(assessor_id), assessee_id=int(assessee_id) )
@@ -160,8 +160,8 @@ class AssociationRepository:
         return ra
 
     def get_associations( self, activity=None ):
-        """Returns all review assignments for the activity
-        Leaving activity as a param even though it is now a property of the object
+        """Returns all review assignments for the activity_inviting_to_complete
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own """
         if activity is None:
             activity = self.activity
@@ -173,7 +173,7 @@ class AssociationRepository:
         """Returns the ReviewAssociation object containing the
         of the student assigned to review the submitter
         or None if no student has been assigned
-        Leaving activity as a param even though it is now a property of the object
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own
         """
         return self.session.query( ReviewAssociation ) \
@@ -188,23 +188,35 @@ class AssociationRepository:
     def get_assessor( self, activity, submitter_id ):
         """Returns the id of the student assigned to review the submitter
         or None if no student has been assigned
-        Leaving activity as a param even though it is now a property of the object
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own
         """
         r = self.get_assessor_object(activity, submitter_id)
         # r = self.session.query( ReviewAssociation ) \
-        #     .filter( ReviewAssociation.activity_id == activity.id ) \
+        #     .filter( ReviewAssociation.activity_id == activity_inviting_to_complete.id ) \
         #     .filter( ReviewAssociation.assessee_id == submitter_id ) \
         #     .one_or_none()
         if r:
             return r.assessor_id
         return r
 
+    def get_by_assessor( self, activity, reviewer_id ):
+        """
+        Returns the review object where the student is the assessor
+        :param activity:
+        :param reviewer_id:
+        :return:
+        """
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .filter( ReviewAssociation.assessor_id == reviewer_id ) \
+            .one_or_none()
+
     def get_assessee_object( self, activity, reviewer_id ):
         """Returns the ReviewAssociation object containing the student
          assigned to be reviewed by the reviewer
         or None if no student has been assigned
-        Leaving activity as a param even though it is now a property of the object
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own
         """
         return self.session.query( ReviewAssociation ) \
@@ -215,12 +227,12 @@ class AssociationRepository:
     def get_assessee( self, activity, reviewer_id ):
         """Returns the student assigned to be reviewed by the reviewer
         or None if no student has been assigned
-        Leaving activity as a param even though it is now a property of the object
+        Leaving activity_inviting_to_complete as a param even though it is now a property of the object
         so test methods can call on its own
         """
         r = self.get_assessee_object(activity, reviewer_id)
         # self.session.query( ReviewAssociation ) \
-        #     .filter( ReviewAssociation.activity_id == activity.id ) \
+        #     .filter( ReviewAssociation.activity_id == activity_inviting_to_complete.id ) \
         #     .filter( ReviewAssociation.assessor_id == reviewer_id ) \
         #     .one_or_none()
         if r:

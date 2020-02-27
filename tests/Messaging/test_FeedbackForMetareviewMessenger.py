@@ -14,7 +14,7 @@ from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
-from CanvasHacks.Messaging.Messengers import FeedbackForMetareviewMessenger
+from CanvasHacks.Messaging.Messengers import MetareviewInvitationMessenger
 
 fake = Faker()
 
@@ -46,7 +46,7 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
 
     def test_prepare_message( self ):
-        obj = FeedbackForMetareviewMessenger( self.activity, self.studentRepo, self.contentRepo )
+        obj = MetareviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo )
 
         # call
         message_data = obj.prepare_message( self.review_assign )
@@ -68,7 +68,7 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     def test_notify( self, sendMock ):
         sendMock.return_value = 'taco'
-        self.obj = FeedbackForMetareviewMessenger( self.activity, self.studentRepo, self.contentRepo )
+        self.obj = MetareviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo )
 
         # Call
         result = self.obj.notify( [ self.review_assign ], send=True )

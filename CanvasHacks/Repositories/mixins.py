@@ -9,6 +9,35 @@ if __name__ == '__main__':
     pass
 
 
+class FrameStorageMixin:
+    """
+    Tools for use by repositories for which
+    self.data is a dataframe of student records
+    """
+
+    def remove_student_records( self, student_ids ):
+        student_ids = student_ids if isinstance(student_ids, list) else [student_ids]
+        if len(student_ids) == 0:
+            # bail if there were no students. That way we can run
+            # this on first time
+            return True
+
+        is_index = False
+        prelen = len(self.data)
+        # figure out whether student_id is the index
+        if 'student_id' not in self.data.columns:
+            self.data.reset_index(inplace=True)
+            is_index = True
+        self.data = self.data[ ~self.data.student_id.isin(student_ids) ].copy(deep=True)
+
+        removed = prelen - len(self.data)
+        if removed > 0:
+            print("Removed {} records".format(removed))
+
+        if is_index:
+            self.data.set_index('student_id', inplace=True)
+
+
 class StudentWorkMixin:
     """Parent class for any repository which holds
     student data and can provide a formatted version

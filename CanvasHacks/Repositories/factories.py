@@ -16,15 +16,17 @@ if __name__ == '__main__':
 
 class WorkRepositoryFactory:
     """Decides what kind of repository is needed
-    and instantiates it"""
+    and instantiates it
+
+    Used for ordinary quiz assignments that aren't part of skaa"""
 
     @staticmethod
     def make( activity, course=None, only_new=False, **kwargs ):
         # Get the object which will handle loading data
-        if only_new:
-            loader = NewQuizReportFileLoader( activity, course )
-        else:
-            loader = AllQuizReportFileLoader( activity, course )
+        # if only_new:
+        #     loader = NewQuizReportFileLoader( activity, course )
+        # else:
+        #     loader = AllQuizReportFileLoader( activity, course )
 
         # Get quiz submission objects
         if isinstance( activity, Review ):
@@ -67,7 +69,7 @@ class WorkRepositoryLoaderFactory:
     @classmethod
     def _for_quiz_type_activity(cls, activity, course, loader, **kwargs):
         """
-        Handles the loading if the activity uses a quiz report
+        Handles the loading if the activity_inviting_to_complete uses a quiz report
         :param activity:
         :param course:
         :param loader:
@@ -94,7 +96,7 @@ class WorkRepositoryLoaderFactory:
     @classmethod
     def _for_assignment_type_activity(cls, activity, course, loader, **kwargs):
         """
-        Handles the loading if the activity uses an assignment (with no report)
+        Handles the loading if the activity_inviting_to_complete uses an assignment (with no report)
         :param activity:
         :param course:
         :param loader:

@@ -38,7 +38,7 @@
 #         # self.unit.components.append(review)
 #
 #     @patch('CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository')
-#     @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.StudentWorkForPeerReviewMessenger')
+#     @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.PeerReviewInvitationMessenger')
 #     @patch('CanvasHacks.SkaaSteps.ISkaaSteps.AssociationRepository')
 #     @patch('CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory')
 #     def test_sends_correctly( self, workLoaderMock, assocRepoMock, messengerMock, studentRepoMock ):

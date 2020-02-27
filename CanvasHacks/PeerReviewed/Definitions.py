@@ -34,16 +34,16 @@ class Activity( Model ):
         return cls.regex.search( assignment_name.strip().lower() )
 
     def __init__( self, **kwargs ):
-        # when the activity is due
+        # when the activity_inviting_to_complete is due
         # ": "2013-01-23T23:59:00-07:00"
         self.due_at = None
         # Set this date if want to give half credit for
         # assignments turned in after this.
         # Normally won't be used, unless manually set
         self.quarter_credit_deadline = None
-        # when to lock the activity
+        # when to lock the activity_inviting_to_complete
         self.lock_at = None
-        # // when to unlock the activity
+        # // when to unlock the activity_inviting_to_complete
         self.unlock_at = None
         self.points_possible = None
         self.unit_number = None
@@ -130,7 +130,7 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
         # Code used to open the review assignment
         self.access_code = None
 
-        # Link to the activity on canvas so students can click
+        # Link to the activity_inviting_to_complete on canvas so students can click
         # directly to it
         self.activity_link = None
 

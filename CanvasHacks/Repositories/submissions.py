@@ -134,7 +134,7 @@ class QuizSubmissionRepository( ISubmissionRepo ):
     def __init__( self, quiz: canvasapi.quiz.Quiz ):
         """
         Should get quiz object with something like
-            quiz = environment.CONFIG.course.get_quiz(activity.quiz_id)
+            quiz = environment.CONFIG.course.get_quiz(activity_inviting_to_complete.quiz_id)
         :param quiz: Canvas api assignment object for use in downloading
         """
         self.quiz = quiz

@@ -38,3 +38,5 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
     def create_test_content( self, student_ids ):
         self.testText = { sid : fake.paragraph() for sid in student_ids}
 
+    def remove_student_records( self, student_ids ):
+        pass

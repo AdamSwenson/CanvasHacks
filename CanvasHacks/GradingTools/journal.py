@@ -49,7 +49,7 @@ class JournalGrader( IGrader ):
 
         # penalty = self.penalizer.get_penalty(submission.submitted_at)
         #
-        # # penalty = get_penalty( submission.submitted_at, self.activity.due_at, self.activity.lock_at, self.activity.grace_period )
+        # # penalty = get_penalty( submission.submitted_at, self.activity_inviting_to_complete.due_at, self.activity_inviting_to_complete.lock_at, self.activity_inviting_to_complete.grace_period )
 
         # penalty was set up for uploading where have to use fudge points.
         # so we need to interpret it a bit here.

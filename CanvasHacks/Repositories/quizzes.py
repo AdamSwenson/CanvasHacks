@@ -6,7 +6,7 @@ from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
 from CanvasHacks.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
-from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin
+from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin, FrameStorageMixin
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
@@ -45,7 +45,7 @@ from CanvasHacks.Repositories.interfaces import IContentRepository
 # assert (make_drop_list( test ) == [ '1.0', '1.0.1', '1.0.2' ])
 
 
-class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, StudentWorkMixin, SelectableMixin ):
+class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, StudentWorkMixin, SelectableMixin, FrameStorageMixin ):
     """Manages the data for a quiz type assignment"""
 
     def __init__( self, activity, course=None ):
@@ -75,13 +75,13 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
 
     # def _initialize_quiz( self):
     #     """Downloads the quiz object corresponding to
-    #     the activity. That's where things like number
+    #     the activity_inviting_to_complete. That's where things like number
     #     of points will be stored"""
     #     try:
     #         if self._quiz:
     #             pass
     #     except AttributeError:
-    #         self._quiz = self.course.get_quiz(self.activity.quiz_id)
+    #         self._quiz = self.course.get_quiz(self.activity_inviting_to_complete.quiz_id)
 
     def _cleanup_data( self ):
         """This is abstracted out so it can be
@@ -93,7 +93,7 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         # so we set to student id to make look ups easier
         self.data.set_index( 'student_id', inplace=True )
         # Remove unneeded columns
-        # self.data = self.data[self.activity.question_columns]
+        # self.data = self.data[self.activity_inviting_to_complete.question_columns]
 
     def get_student_work( self, student_id ):
         try:
@@ -167,15 +167,15 @@ class ReviewRepository( QuizRepository ):
 
     #
     # def _set_question_types( self ):
-    #     def __init__( self, activity ):
-    #         self.activity = activity
+    #     def __init__( self, activity_inviting_to_complete ):
+    #         self.activity_inviting_to_complete = activity_inviting_to_complete
     #     self.question_columns = []
 
     # @property
     # def questions( self ):
-    #     """Returns canvasapi questions for the activity"""
+    #     """Returns canvasapi questions for the activity_inviting_to_complete"""
     #     print('getting qs')
-    #     return self.course.get_quiz(self.activity.quiz_id).get_questions()
+    #     return self.course.get_quiz(self.activity_inviting_to_complete.quiz_id).get_questions()
 
     def _fix_forgot_answers( self ):
         def r( v ):
@@ -231,13 +231,13 @@ if __name__ == '__main__':
 
 
 def make_quiz_repo( course, activity, save=True ):
-    """Gets all student work data for the activity that's part of the assignment
+    """Gets all student work data for the activity_inviting_to_complete that's part of the assignment
     loads it into a QuizRepository or ReviewRepository and
     returns the repository.
     This is the main method called to get data
     """
     # Get quiz submission objects
-    # repo = WorkRepositoryFactory.make( activity, course )
+    # repo = WorkRepositoryFactory.make( activity_inviting_to_complete, course )
     if isinstance(activity, Review):
         repo = ReviewRepository(activity, course)
     else:

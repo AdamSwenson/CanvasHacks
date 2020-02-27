@@ -2,17 +2,18 @@
 Created by adam on 9/14/18
 """
 __author__ = 'adam'
+
 import os
+
 import CanvasHacks.testglobals
 
 if CanvasHacks.testglobals.TEST:
     print( "RUNNING IN TEST MODE" )
 
 # Putting this here for an easy place to manually
-# toggle, since that usually only needs to happen when
+# toggle, since it only needs to be true when
 # testing against server.
-CanvasHacks.testglobals.TEST_WITH_FILE_DB = True
-
+CanvasHacks.testglobals.TEST_WITH_FILE_DB = False
 
 from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration
 

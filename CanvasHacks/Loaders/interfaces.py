@@ -34,7 +34,7 @@ class ILoader:
 
     @staticmethod
     def get_assignment(course, activity):
-        """If doesn't use quiz report, we need the activity"""
+        """If doesn't use quiz report, we need the activity_inviting_to_complete"""
         return course.get_assignment(activity.id)
 
     @staticmethod
@@ -63,5 +63,5 @@ class IAllLoader(ILoader):
     data for the quiz"""
     pass
     # @staticmethod
-    # def load( activity, course=None, **kwargs ):
+    # def load( activity_inviting_to_complete, course=None, **kwargs ):
     #     raise NotImplementedError

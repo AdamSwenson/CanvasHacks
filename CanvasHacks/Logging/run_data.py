@@ -15,7 +15,7 @@ class RunLogger( TextLogger ):
 
     entry_template = """ 
         \n --------- {time} --------- \n
-        Checked for new submissions on activity: {activity_name}
+        Checked for new submissions on activity_inviting_to_complete: {activity_name}
         {message}
         \n -------------------------- \n
         """
@@ -44,6 +44,17 @@ class RunLogger( TextLogger ):
 
     @classmethod
     def log_review_feedback_distributed( cls, assigned_activity, message, time_to_record=None ):
+        if time_to_record is None:
+            time_to_record = current_utc_timestamp()
+        d = {
+            'activity_name': assigned_activity.name,
+            'time': time_to_record,
+            'message': message
+        }
+        cls.write( cls.entry_template.format( **d ) )
+
+    @classmethod
+    def log_metareview_feedback_distributed( cls, assigned_activity, message, time_to_record=None ):
         if time_to_record is None:
             time_to_record = current_utc_timestamp()
         d = {

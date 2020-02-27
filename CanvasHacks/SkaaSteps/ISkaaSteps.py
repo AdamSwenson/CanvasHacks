@@ -41,8 +41,10 @@ class IStep:
         self.studentRepo = StudentRepository( self.course )
         self.studentRepo.download()
         self._initialize_db()
-        self.associationRepo = AssociationRepository( self.dao, self.activity)
-        self.statusRepo = StatusRepository(self.dao, self.activity)
+        self.associationRepo = AssociationRepository( self.dao, self.activity_for_review_pairings)
+        self.submittedStatusRepo = StatusRepository(self.dao, self.activity)
+        self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
+
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:

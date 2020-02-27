@@ -35,7 +35,7 @@ def make_review_audit_file(associationRepo, studentRepo, unit):
     #     print(assessor)
     #
     #     review_audit.append({
-    #         'activity' : unit.review.name,
+    #         'activity_inviting_to_complete' : unit.review.name,
     #         'assessor_name' : assessor.short_name,
     #         'assessor_sis_id': assessor.sis_user_id,
     #         'assessor_canvas_id': assessor.id,

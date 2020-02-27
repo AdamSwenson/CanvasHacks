@@ -27,6 +27,7 @@ class IContentRepository( IRepo ):
     return the content of student work
     """
 
+
     def get_formatted_work_by( self, student_id ):
         raise NotImplementedError
 

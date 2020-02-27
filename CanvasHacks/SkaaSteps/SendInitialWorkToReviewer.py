@@ -1,10 +1,11 @@
 """
 Created by adam on 2/23/20
 """
+import CanvasHacks.testglobals
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.Errors.review_pairings import AllAssigned, NoAvailablePartner
 from CanvasHacks.Logging.run_data import RunLogger
-from CanvasHacks.Messaging.Messengers import StudentWorkForPeerReviewMessenger
+from CanvasHacks.Messaging.Messengers import PeerReviewInvitationMessenger
 # from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Logging.review_pairings import make_review_audit_file
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -24,11 +25,18 @@ class SendInitialWorkToReviewer( IStep ):
         :param send: Whether to actually send the messages
         """
         super().__init__( course, unit, is_test, send, **kwargs )
-        # The activity whose results we are going to be doing something with
+        # The activity_inviting_to_complete whose results we are going to be doing something with
         self.activity = unit.initial_work
+
+        # The activity_inviting_to_complete which we are inviting the receiving student to complete
+        self.activity_notifying_about = unit.review
+
+        # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
+        self.activity_for_review_pairings = unit.initial_work
+
         self._initialize()
 
-    def run( self, only_new=False ):
+    def run( self, only_new=False, rest_timeout=5 ):
         """
         Loads content assignments, assigns reviewers, and sends formatted
         work to reviewer
@@ -36,7 +44,7 @@ class SendInitialWorkToReviewer( IStep ):
         :return:
         """
         try:
-            self.work_repo = WorkRepositoryLoaderFactory.make( self.unit.initial_work, self.course, only_new )
+            self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new, rest_timeout=rest_timeout )
             # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
             # Assign reviewers to each submitter and store in db
@@ -51,7 +59,7 @@ class SendInitialWorkToReviewer( IStep ):
             # Send the work to the reviewers
             # Note that we still do this even if send is false because
             # the messenger will print out the messages rather than sending them
-            self.messenger = StudentWorkForPeerReviewMessenger( self.unit.review, self.studentRepo, self.work_repo, self.statusRepo )
+            self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
 
             # NB, we don't use associationRepo.data because we only
             # want to send to people who are newly assigned
@@ -68,6 +76,9 @@ class SendInitialWorkToReviewer( IStep ):
             print( "No new submissions" )
             # todo Log run failure
             RunLogger.log_no_submissions(self.unit.initial_work)
+            if CanvasHacks.testglobals.TEST:
+                # Reraise so can see what happened for tests
+                raise NoNewSubmissions
 
         except AllAssigned as e:
             # Folks already assigned to review
@@ -75,6 +86,9 @@ class SendInitialWorkToReviewer( IStep ):
             # This could be due to them resubmitting late
             print("New submitters but everyone already assigned")
             print(e.submitters)
+            if CanvasHacks.testglobals.TEST:
+                # Reraise so can see what happened for tests
+                raise AllAssigned(e.submitters)
 
         except NoAvailablePartner as e:
             # We will probably want to notify the student that they
@@ -82,6 +96,9 @@ class SendInitialWorkToReviewer( IStep ):
             # a partner
             # todo Notify student that they are waiting
             print("1 student has submitted and has no partner ", e.submitters)
+            if CanvasHacks.testglobals.TEST:
+                # Reraise so can see what happened for tests
+                raise NoAvailablePartner(e.submitters)
 
     @property
     def audit_frame( self ):

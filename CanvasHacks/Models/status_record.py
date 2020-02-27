@@ -15,20 +15,21 @@ from CanvasHacks.TimeTools import current_utc_timestamp
 
 class StatusRecord( Base, Model ):
     """
-    Keeps track of when an activity was made available to a
+    Keeps track of when an activity_inviting_to_complete was made available to a
     student and when they submitted it.
 
     NB, No need for recording when a wait notification is sent.
     That can go in the logs for auditing
     """
     __tablename__ = env.STATUS_TABLE_NAME
-    # Id of the relevant activity
+
+    # Id of the relevant activity_inviting_to_complete
     activity_id = Column(Integer, primary_key=True, nullable=False)
 
     # The student whom this record concerns
     student_id = Column( Integer, primary_key=True, nullable=False )
 
-    # When this student submitted the activity
+    # When this student submitted the activity_inviting_to_complete
     submitted = Column( DATETIME, nullable=True )
 
     # When the student was notified this was available
@@ -36,10 +37,11 @@ class StatusRecord( Base, Model ):
     # by other party
     notified = Column( DATETIME, nullable=True )
 
-    # When the student was sent feedback on the assignment, if
-    # applicable.
-    # On the content assignment, this would be when they were
-    # sent the peer review feedback
+    # When their metareview feedback was sent out
+    #
+    # This is only relevant for the metareview since need to record when the
+    # feedback from this student was sent out to the person who did the peer review.
+    # Notified already represents when they were invited to do the metareview assignment
     results = Column(DATETIME, nullable=True)
 
     def record_submission( self, time_to_record=None ):
@@ -56,7 +58,7 @@ class StatusRecord( Base, Model ):
     def record_opened( self, time_to_record=None ):
         """
         Called to record the timestamp of when this student was
-        notified that the activity was available.
+        notified that the activity_inviting_to_complete was available.
         With activities like peer review, this is also the
         time that they were sent someone else's work
         :param time_to_record:

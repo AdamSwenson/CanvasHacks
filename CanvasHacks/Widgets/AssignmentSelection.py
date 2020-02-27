@@ -112,7 +112,7 @@ def make_assignment_chooser(activity=None):
     assignments = [ (a[ 'id' ], a[ 'name' ]) for a in assignments ]
 
     if activity is not None:
-        # If we we're passed an activity, filter the assignments
+        # If we we're passed an activity_inviting_to_complete, filter the assignments
         assignments = [a for a in assignments if activity.is_activity_type(a[1])]
 
     print( "{} assignments with submissions".format( len( assignments ) ) )

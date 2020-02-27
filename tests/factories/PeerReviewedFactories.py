@@ -40,14 +40,15 @@ def test_data_factory():
     }
 
 
-def unit_factory(course=None, unit_number=None):
+def unit_factory(course=None, unit_number=None, initial_is_quiz_type=True):
     """Creates a Unit object with fake data for all assignments"""
     course = course if course is not None else MagicMock()
     unit_number = unit_number if unit_number is not None else random.randint(1, 22222)
     test_data = test_data_factory()
     initial = InitialWork( **test_data[ 'initial' ] )
     initial.id = random.randint( 0, 10000 )
-    initial.quiz_id = initial.id
+    if initial_is_quiz_type:
+        initial.quiz_id = initial.id
     review = Review( **test_data[ 'review' ] )
     review.id = random.randint( 0, 10000 )
     review.quiz_id = review.id

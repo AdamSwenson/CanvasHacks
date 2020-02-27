@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
 
 class Submission( StoreMixin ):
-    """A student's completion of an activity
+    """A student's completion of an activity_inviting_to_complete
     Parent class; not usually used
     """
 
@@ -33,7 +33,7 @@ class Submission( StoreMixin ):
 
     @property
     def on_time( self ):
-        """Returns true if the student submitted the activity
+        """Returns true if the student submitted the activity_inviting_to_complete
         on time.
         """
         return self.completion_date <= self.activity.due_date
@@ -103,7 +103,7 @@ class ReviewSubmission( Submission ):
 
 
 class SubmissionFactory( StoreMixin ):
-    """A student's completion of an activity
+    """A student's completion of an activity_inviting_to_complete
     todo: refactor into factory """
 
     def __init__( self, activity, **kwargs ):

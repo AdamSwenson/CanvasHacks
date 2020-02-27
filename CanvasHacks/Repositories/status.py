@@ -8,28 +8,62 @@ from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'
 
+from CanvasHacks.Repositories.mixins import StudentWorkMixin
+
 if __name__ == '__main__':
     pass
 
 
-class StatusRepository(IRepo):
+class StatusRepository(StudentWorkMixin, IRepo):
 
     def __init__( self, dao: SqliteDAO, activity: Activity):
         """
         Create a repository to handle events for a
-        particular activity
+        particular activity_inviting_to_complete
         """
         self.activity = activity
         self.session = dao.session
 
-    def get_or_create_record( self, student_or_id ):
-        """Keeping the 2 required methods separate in
-        case have some use to do them separately
+    def create_record( self, student_or_id ):
+        """Creates and returns a record for the student on the activity_inviting_to_complete.
+        It does not set the submitted or notified values
         """
-        record = self.get_record(student_or_id)
-        if record is None:
-            record = self.create_record(student_or_id)
-        return record
+        student_id = self._handle_id(student_or_id)
+        rec = StatusRecord( student_id=student_id, activity_id=self.activity.id )
+        self.session.add( rec )
+        # todo Consider bulk commits if slow
+        self.session.commit()
+        return rec
+
+    @property
+    def previously_notified_students( self ):
+        """Returns a list of ids of students who have
+        already been notified
+        """
+        records = self.session.query( StatusRecord ) \
+            .filter( StatusRecord.activity_id == self.activity.id ) \
+            .filter( StatusRecord.notified.isnot(None)  ) \
+            .all()
+        return [r.student_id for r in records]
+        # record = self.get_record(student_or_id)
+        # if record is not None:
+        #     # this will be true if notified is a datetime
+        #     return record.notified is not None
+        # # If the record hasn't been created yet, it will
+        # # return false. That way this check can be run before
+        # # the process that creates the records
+        # return False
+
+    @property
+    def previously_sent_results( self ):
+        """Returns a list of ids of students who have
+        already been notified
+        """
+        records = self.session.query( StatusRecord ) \
+            .filter( StatusRecord.activity_id == self.activity.id ) \
+            .filter( StatusRecord.results.isnot(None)  ) \
+            .all()
+        return [r.student_id for r in records]
 
     def get_record( self, student_or_id ):
         """
@@ -44,42 +78,68 @@ class StatusRepository(IRepo):
             .filter( StatusRecord.student_id == student_id ) \
             .one_or_none()
 
-    def create_record( self, student_or_id ):
-        """Creates and returns a record for the student on the activity.
-        It does not set the submitted or notified values
+    def get_or_create_record( self, student_or_id ):
+        """Keeping the 2 required methods separate in
+        case have some use to do them separately
         """
-        student_id = self._handle_id(student_or_id)
-        rec = StatusRecord( student_id=student_id, activity_id=self.activity.id )
-        self.session.add( rec )
-        # todo Consider bulk commits if slow
-        self.session.commit()
-        return rec
+        record = self.get_record(student_or_id)
+        if record is None:
+            record = self.create_record(student_or_id)
+        return record
+
+    def record( self, student, time_to_record=None ):
+        """
+        Generic version which will normally record via
+        record_opened. However, can be overriden by other
+        repos
+        :param student:
+        :param time_to_record:
+        :return:
+        """
+        self.record_opened(student, time_to_record)
 
     def record_opened( self, student, time_to_record=None ):
-        """Record that the student was notified that the activity
+        """Record that the student was notified that the activity_inviting_to_complete
          is available
         """
+        print("record_opened", student)
         record = self.get_or_create_record(student)
         record.record_opened( time_to_record )
         self.session.commit()
 
     def record_submitted( self, student, time_to_record=None):
         """Record that the student has submitted
-        the activity
+        the activity_inviting_to_complete
         """
         record = self.get_or_create_record(student)
         record.record_submission(time_to_record)
         self.session.commit()
 
-    def record_sent_feedback( self, student, time_to_record=None ):
-        """Records when the student was sent feedback on their work
-        So, for the content assignment, this would be called after
-        the reviewer submits the review.
-        todo NOthing uses this yet
+    def record_sent_results( self, student, time_to_record=None ):
+        """Records when feedback from this student was sent out
+
+        This is only relevant for the metareview since need to record when the
+        feedback from this student was sent out to the person who did the peer review.
+        NB, notified already represents when they were
+        invited to do the metareview assignment, the results of which we are now sending
         """
+        print('record_sent', student)
         record = self.get_or_create_record(student)
         record.record_sent_results(time_to_record)
         self.session.commit()
+
+
+class MetareviewResultsStatusRepository(StatusRepository):
+    def __init__( self, dao: SqliteDAO, activity: Activity):
+        """
+        Create a repository to handle events for a
+        particular activity_inviting_to_complete
+        """
+        self.activity = activity
+        self.session = dao.session
+
+    def record( self, student, time_to_record=None ):
+        self.record_sent_results(student, time_to_record)
 
 
 
@@ -89,7 +149,7 @@ class ComplexStatusRepository:
     def __init__( self, dao: SqliteDAO, unit: Unit):
         """
         Create a repository to handle review assignments for a
-        particular activity
+        particular activity_inviting_to_complete
         """
         self.content_assignment_id = unit.initial_work.id
         self.session = dao.session

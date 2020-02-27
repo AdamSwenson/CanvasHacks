@@ -7,7 +7,7 @@ from CanvasHacks.Messaging.Messengers import make_prompt_and_response
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.Repositories.interfaces import IContentRepository
-from CanvasHacks.Repositories.mixins import SelectableMixin, StudentWorkMixin
+from CanvasHacks.Repositories.mixins import SelectableMixin, StudentWorkMixin, FrameStorageMixin
 from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     pass
 
 
-class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWorkMixin, SelectableMixin ):
+class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWorkMixin, SelectableMixin, FrameStorageMixin ):
     """Manages the data for a non-quiz type assignment
     """
 

@@ -10,7 +10,7 @@ from faker import Faker
 
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.PeerReviewed.Definitions import *
-from CanvasHacks.Messaging.Messengers import StudentWorkForPeerReviewMessenger
+from CanvasHacks.Messaging.Messengers import PeerReviewInvitationMessenger
 from CanvasHacks.Repositories.students import StudentRepository
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory
@@ -43,7 +43,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
 
     def test_prepare_message( self ):
         # student recieiving the message
-        self.obj = StudentWorkForPeerReviewMessenger( self.activity, self.studentRepo, self.contentRepo )
+        self.obj = PeerReviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo )
 
         # call
         message_data = self.obj.prepare_message( self.review_assign )
@@ -69,7 +69,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'this would be the result of sending'
-        self.obj = StudentWorkForPeerReviewMessenger( self.activity, self.studentRepo, self.contentRepo, self.statusRepository )
+        self.obj = PeerReviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo, self.statusRepository )
 
         # Call
         result = self.obj.notify( [ self.review_assign ], send=True )

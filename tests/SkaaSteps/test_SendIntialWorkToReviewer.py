@@ -41,7 +41,7 @@ class TestCallsAllExpected( TestingBase ):
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
-    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.StudentWorkForPeerReviewMessenger' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.PeerReviewInvitationMessenger' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.AssociationRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_run( self, workLoaderMock, assocRepoMock, messengerMock, studentRepoMock, statusRepoMock ):
@@ -63,12 +63,15 @@ class TestCallsAllExpected( TestingBase ):
 
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
 
+        assignments = [ ReviewAssociation(assessee_id=students[0], assessor_id=students[1]), ReviewAssociation(assessee_id=students[1], assessor_id=students[0]),]
+        obj.associationRepo.assign_reviewers = MagicMock(return_value=assignments)
+
         # call
         obj.run()
 
         # check
         workLoaderMock.make.assert_called()
-        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course, True )
+        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course, False, rest_timeout=5 )
 
         obj.studentRepo.download.assert_called()
 
@@ -76,7 +79,8 @@ class TestCallsAllExpected( TestingBase ):
         obj.associationRepo.assign_reviewers.assert_called_with( submitter_ids )
 
         obj.messenger.notify.assert_called()
-        obj.messenger.notify.assert_called_with( obj.associationRepo.data, True )
+        obj.messenger.notify.assert_called_with( assignments, True )
+        # obj.messenger.notify.assert_called_with( obj.associationRepo.data, True )
 
         # obj.statusRepo.record_opened.assert_called()
         # obj.statusRepo.record_opened.assert_called_with(submitter_ids[0])
@@ -98,8 +102,8 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.course = MagicMock()
 
         self.activity_id = self.unit.initial_work.id
-        self.dao = SqliteDAO()
-        self.session = self.dao.session
+        # self.dao = SqliteDAO()
+        # self.session = self.dao.session
         self.create_new_and_preexisting_students()
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
@@ -118,7 +122,6 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         :param messengerMock:
         :return:
         """
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
@@ -136,12 +139,17 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # studentRepoMock.get_student = MagicMock(side_effect=se)
         # studentRepoMock.download = MagicMock( return_value=self.students )
-
+        # statusRepoMock.record_opened = MagicMock()
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         # obj.studentRepo = MagicMock()
         obj.studentRepo.get_student = MagicMock(side_effect=se)
         obj.studentRepo.download = MagicMock( return_value=self.students )
+
+        # Have to do this after object creation so that we can use the
+        # same in-memory db
+        self.session = obj.dao.session
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
         obj.run()
 
@@ -176,12 +184,13 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # print(args)
 
         # Status repo calls on messenger
-        obj.messenger.status_repository.record_opened.assert_called()
-        call_list = obj.messenger.status_repository.record_opened.call_args_list
+        # statusRepoMock.record_opened.assert_called()
+        obj.messenger.status_repository.record.assert_called()
+        call_list = obj.messenger.status_repository.record.call_args_list
         status_args = [c[0][0] for c in call_list]
         self.assertEqual(len(self.new_students), len(call_list),  "Status repo record_opened called expected number of times")
         for sid in self.new_students_ids:
-            self.assertIn(sid, status_args, "StatusRepo.record_opened called on all students")
+            self.assertIn(sid, status_args, "StatusRepo.record called on all students")
 
         # student repo calls on messenger
         for sid in self.new_students_ids:
@@ -199,7 +208,6 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_raises_when_all_submitters_already_assigned( self, workLoaderMock, studentRepoMock ):
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
@@ -217,6 +225,8 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        self.session = obj.dao.session
+        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
 
         with self.assertRaises(AllAssigned):
             obj.run()
@@ -224,7 +234,6 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_raises_when_only_one_submission( self, workLoaderMock, studentRepoMock ):
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
@@ -242,6 +251,10 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        # Have to do this after object creation so that we can use the
+        # same in-memory db
+        self.session = obj.dao.session
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
         with self.assertRaises(AllAssigned):
             obj.run()
@@ -349,8 +362,11 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # print(args)
 
         # Status repo calls on messenger
-        obj.messenger.status_repository.record_opened.assert_called()
-        call_list = obj.messenger.status_repository.record_opened.call_args_list
+        obj.messenger.status_repository.record.assert_called()
+        call_list = obj.messenger.status_repository.record.call_args_list
+
+        # obj.messenger.status_repository.record_opened.assert_called()
+        # call_list = obj.messenger.status_repository.record_opened.call_args_list
         status_args = [c[0][0] for c in call_list]
         self.assertEqual(len(self.new_students), len(call_list),  "Status repo record_opened called expected number of times")
         for sid in self.new_students_ids:
@@ -368,6 +384,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
             sent_text = [t[2] for t in messenger_args if t[0] == record.assessor_id][0]
             rx = r'{}'.format(author_text)
             self.assertRegex(sent_text, rx, "Author's work in message sent to reviewer")
+
 
 class TestLateSubmissions( TestingBase ):
     """Checks that works properly on subsequent runs after the

@@ -49,9 +49,9 @@ class TestStudentNotices( TestingBase ):
     #     self.assertTrue( len( j ) > 1, "Created string is non empty" )
 
 
-# def make_expected_message_data(activity, template, receiving_student, content, other=None):
+# def make_expected_message_data(activity_inviting_to_complete, template, receiving_student, content, other=None):
 #     d = {
-#         'intro': activity.email_intro,
+#         'intro': activity_inviting_to_complete.email_intro,
 #
 #         'name': get_first_name( receiving_student ),
 #
@@ -62,10 +62,10 @@ class TestStudentNotices( TestingBase ):
 #         'other': other,
 #
 #         # Add code and link to do reviewing assignment
-#         'review_assignment_name': activity.name,
-#         'access_code': activity.access_code,
-#         'review_url': activity.html_url,
-#         'due_date': activity.string_due_date
+#         'review_assignment_name': activity_inviting_to_complete.name,
+#         'access_code': activity_inviting_to_complete.access_code,
+#         'review_url': activity_inviting_to_complete.html_url,
+#         'due_date': activity_inviting_to_complete.string_due_date
 #     }
 #
 #     message = template.format( **d )
@@ -117,7 +117,7 @@ class TestSkaaMessenger(TestingBase):
     #         {review_assignment_name} {access_code} {review_url} {due_date}
     #         """
     #
-    #     self.obj = SkaaMessenger(self.activity, self.studentRepo, self.contentRepo)
+    #     self.obj = SkaaMessenger(self.activity_inviting_to_complete, self.studentRepo, self.contentRepo)
     #
     #     self.obj.message_template = testing_template
     #
