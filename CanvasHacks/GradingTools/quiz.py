@@ -27,7 +27,7 @@ class QuizGrader( IGrader ):
         self.submission_repo = submission_repo
         super().__init__( **kwargs )
 
-    def grade( self ):
+    def grade( self, **kwargs):
         """
 
         todo: Add logging of details of how grade assigned
@@ -36,7 +36,7 @@ class QuizGrader( IGrader ):
         self.graded = [ ]
         for i, row in self.work_repo.data.iterrows():
             try:
-                self.graded.append( self._grade_row( row ) )
+                self.graded.append( self._grade_row( row, **kwargs ) )
             except NonStringInContentField as e:
                 print(e, row)
         return self.graded
@@ -66,7 +66,7 @@ class QuizGrader( IGrader ):
         fudge_points = total_score * -penalty
         return fudge_points
 
-    def _grade_row( self, row ):
+    def _grade_row( self, row , **kwargs):
         fudge_points = 0
         out = {
             'student_id': int( row[ 'student_id' ] ),
@@ -84,7 +84,7 @@ class QuizGrader( IGrader ):
         # todo This should use credit_no_credit from GradingTools.nonempty
         for qid, column_name in self.work_repo.question_columns:
             content = row[ column_name ]
-            pts = self._get_score( content )
+            pts = self._get_score( content, **kwargs )
             questions[ qid ] = { 'score': pts }
             total_score += pts
             # if receives_credit(content):
