@@ -71,7 +71,7 @@ class TestCallsAllExpected( TestingBase ):
 
         # check
         workLoaderMock.make.assert_called()
-        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course, False, rest_timeout=5 )
+        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course, only_new=False, rest_timeout=5 )
 
         obj.studentRepo.download.assert_called()
 
@@ -259,13 +259,6 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         with self.assertRaises(AllAssigned):
             obj.run()
 
-#
-    # def test_assignments_stored_correctly( self ):
-    #     """Check that the students who have submitted the assignment
-    #     (and none of the non-submitteers) have been paired up
-    #     in the expected manner, and that the pairings have been stored
-    #     """
-    #     self.fail()
 
 class TestFunctionalTestWhenNonQuizType( TestingBase ):
     """
@@ -275,7 +268,6 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
     For tests of whole process which hit server, see tests.EndToEnd
     """
-
     def setUp( self ):
         self.config_for_test()
         self.unit = unit_factory()
@@ -304,8 +296,6 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         :param messengerMock:
         :return:
         """
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
-
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
         workRepo.create_test_content(self.student_ids)
@@ -328,6 +318,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # obj.studentRepo = MagicMock()
         obj.studentRepo.get_student = MagicMock(side_effect=se)
         obj.studentRepo.download = MagicMock( return_value=self.students )
+        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students, obj.dao.session)
 
         obj.run()
 
@@ -386,37 +377,52 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
             self.assertRegex(sent_text, rx, "Author's work in message sent to reviewer")
 
 
-class TestLateSubmissions( TestingBase ):
-    """Checks that works properly on subsequent runs after the
-    initial assignments have been sent out
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
+    def test_raises_when_all_submitters_already_assigned( self, workLoaderMock, studentRepoMock ):
+        # Prepare fake work repo to give values to calling  objects
+        workRepo = ContentRepositoryMock()
+        workRepo.create_test_content(self.preexisting_student_ids)
 
-    """
+        # Setting to return all the previously assigned students.
+        # this should cause all the students to be filtered out
+        # and the errror raised
+        workRepo.submitter_ids = self.preexisting_student_ids
+        workLoaderMock.make = MagicMock( return_value=workRepo )
 
-    def test_run( self ):
-        """Check that each student receives the expected message
-        containing the correct student's submission
-        """
-        # todo
-        self.skipTest( "not written" )
+        studentRepoMock.download = MagicMock( return_value=self.students )
 
-    def test_review_pairings_made_correctly( self ):
-        """Check that the students who have submitted the assignment
-        (and none of the non-submitteers) have been paired up
-        in the expected manner, and that the pairings have been stored
-        """
-        # todo
-        self.skipTest( "not written" )
-        # self.fail()
+        # call
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        self.session = obj.dao.session
+        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
 
-    def test_original_review_pairings_are_unaffected( self ):
-        """Check that the review assignments which were created
-        on the earlier run(s) have not been altered when the
-        new review assignments were made
-        """
-        # todo
-        self.skipTest( "not written" )
-        # self.fail()
+        with self.assertRaises(AllAssigned):
+            obj.run()
 
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
+    def test_raises_when_only_one_submission( self, workLoaderMock, studentRepoMock ):
 
-if __name__ == '__main__':
-    unittest.main()
+        # Prepare fake work repo to give values to calling  objects
+        workRepo = ContentRepositoryMock()
+        workRepo.create_test_content(self.new_students_ids)
+
+        # Setting to return all the previously assigned students.
+        # this should cause all the students to be filtered out
+        # and the errror raised
+        workRepo.submitter_ids = [self.new_students[0]]
+        workLoaderMock.make = MagicMock( return_value=workRepo )
+
+        studentRepoMock.download = MagicMock( return_value=self.students )
+
+        # call
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        # Have to do this after object creation so that we can use the
+        # same in-memory db
+        self.session = obj.dao.session
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
+
+        with self.assertRaises(NoAvailablePartner):
+            obj.run()
+

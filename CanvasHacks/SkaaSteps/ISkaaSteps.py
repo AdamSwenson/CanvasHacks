@@ -3,9 +3,9 @@ Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, MetareviewResultsStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
-
+from CanvasHacks.PeerReviewed.Definitions import MetaReview
 __author__ = 'adam'
 
 from CanvasHacks import environment as env
@@ -42,9 +42,15 @@ class IStep:
         self.studentRepo.download()
         self._initialize_db()
         self.associationRepo = AssociationRepository( self.dao, self.activity_for_review_pairings)
-        self.submittedStatusRepo = StatusRepository(self.dao, self.activity)
-        self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
+        if isinstance(self.activity, MetaReview) and isinstance(self.activity_notifying_about, MetaReview):
+            # If both of these are the metareview, then we are on the final
+            # step (sending the metareview results to the reviewer). Thus
+            # we need a special status repository since the notified field
+            # for the metareview will have already been populated in the previous step
+            self.notificationStatusRepo = MetareviewResultsStatusRepository(self.dao, self.activity_notifying_about)
+        else:
+            self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:

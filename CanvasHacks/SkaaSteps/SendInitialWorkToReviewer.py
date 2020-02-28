@@ -40,11 +40,12 @@ class SendInitialWorkToReviewer( IStep ):
         """
         Loads content assignments, assigns reviewers, and sends formatted
         work to reviewer
-        :param only_new:
+        :param rest_timeout: Number of seconds to wait for canvas to generate report
+        :param only_new: Probably will not be used
         :return:
         """
         try:
-            self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new, rest_timeout=rest_timeout )
+            self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout )
             # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
             # Assign reviewers to each submitter and store in db

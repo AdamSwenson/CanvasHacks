@@ -27,6 +27,9 @@ class StudentRepositoryMock(StudentRepository, StoreMixin):
 
 
 class ContentRepositoryMock( IContentRepository, StoreMixin ):
+    """Mainly used to avoid creating whole dataframes
+    for testing
+    """
 
     def __init__( self, **kwargs ):
         self.handle_kwargs(**kwargs)
@@ -38,5 +41,9 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
     def create_test_content( self, student_ids ):
         self.testText = { sid : fake.paragraph() for sid in student_ids}
 
+    # @property
+    # def submitter_ids( self ):
+    #     return [k for k in self.testText.keys()]
+
     def remove_student_records( self, student_ids ):
-        pass
+        self.testText = { k : self.testText[k] for k in self.testText.keys() if k not in student_ids }

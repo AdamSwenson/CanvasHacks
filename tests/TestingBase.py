@@ -53,20 +53,22 @@ class TestingBase(unittest.TestCase):
         self.preexisting_student_ids = [ s.student_id for s in self.preexisting_students ]
         self.new_students_ids = [ s.student_id for s in self.new_students ]
 
-    def create_preexisting_review_pairings( self, activity_id, preexisting_students ):
+    def create_preexisting_review_pairings( self, activity_id, preexisting_students, session=None ):
         """Populates the in-memory database with ReviewAssociations between
         the provided students
         NB, must have the dao session stored on self.session
         """
         old_assigns = assign_reviewers( preexisting_students )
 
+        session = session if session is not None else self.session
+
         for assessor, assessee in old_assigns:
             ra = ReviewAssociation( activity_id=activity_id,
                                     assessor_id=int( assessor.student_id ), assessee_id=int( assessee.student_id )
                                     )
-            self.session.add( ra )
-            self.session.commit()
-        pairings = self.session.query( ReviewAssociation ) \
+            session.add( ra )
+            session.commit()
+        pairings = session.query( ReviewAssociation ) \
             .filter( ReviewAssociation.activity_id == activity_id ).all()
         self.assertEqual( len( preexisting_students ), len( pairings  ),  "PRE-RUN CHECK: {} students in db".format( len(preexisting_students ) ) )
         return pairings

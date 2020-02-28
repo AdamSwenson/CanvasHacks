@@ -44,7 +44,7 @@ class SendReviewToReviewee(IStep):
         :return:
         """
         try:
-            self.work_repo = WorkRepositoryLoaderFactory.make(self.activity, self.course, only_new, rest_timeout=rest_timeout)
+            self.work_repo = WorkRepositoryLoaderFactory.make(self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout)
             # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
             # Filter out students who have already been notified.

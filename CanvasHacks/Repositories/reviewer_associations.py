@@ -212,6 +212,20 @@ class AssociationRepository:
             .filter( ReviewAssociation.assessor_id == reviewer_id ) \
             .one_or_none()
 
+    def get_by_assessee( self, activity, author_id ):
+        """
+        Returns the review object where the student is the author of
+        the original work
+        :param activity:
+        :param author_id:
+        :return:
+        """
+        return self.session.query( ReviewAssociation ) \
+            .filter( ReviewAssociation.activity_id == activity.id ) \
+            .filter( ReviewAssociation.assessee_id == author_id ) \
+            .one_or_none()
+
+
     def get_assessee_object( self, activity, reviewer_id ):
         """Returns the ReviewAssociation object containing the student
          assigned to be reviewed by the reviewer

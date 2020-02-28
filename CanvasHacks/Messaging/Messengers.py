@@ -197,8 +197,6 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repository: StatusRepository ):
 
-        # todo This will cause errors because the make messages assumes we're notifying about a subsequent assignment
-
         self.activity_inviting_to_complete = None
 
         super().__init__( unit, student_repository, content_repository, status_repository )
@@ -212,12 +210,12 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
         """
         try:
             # We are going to send the metareview feedback
-            # created by the assessee to the student who did
+            # created by the assessee (original author) to the student who did
             # the assessing in the peer review stage
             receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
 
-            # The assessor did the work that we want to send
-            # to the assessee
+            # The assessee (original author) did the work that we want to send
+            # to the assessor (peer reviewer)
             content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
             d = {

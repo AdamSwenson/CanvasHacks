@@ -9,7 +9,6 @@ from CanvasHacks.Messaging.Messengers import FeedbackFromMetareviewMessenger
 __author__ = 'adam'
 
 
-
 class SendMetareviewToReviewer(IStep):
 
     def __init__(self, course=None, unit=None, is_test=None, send=True, **kwargs):
@@ -31,9 +30,16 @@ class SendMetareviewToReviewer(IStep):
 
         self._initialize()
 
-    def run(self, only_new=True, rest_timeout=5):
+    def run(self, only_new=False, rest_timeout=5):
+        """
+        Send feedback from the metareview to the person
+        who completed the peer review
+        :param only_new: Probably won't be used
+        :param rest_timeout: Number of seconds to wait for canvas to generate report
+        :return:
+        """
         # Get work
-        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new, rest_timeout=rest_timeout )
+        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout )
 
         # Filter out students who have already been notified.
         # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
@@ -46,13 +52,13 @@ class SendMetareviewToReviewer(IStep):
             # Work repo contains submitted meta reviews. Thus we look up
             # review pairings where a student submitting the metareview assignment
             # is the assessee
-            records = self.associationRepo.get_assessee_object( self.activity_for_review_pairings, student_id )
+            records = self.associationRepo.get_by_assessee( self.activity_for_review_pairings, student_id )
             self.associations.append( records )
         print( "Going to send metareview results for {} students".format( len( self.associations ) ) )
 
         # Send
-        self.messenger = FeedbackFromMetareviewMessenger(self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo.record_sent_results )
-        self.messenger.notify(self.associationRepo.data, self.send)
+        self.messenger = FeedbackFromMetareviewMessenger(self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+        self.messenger.notify(self.associations, self.send)
 
         # Log the run
         msg = "Sent {} metareview results \n {}".format( len( self.associations ), self.associations )
