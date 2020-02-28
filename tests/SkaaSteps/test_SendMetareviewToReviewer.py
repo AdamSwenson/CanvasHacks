@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import CanvasHacks.environment as env
 import CanvasHacks.testglobals
+from CanvasHacks.Models.status_record import StatusRecord
 from CanvasHacks.Repositories.status import MetareviewResultsStatusRepository
 from factories.RepositoryMocks import ContentRepositoryMock
 from tests.factories.ModelFactories import student_factory
@@ -142,8 +143,7 @@ class TestFunctionalTests( TestingBase ):
         messengerMock.assert_called()
         self.assertEqual( messengerMock.call_count, len( self.students ),
                           "Send method called expected number of times" )
-        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in
-                           messengerMock.call_args_list ]
+        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in messengerMock.call_args_list ]
         # print(args)
 
         # Status repo calls on messenger
@@ -169,6 +169,59 @@ class TestFunctionalTests( TestingBase ):
             sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
             rx = r'{}'.format( review_text_by_author )
             self.assertRegex( sent_text, rx, "Author's review of review in message sent to reviewer" )
+
+            # check marked as sent
+            obj.notificationStatusRepo.previously_sent_results
+
+
+    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
+    def test_status_updated( self, workLoaderMock, studentRepoMock, messengerMock ):
+        # Prepare fake work repo to give values to calling  objects
+        workRepo = ContentRepositoryMock()
+        workRepo.create_test_content( self.student_ids )
+        workRepo.submitter_ids = self.student_ids
+        workRepo.remove_student_records = MagicMock()
+        workLoaderMock.make = MagicMock( return_value=workRepo )
+
+        # prepare student repo
+        students = { s.student_id: s for s in self.students }
+
+        def se( sid ):
+            return students.get( sid )
+
+        # set up mocks on instantiated object
+        obj = SendMetareviewToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        obj.studentRepo.get_student = MagicMock( side_effect=se )
+        obj.studentRepo.download = MagicMock( return_value=self.students )
+
+        # Have to do this after object creation so that we can use the
+        # same in-memory db
+        self.session = obj.dao.session
+        # Sets up data for the association repo to use
+        self.preexisting_pairings = self.create_preexisting_review_pairings( self.unit.initial_work.id, self.students )
+
+        r = self.session.query(StatusRecord).filter(StatusRecord.activity_id == self.unit.metareview.id).all()
+        self.assertTrue(len(r) == 0, "No records beforehand")
+
+        # call
+        obj.run()
+
+        # check
+        self.assertEqual( len( obj.associations ), len( self.students ), "Correct number of students notified" )
+
+        # check marked as sent
+        self.assertEqual(len(self.students), len(obj.notificationStatusRepo.previously_sent_results))
+
+        # Check the content sent
+        for record in obj.associations:
+            # we need to check each of the reviewers to see that results has a value
+            status_record = self.session.query( StatusRecord )\
+                .filter( StatusRecord.activity_id == self.unit.metareview.id )\
+                .filter(StatusRecord.student_id == record.assessor_id).one_or_none()
+            self.assertIsNotNone(status_record, "Record exists")
+            self.assertIsNotNone(status_record.results, "Value set for results")
 
     # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.MetareviewResultsStatusRepository' )
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
@@ -305,13 +358,14 @@ class TestFunctionalTests( TestingBase ):
         # Check that mocked objects were called with expected data
         messengerMock.assert_called()
         self.assertEqual( messengerMock.call_count, num_to_notify, "Send method called expected number of times" )
-        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in
-                           messengerMock.call_args_list ]
+        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in messengerMock.call_args_list ]
 
         # Check the content sent
         for record in obj.associations:
+            # get original author's feedback on their review
             review_text_by_author = workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
             sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
             rx = r'{}'.format( review_text_by_author )
             self.assertRegex( sent_text, rx, "Author's review of review in message sent to reviewer" )
+

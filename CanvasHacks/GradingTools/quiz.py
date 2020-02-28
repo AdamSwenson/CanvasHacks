@@ -1,11 +1,12 @@
 """
 Created by adam on 5/6/19
 """
+from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingTools.base import IGrader
 from CanvasHacks.GradingTools.nonempty import receives_credit
 from CanvasHacks.GradingTools.penalities import get_penalty
-from CanvasHacks.Repositories.quizzes import QuizRepository
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
+from CanvasHacks.Repositories.quizzes import QuizRepository
 
 __author__ = 'adam'
 
@@ -34,7 +35,10 @@ class QuizGrader( IGrader ):
         """
         self.graded = [ ]
         for i, row in self.work_repo.data.iterrows():
-            self.graded.append( self._grade_row( row ) )
+            try:
+                self.graded.append( self._grade_row( row ) )
+            except NonStringInContentField as e:
+                print(e, row)
         return self.graded
 
     def _get_score( self, content, on_empty=None ):
@@ -53,8 +57,7 @@ class QuizGrader( IGrader ):
     def _get_fudge_points( self, row, total_score ):
         """Calculates the amount for canvas to subtract or add to the total score"""
         # compute penalty if needed
-        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date,
-                               self.activity.grace_period )
+        penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
 
         if penalty > 0:
             print( self._penalty_message( penalty, row ) )

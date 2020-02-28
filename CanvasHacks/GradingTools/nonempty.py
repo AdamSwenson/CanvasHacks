@@ -3,6 +3,7 @@ Created by adam on 1/29/19
 """
 __author__ = 'adam'
 
+from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.TextProcessing import make_wordbag
 from nltk.corpus import stopwords
 import string
@@ -91,6 +92,8 @@ def receives_credit( content: str, min_words=2, count_stopwords=True ):
     :param count_stopwords: Whether stopwords should count toward word count
     :return: Boolean
     """
+    if not isinstance(content, str):
+        raise NonStringInContentField
     remove = [ '``', "''", "'s"]
     remove += string.punctuation
     if not count_stopwords:

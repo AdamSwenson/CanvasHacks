@@ -2,16 +2,14 @@
 Assigns a randomly selected reviewer and sends them the work
 
 """
-import unittest
-from unittest.mock import MagicMock, patch, create_autospec
+from unittest.mock import MagicMock, patch
 
 import CanvasHacks.testglobals
 from CanvasHacks.Models.review_association import ReviewAssociation
-from CanvasHacks.Repositories.quizzes import QuizRepository
-from CanvasHacks.Repositories.reviewer_associations import assign_reviewers
-from tests.factories.ModelFactories import student_factory, make_students
+from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
+
 CanvasHacks.testglobals.use_api = False
 from CanvasHacks.Errors.review_pairings import AllAssigned, NoAvailablePartner
 
@@ -63,8 +61,9 @@ class TestCallsAllExpected( TestingBase ):
 
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
 
-        assignments = [ ReviewAssociation(assessee_id=students[0], assessor_id=students[1]), ReviewAssociation(assessee_id=students[1], assessor_id=students[0]),]
-        obj.associationRepo.assign_reviewers = MagicMock(return_value=assignments)
+        assignments = [ ReviewAssociation( assessee_id=students[ 0 ], assessor_id=students[ 1 ] ),
+                        ReviewAssociation( assessee_id=students[ 1 ], assessor_id=students[ 0 ] ), ]
+        obj.associationRepo.assign_reviewers = MagicMock( return_value=assignments )
 
         # call
         obj.run()
@@ -110,7 +109,8 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
-    def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock, statusRepoMock ):
+    def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock,
+                                                       statusRepoMock ):
         """
         Simulates a run where some students have already been assigned
         peer reviewers and a new group is being processed.
@@ -125,17 +125,17 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.student_ids)
+        workRepo.create_test_content( self.student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
         workRepo.submitter_ids = self.new_students_ids
         workLoaderMock.make = MagicMock( return_value=workRepo )
 
         # prepare student repo
-        students = { s.student_id : s for s in self.students}
+        students = { s.student_id: s for s in self.students }
 
-        def se(sid):
-            return students.get(sid)
+        def se( sid ):
+            return students.get( sid )
 
         # studentRepoMock.get_student = MagicMock(side_effect=se)
         # studentRepoMock.download = MagicMock( return_value=self.students )
@@ -143,7 +143,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         # obj.studentRepo = MagicMock()
-        obj.studentRepo.get_student = MagicMock(side_effect=se)
+        obj.studentRepo.get_student = MagicMock( side_effect=se )
         obj.studentRepo.download = MagicMock( return_value=self.students )
 
         # Have to do this after object creation so that we can use the
@@ -180,30 +180,32 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         messengerMock.assert_called()
         self.assertEqual( messengerMock.call_count, len( self.new_students_ids ),
                           "Send method called expected number of times" )
-        messenger_args = [ (c[1]['student_id'], c[1]['subject'], c[ 1 ]['body']) for c in messengerMock.call_args_list ]
+        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in
+                           messengerMock.call_args_list ]
         # print(args)
 
         # Status repo calls on messenger
         # statusRepoMock.record_opened.assert_called()
         obj.messenger.status_repository.record.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list
-        status_args = [c[0][0] for c in call_list]
-        self.assertEqual(len(self.new_students), len(call_list),  "Status repo record_opened called expected number of times")
+        status_args = [ c[ 0 ][ 0 ] for c in call_list ]
+        self.assertEqual( len( self.new_students ), len( call_list ),
+                          "Status repo record_opened called expected number of times" )
         for sid in self.new_students_ids:
-            self.assertIn(sid, status_args, "StatusRepo.record called on all students")
+            self.assertIn( sid, status_args, "StatusRepo.record called on all students" )
 
         # student repo calls on messenger
         for sid in self.new_students_ids:
-            obj.messenger.student_repository.get_student.assert_any_call(sid)
+            obj.messenger.student_repository.get_student.assert_any_call( sid )
 
         # Check the content sent
         for record in obj.new_assignments:
             # print(record.assessee_id)
-            author_text = workRepo.get_formatted_work_by(record.assessee_id)
+            author_text = workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
-            sent_text = [t[2] for t in messenger_args if t[0] == record.assessor_id][0]
-            rx = r'{}'.format(author_text)
-            self.assertRegex(sent_text, rx, "Author's work in message sent to reviewer")
+            sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
+            rx = r'{}'.format( author_text )
+            self.assertRegex( sent_text, rx, "Author's work in message sent to reviewer" )
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
@@ -211,7 +213,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.preexisting_student_ids)
+        workRepo.create_test_content( self.preexisting_student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
@@ -226,9 +228,9 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         self.session = obj.dao.session
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
-        with self.assertRaises(AllAssigned):
+        with self.assertRaises( AllAssigned ):
             obj.run()
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
@@ -237,7 +239,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.preexisting_student_ids)
+        workRepo.create_test_content( self.preexisting_student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
@@ -256,7 +258,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.session = obj.dao.session
         preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
-        with self.assertRaises(AllAssigned):
+        with self.assertRaises( AllAssigned ):
             obj.run()
 
 
@@ -268,6 +270,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
     For tests of whole process which hit server, see tests.EndToEnd
     """
+
     def setUp( self ):
         self.config_for_test()
         self.unit = unit_factory()
@@ -284,7 +287,8 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
     @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
-    def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock, statusRepoMock ):
+    def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock,
+                                                       statusRepoMock ):
         """
         Simulates a run where some students have already been assigned
         peer reviewers and a new group is being processed.
@@ -298,17 +302,17 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         """
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.student_ids)
+        workRepo.create_test_content( self.student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
         workRepo.submitter_ids = self.new_students_ids
         workLoaderMock.make = MagicMock( return_value=workRepo )
 
         # prepare student repo
-        students = { s.student_id : s for s in self.students}
+        students = { s.student_id: s for s in self.students }
 
-        def se(sid):
-            return students.get(sid)
+        def se( sid ):
+            return students.get( sid )
 
         # studentRepoMock.get_student = MagicMock(side_effect=se)
         # studentRepoMock.download = MagicMock( return_value=self.students )
@@ -316,9 +320,10 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         # obj.studentRepo = MagicMock()
-        obj.studentRepo.get_student = MagicMock(side_effect=se)
+        obj.studentRepo.get_student = MagicMock( side_effect=se )
         obj.studentRepo.download = MagicMock( return_value=self.students )
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students, obj.dao.session)
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students,
+                                                                        obj.dao.session )
 
         obj.run()
 
@@ -349,7 +354,8 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         messengerMock.assert_called()
         self.assertEqual( messengerMock.call_count, len( self.new_students_ids ),
                           "Send method called expected number of times" )
-        messenger_args = [ (c[1]['student_id'], c[1]['subject'], c[ 1 ]['body']) for c in messengerMock.call_args_list ]
+        messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in
+                           messengerMock.call_args_list ]
         # print(args)
 
         # Status repo calls on messenger
@@ -358,31 +364,31 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
         # obj.messenger.status_repository.record_opened.assert_called()
         # call_list = obj.messenger.status_repository.record_opened.call_args_list
-        status_args = [c[0][0] for c in call_list]
-        self.assertEqual(len(self.new_students), len(call_list),  "Status repo record_opened called expected number of times")
+        status_args = [ c[ 0 ][ 0 ] for c in call_list ]
+        self.assertEqual( len( self.new_students ), len( call_list ),
+                          "Status repo record_opened called expected number of times" )
         for sid in self.new_students_ids:
-            self.assertIn(sid, status_args, "StatusRepo.record_opened called on all students")
+            self.assertIn( sid, status_args, "StatusRepo.record_opened called on all students" )
 
         # student repo calls on messenger
         for sid in self.new_students_ids:
-            obj.messenger.student_repository.get_student.assert_any_call(sid)
+            obj.messenger.student_repository.get_student.assert_any_call( sid )
 
         # Check the content sent
         for record in obj.new_assignments:
             # print(record.assessee_id)
-            author_text = workRepo.get_formatted_work_by(record.assessee_id)
+            author_text = workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
-            sent_text = [t[2] for t in messenger_args if t[0] == record.assessor_id][0]
-            rx = r'{}'.format(author_text)
-            self.assertRegex(sent_text, rx, "Author's work in message sent to reviewer")
-
+            sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
+            rx = r'{}'.format( author_text )
+            self.assertRegex( sent_text, rx, "Author's work in message sent to reviewer" )
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_raises_when_all_submitters_already_assigned( self, workLoaderMock, studentRepoMock ):
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.preexisting_student_ids)
+        workRepo.create_test_content( self.preexisting_student_ids )
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
@@ -395,9 +401,9 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         self.session = obj.dao.session
-        preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)
+        preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
-        with self.assertRaises(AllAssigned):
+        with self.assertRaises( AllAssigned ):
             obj.run()
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
@@ -406,12 +412,12 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
-        workRepo.create_test_content(self.new_students_ids)
+        workRepo.create_test_content( self.new_students_ids )
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
         # and the errror raised
-        workRepo.submitter_ids = [self.new_students[0]]
+        workRepo.submitter_ids = [ self.new_students[ 0 ] ]
         workLoaderMock.make = MagicMock( return_value=workRepo )
 
         studentRepoMock.download = MagicMock( return_value=self.students )
@@ -423,6 +429,5 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         self.session = obj.dao.session
         preexisting_pairings = self.create_preexisting_review_pairings( self.activity_id, self.preexisting_students )
 
-        with self.assertRaises(NoAvailablePartner):
+        with self.assertRaises( NoAvailablePartner ):
             obj.run()
-
