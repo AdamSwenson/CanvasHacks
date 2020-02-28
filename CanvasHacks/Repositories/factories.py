@@ -3,6 +3,7 @@ Created by adam on 2/26/20
 """
 __author__ = 'adam'
 
+from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded
 from CanvasHacks.Loaders.quiz import NewQuizReportFileLoader, AllQuizReportFileLoader
 from CanvasHacks.PeerReviewed.Definitions import Review
 from CanvasHacks.Repositories.assignments import AssignmentRepository
@@ -48,6 +49,8 @@ class WorkRepositoryLoaderFactory:
         """
         Returns a IContentRepository of the appropriate sort with all the
         relevant data loaded, processed, and stored as a dataframe on data
+        kwags may contain
+            download=True
 
         :param activity:
         :param course:
@@ -57,7 +60,7 @@ class WorkRepositoryLoaderFactory:
         """
         # Get the object which handles loading student data
         # The params will determine whether this is from file or download
-        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, download=True, only_new=only_new )
+        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, **kwargs) #download=True, only_new=only_new, **kwargs )
 
         if activity.is_quiz_type:
             # If uses a quiz report, downloads report and populates the
@@ -84,6 +87,9 @@ class WorkRepositoryLoaderFactory:
 
         student_work_frame = loader.load( activity, course, **kwargs )
 
+        if student_work_frame is None or len(student_work_frame) == 0:
+            raise NoStudentWorkDataLoaded
+
         # Download submissions
         subRepo = QuizSubmissionRepository( repo.quiz )
 
@@ -106,6 +112,9 @@ class WorkRepositoryLoaderFactory:
         repo = AssignmentRepository( activity, course )
 
         student_work_frame = loader.load( activity, course, **kwargs )
+
+        if student_work_frame is None or len(student_work_frame) == 0:
+            raise NoStudentWorkDataLoaded
 
         repo.process( student_work_frame )
 

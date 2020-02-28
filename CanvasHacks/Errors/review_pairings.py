@@ -36,3 +36,6 @@ class NoAvailablePartner( Exception ):
     def __init__(self, submitters):
         self.submitters = submitters
 
+class NoReviewPairingsLoaded(Exception):
+    pass
+

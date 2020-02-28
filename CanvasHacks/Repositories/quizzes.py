@@ -73,16 +73,6 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         # Store the text column names
         self.set_question_columns( self.data )
 
-    # def _initialize_quiz( self):
-    #     """Downloads the quiz object corresponding to
-    #     the activity_inviting_to_complete. That's where things like number
-    #     of points will be stored"""
-    #     try:
-    #         if self._quiz:
-    #             pass
-    #     except AttributeError:
-    #         self._quiz = self.course.get_quiz(self.activity_inviting_to_complete.quiz_id)
-
     def _cleanup_data( self ):
         """This is abstracted out so it can be
         called independently for use with test data

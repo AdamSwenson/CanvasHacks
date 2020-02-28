@@ -1,6 +1,7 @@
 """
 Created by adam on 2/23/20
 """
+from CanvasHacks.Errors.review_pairings import NoReviewPairingsLoaded
 from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -30,7 +31,7 @@ class SendMetareviewToReviewer(IStep):
 
         self._initialize()
 
-    def run(self, only_new=False, rest_timeout=5):
+    def run(self, only_new=False, rest_timeout=5, **kwargs):
         """
         Send feedback from the metareview to the person
         who completed the peer review
@@ -39,7 +40,7 @@ class SendMetareviewToReviewer(IStep):
         :return:
         """
         # Get work
-        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout )
+        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout, **kwargs )
 
         # Filter out students who have already been notified.
         # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
@@ -52,9 +53,13 @@ class SendMetareviewToReviewer(IStep):
             # Work repo contains submitted meta reviews. Thus we look up
             # review pairings where a student submitting the metareview assignment
             # is the assessee
-            records = self.associationRepo.get_by_assessee( self.activity_for_review_pairings, student_id )
-            self.associations.append( records )
+            record = self.associationRepo.get_by_assessee( self.activity_for_review_pairings, student_id )
+            if record is not None:
+                self.associations.append( record )
         print( "Going to send metareview results for {} students".format( len( self.associations ) ) )
+
+        if len(self.associations) == 0:
+            raise NoReviewPairingsLoaded
 
         # Send
         self.messenger = FeedbackFromMetareviewMessenger(self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )

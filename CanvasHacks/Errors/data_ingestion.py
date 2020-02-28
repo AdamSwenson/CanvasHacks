@@ -11,3 +11,6 @@ class NoNewSubmissions(Exception):
     in the data which has been retrieved
     """
     pass
+
+class NoStudentWorkDataLoaded(Exception):
+    pass
