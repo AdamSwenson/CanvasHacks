@@ -3,6 +3,7 @@ Created by adam on 2/9/20
 """
 from CanvasHacks.Errors.messaging import MessageSendError
 from CanvasHacks.Logging.decorators import log_message
+from CanvasHacks.Messaging.interfaces import ISender
 from CanvasHacks.RequestTools import send_post_request
 
 __author__ = 'adam'
@@ -11,20 +12,7 @@ if __name__ == '__main__':
     pass
 
 
-class ISender:
-    """Parent of all classes which handle sending
-    messages to students"""
-
-    def send( self ):
-        """
-        Handles sending through whatever channel
-        :return:
-        :raises MessageSendError which wraps the server's error
-        """
-        raise NotImplementedError
-
-
-class ConversationMessageSender(ISender):
+class ConversationMessageSender( ISender ):
     """Handles sending messages through canvas's conversation
     interface.
     Doing via class allows easier mocking

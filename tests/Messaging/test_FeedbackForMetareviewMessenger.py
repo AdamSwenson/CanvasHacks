@@ -14,7 +14,7 @@ from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
-from CanvasHacks.Messaging.Messengers import MetareviewInvitationMessenger
+from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
 
 fake = Faker()
 

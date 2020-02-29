@@ -4,7 +4,7 @@ Created by adam on 2/23/20
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
-from CanvasHacks.Messaging.Messengers import MetareviewInvitationMessenger
+from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
 from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 
@@ -37,16 +37,17 @@ class SendReviewToReviewee(IStep):
 
         self._initialize()
 
-    def run(self, only_new=False, rest_timeout=5):
+    def run(self, **kwargs):
         """
         Retrieves submitted reviews and sends themto the authors
         along with instructions for metareview
+        only_new=False, rest_timeout=5
         :param rest_timeout:
         :param only_new:
         :return:
         """
         try:
-            self._load_step( only_new, rest_timeout )
+            self._load_step( **kwargs)
 
             self._assign_step()
 

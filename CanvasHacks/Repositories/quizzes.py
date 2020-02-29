@@ -14,7 +14,7 @@ __author__ = 'adam'
 
 import pandas as pd
 
-from CanvasHacks.Messaging.Messengers import make_prompt_and_response
+from CanvasHacks.Messaging.skaa import make_prompt_and_response
 from CanvasHacks.Repositories.interfaces import IContentRepository
 
 

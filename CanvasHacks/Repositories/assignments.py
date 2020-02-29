@@ -3,7 +3,7 @@ Created by adam on 2/26/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Messaging.Messengers import make_prompt_and_response
+from CanvasHacks.Messaging.skaa import make_prompt_and_response
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.Repositories.interfaces import IContentRepository

@@ -10,7 +10,7 @@ from faker import Faker
 
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.PeerReviewed.Definitions import *
-from CanvasHacks.Messaging.Messengers import PeerReviewInvitationMessenger
+from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
 from CanvasHacks.Repositories.students import StudentRepository
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory

@@ -5,7 +5,7 @@ import CanvasHacks.testglobals
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.Errors.review_pairings import AllAssigned, NoAvailablePartner
 from CanvasHacks.Logging.run_data import RunLogger
-from CanvasHacks.Messaging.Messengers import PeerReviewInvitationMessenger
+from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
 # from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Logging.review_pairings import make_review_audit_file
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -36,16 +36,17 @@ class SendInitialWorkToReviewer( IStep ):
 
         self._initialize()
 
-    def run( self, only_new=False, rest_timeout=5 ):
+    def run( self, **kwargs):
         """
         Loads content assignments, assigns reviewers, and sends formatted
         work to reviewer
+         only_new=False, rest_timeout=5
         :param rest_timeout: Number of seconds to wait for canvas to generate report
         :param only_new: Probably will not be used
         :return:
         """
         try:
-            self._load_step( only_new, rest_timeout )
+            self._load_step( **kwargs )
 
             self._assign_step()
 
@@ -103,14 +104,17 @@ class SendInitialWorkToReviewer( IStep ):
             # to file
             make_review_audit_file( self.associationRepo, self.studentRepo, self.unit )
 
-    def _load_step( self, only_new, rest_timeout ):
-        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, only_new=only_new, rest_timeout=rest_timeout )
+    def _load_step( self, **kwargs ):
+        self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         prelen = len(self.work_repo.data)
         print("downloaded {} records".format(prelen))
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
+
         # hotfix needed to filter unsubmitted for non quiz ca
         self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
-        self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
+        if isinstance(self.work_repo.data, pd.DataFrame):
+            self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
+
         print("Removed {} empty or non submitted".format(prelen - len(self.work_repo.data)))
 
     @property

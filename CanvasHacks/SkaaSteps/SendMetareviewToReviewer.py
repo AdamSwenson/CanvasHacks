@@ -3,7 +3,7 @@ Created by adam on 2/23/20
 """
 from CanvasHacks.Errors.review_pairings import NoReviewPairingsLoaded
 from CanvasHacks.Logging.run_data import RunLogger
-from CanvasHacks.Messaging.Messengers import FeedbackFromMetareviewMessenger
+from CanvasHacks.Messaging.skaa import FeedbackFromMetareviewMessenger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
@@ -32,7 +32,7 @@ class SendMetareviewToReviewer( IStep ):
         self._initialize()
         self.associations = [ ]
 
-    def run( self, only_new=False, rest_timeout=5, **kwargs ):
+    def run( self, **kwargs ):
         """
         Send feedback from the metareview to the person
         who completed the peer review
@@ -40,7 +40,7 @@ class SendMetareviewToReviewer( IStep ):
         :param rest_timeout: Number of seconds to wait for canvas to generate report
         :return:
         """
-        self._load_step( kwargs, only_new, rest_timeout )
+        self._load_step( **kwargs )
 
         self._assign_step()
 

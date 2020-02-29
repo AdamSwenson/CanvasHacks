@@ -100,7 +100,7 @@ class TestFunctionalTests( TestingBase ):
         self.assertIsInstance(obj.notificationStatusRepo, MetareviewResultsStatusRepository, "Correct status repo instantiated")
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.MetareviewResultsStatusRepository' )
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
     def test_run( self, workLoaderMock, studentRepoMock, messengerMock, statusRepoMock ):
@@ -174,7 +174,7 @@ class TestFunctionalTests( TestingBase ):
             obj.notificationStatusRepo.previously_sent_results
 
 
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
     def test_status_updated( self, workLoaderMock, studentRepoMock, messengerMock ):
@@ -224,7 +224,7 @@ class TestFunctionalTests( TestingBase ):
             self.assertIsNotNone(status_record.results, "Value set for results")
 
     # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.MetareviewResultsStatusRepository' )
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
     def test_run_some_already_notified( self, workLoaderMock, studentRepoMock, messengerMock): #, statusRepoMock ):
@@ -313,7 +313,7 @@ class TestFunctionalTests( TestingBase ):
             rx = r'{}'.format( review_text_by_author )
             self.assertRegex( sent_text, rx, "Author's review of review in message sent to reviewer" )
 
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
     def test_run_some_not_turned_in( self, workLoaderMock, studentRepoMock, messengerMock):

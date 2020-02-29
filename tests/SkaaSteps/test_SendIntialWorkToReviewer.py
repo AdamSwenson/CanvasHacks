@@ -106,7 +106,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.create_new_and_preexisting_students()
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock,
@@ -284,7 +284,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         self.create_new_and_preexisting_students()
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_does_not_send_to_people_already_assigned( self, workLoaderMock, studentRepoMock, messengerMock,

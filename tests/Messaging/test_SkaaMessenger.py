@@ -9,7 +9,7 @@ from tests.TestingBase import TestingBase
 
 fake = Faker()
 
-from CanvasHacks.Messaging.Messengers import *
+from CanvasHacks.Messaging.skaa import *
 from CanvasHacks.PeerReviewed.Definitions import *
 from tests.factories.PeerReviewedFactories import activity_data_factory
 from tests.factories.ModelFactories import student_factory

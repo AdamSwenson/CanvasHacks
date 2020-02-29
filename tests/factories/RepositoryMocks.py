@@ -33,6 +33,7 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
 
     def __init__( self, **kwargs ):
         self.handle_kwargs(**kwargs)
+        self.data = []
 
     def get_formatted_work_by( self, student_id ):
         return self.testText.get(student_id)

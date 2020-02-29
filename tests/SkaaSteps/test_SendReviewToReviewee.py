@@ -91,7 +91,7 @@ class TestFunctionalTests( TestingBase ):
         self.assertIsInstance( obj.notificationStatusRepo, StatusRepository, "Correct status repo instantiated" )
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendReviewToReviewee.WorkRepositoryLoaderFactory' )
     def test_run( self, workLoaderMock, studentRepoMock, messengerMock, statusRepoMock ):
@@ -161,7 +161,7 @@ class TestFunctionalTests( TestingBase ):
             rx = r'{}'.format( reviewer_text )
             self.assertRegex( sent_text, rx, "Reviewer's work in message sent to author" )
 
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendReviewToReviewee.WorkRepositoryLoaderFactory' )
     def test_run_some_already_notified( self, workLoaderMock, studentRepoMock, messengerMock ):
@@ -220,7 +220,7 @@ class TestFunctionalTests( TestingBase ):
             rx = r'{}'.format( reviewer_text )
             self.assertRegex( sent_text, rx, "Reviewer's work in message sent to author" )
 
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendReviewToReviewee.WorkRepositoryLoaderFactory' )
     def test_run_some_not_turned_in( self, workLoaderMock, studentRepoMock, messengerMock ):
