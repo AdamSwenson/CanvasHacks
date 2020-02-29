@@ -84,8 +84,7 @@ class SendInitialWorkToReviewer( IStep ):
         # Send the work to the reviewers
         # Note that we still do this even if send is false because
         # the messenger will print out the messages rather than sending them
-        self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo,
-                                                        self.notificationStatusRepo )
+        self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
         self.messenger.notify( self.new_assignments, self.send )

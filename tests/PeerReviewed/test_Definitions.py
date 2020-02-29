@@ -3,8 +3,8 @@ Created by adam on 12/24/19
 """
 import pandas as pd
 from unittest import TestCase
-
-from tests.factories.PeerReviewedFactories import activity_data_factory, test_data_factory
+from tests.TestingBase import TestingBase
+from tests.factories.PeerReviewedFactories import activity_data_factory, test_data_factory, unit_factory
 from CanvasHacks.Models.model import Model
 from CanvasHacks.PeerReviewed.Definitions import Unit, Activity, UnitEndSurvey, Journal, InitialWork, Review, MetaReview, TopicalAssignment, DiscussionReview, DiscussionForum
 import re
@@ -71,6 +71,15 @@ class TestUnit( TestCase ):
         self.obj.find_components( assigns )
         # print(self.obj.components)
         self.assertEqual( len( self.obj.components ), 3 )
+
+    def test__set_access_code_for_next( self ):
+        unit = unit_factory()
+        for c in unit.components:
+            unit._set_access_code_for_next(c)
+
+        # check
+        self.assertEqual(unit.initial_work.access_code_for_next, unit.review.access_code)
+        self.assertEqual(unit.review.access_code_for_next, unit.metareview.access_code)
 
 
 class TestInitialWork( TestCase ):

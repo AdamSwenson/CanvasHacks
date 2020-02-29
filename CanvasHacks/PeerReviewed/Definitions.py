@@ -119,6 +119,10 @@ class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
         super().__init__( **kwargs )
         self.grace_period = pd.Timedelta('2 days')
 
+        # Code for accessing the subsequent assignment
+        self.access_code_for_next_on = Review
+        self.access_code_for_next = None
+
 
 class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review component of the
@@ -129,6 +133,10 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
     def __init__( self, **kwargs ):
         # Code used to open the review assignment
         self.access_code = None
+
+        # todo access_code_for_next_on probably not needed; created without looking at what already have
+        self.access_code_for_next_on = MetaReview
+        self.access_code_for_next = None
 
         # Link to the activity_inviting_to_complete on canvas so students can click
         # directly to it
@@ -144,6 +152,8 @@ class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of 
     another student's submission"""
     title_base = "Metareview"
+
+    access_code_for_next_on = None
 
     regex = re.compile( r"\bmetareview\b" )
 
@@ -236,6 +246,9 @@ class Unit:
         unit_assignments = self.find_for_unit( self.unit_number, assignments )
         print( "{} assignments found for unit # {}".format( len( unit_assignments ), self.unit_number ) )
         self.find_components( unit_assignments )
+        for c in self.components:
+            # todo access_code_for_next_on probably not needed; created without looking at what already have
+            self._set_access_code_for_next(c)
 
     def find_components( self, unit_assignments ):
         # Parse components of unit
@@ -257,12 +270,28 @@ class Unit:
             # Things like discussion forums have a title, not a name
             return [ a for a in assignments if rx.search( a.title.strip().lower() ) ]
 
+    def _set_access_code_for_next( self, obj ):
+        """Sets the access code students will need for the subsequent
+        assignment on the present assignment as access_code_for_next.
+        NB, this must be run after all the unit.components have been
+        discovered and had their access codes set
+        """
+        # todo access_code_for_next_on probably not needed; created without looking at what already have
+
+        try:
+            if obj.access_code_for_next_on is not None:
+                next_assign = self.get_by_class(obj.access_code_for_next_on)
+                obj.access_code_for_next = next_assign.access_code
+        except AttributeError:
+            print("No access code for subsequent assignment set for {}".format(obj.name))
 
     def _set_access_code( self, obj ):
         """Some things will have an access code stored
-        on them. Others ahve no access code. Some have
+        on them. Others have no access code. Some have
         the access code stored elsewhere.
-        This sorts that out and sets the access code if possible
+        This sorts that out and sets the access code if possible.
+        NB, this sets the code for the present assignment, not the assignment
+        we will be notifying about
         """
         try:
             # first we try to set from self
@@ -274,6 +303,17 @@ class Unit:
             except AttributeError:
                 print( "No access code for {}".format( obj.name ) )
                 return None
+
+    def get_by_class( self, component_class ):
+        """
+        Returns the unit component given an unistantiated
+        class definition object
+        :param component_class:
+        :return:
+        """
+        for c in self.components:
+            if isinstance( c, component_class ):
+                return c
 
     @property
     def topical_assignment( self ):

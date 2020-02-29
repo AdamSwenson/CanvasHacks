@@ -1,0 +1,1057 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "__tools for test data and otherwise accessing canvas as a student__"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:12:06.093108Z",
+     "start_time": "2020-02-27T03:12:06.041811Z"
+    },
+    "run_control": {
+     "marked": true
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/Users/adam/Dropbox/CanvasHacks\n"
+     ]
+    }
+   ],
+   "source": [
+    "%cd ~/Dropbox/CanvasHacks\n",
+    "\n",
+    "#Plotting \n",
+    "# %matplotlib inline\n",
+    "# from matplotlib import pyplot as plt\n",
+    "# import seaborn as sns\n",
+    "# sns.set(style=\"whitegrid\")\n",
+    "\n",
+    "import pandas as pd\n",
+    "\n",
+    "from CanvasHacks import environment\n",
+    "from CanvasHacks.RequestTools import *\n",
+    "from CanvasHacks.UrlTools import *\n",
+    "from CanvasHacks.Configuration import InteractiveConfiguration\n",
+    "from CanvasHacks.Widgets.InputFields import make_course_ids_input, make_canvas_token_input, make_canvas_url_input, make_general_reset_button\n",
+    "import CanvasHacks.GradingTools as GT\n",
+    "import CanvasHacks.DownloadProcessingTools as PT\n",
+    "from CanvasHacks.Repositories.DataManagement import DataStore\n",
+    "\n",
+    "from CanvasHacks.Widgets.ConsolidatedTextOutput import make_assignment_header, make_consolidated_text_fields\n",
+    "from CanvasHacks.UploadGradeTools import make_upload_button\n",
+    "\n",
+    "# This aren't used in the non-saving version\n",
+    "from CanvasHacks.FileTools import makeDataFileIterator\n",
+    "from CanvasHacks.JournalsFileTools import get_journal_folders, make_folder_list, calculate_journal_counts\n",
+    "from CanvasHacks.JournalsFileTools import journal_folder_name, create_folder\n",
+    "\n",
+    "\n",
+    "from CanvasHacks.Models.student import Student\n",
+    "\n",
+    "# Import the Canvas class\n",
+    "import canvasapi\n",
+    "from canvasapi import Canvas\n",
+    "from canvasapi.quiz import QuizReport, Quiz\n",
+    "# from canvasapi.requester import Requester\n",
+    "# from canvasapi.conversation import Conversation\n",
+    "\n",
+    "# Initialize a Canvas api objects\n",
+    "canvas = Canvas(environment.CONFIG.canvas_url_base, environment.CONFIG.canvas_token)\n",
+    "# requester = Requester(environment.CONFIG.canvas_url_base, environment.CONFIG.canvas_token)\n",
+    "\n",
+    "import inspect\n",
+    "def look_inside(obj):\n",
+    "    print(inspect.getmembers(obj, lambda a:not(inspect.isroutine(a))))\n",
+    "\n",
+    "from CanvasHacks.PeerReviewed.Definitions import Review, InitialWork, MetaReview, Unit\n",
+    "\n",
+    "\n",
+    "from CanvasHacks.Repositories.quizzes import QuizRepository\n",
+    "\n",
+    "# Widgets\n",
+    "from CanvasHacks.Widgets.AssignmentSelection import make_assignment_chooser, view_selected_assignments, view_ungraded_assignments\n",
+    "from CanvasHacks.Widgets.AssignmentSelection import make_discussion_chooser\n",
+    "from CanvasHacks.Widgets.LiveSelection import make_test_selector\n",
+    "from CanvasHacks.Widgets.AssignmentSelection import make_unit_chooser\n",
+    "\n",
+    "\n",
+    "# Testing\n",
+    "from faker import Faker\n",
+    "fake = Faker()\n",
+    "from CanvasHacks.Models.users import StudentUser\n",
+    "from tests.factories.PeerReviewedFactories import discussion_entry_factory\n",
+    "from tests.factories.SKAAFactories import populate_quiz_w_text_answers\n",
+    "from tests.factories.SKAAFactories import populate_discussion, populate_assignment, answer_survey\n",
+    "\n",
+    "STUDENT_TEST_ACCT_FP = \"{}/private/test-accounts.xlsx\".format(environment.CONFIG.proj_base)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:12:06.659341Z",
+     "start_time": "2020-02-27T03:12:06.655462Z"
+    },
+    "run_control": {
+     "marked": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "\n",
+    "\n",
+    "main_quiz = 165098\n",
+    "review_quiz = 165820\n",
+    "meta_review = 165821\n",
+    "\n",
+    "url = 'https://canvas.csun.edu/api/v1/courses/85210/assignments/{}/submissions'\n",
+    "\n",
+    "# last semester data\n",
+    "prev_course_id = 62657\n",
+    "prev_quiz = 151633\n",
+    "\n",
+    "# QUIZ_ID = prev_quiz\n",
+    "\n",
+    "TEST_STUDENT_ID = 168439\n",
+    "SEMESTER_NAME = 'S20'\n",
+    "topic_id = 737847\n",
+    "\n",
+    "\n",
+    "adam_id = 6417\n",
+    "\n",
+    "# Test data\n",
+    "test_course_id = 85210\n",
+    "\n",
+    "COURSE_ID = test_course_id\n",
+    "# COURSE_ID = prev_course_id\n",
+    "SEMESTER_NAME = 'S20'\n",
+    "UNIT_NUMBER = 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:12:08.343076Z",
+     "start_time": "2020-02-27T03:12:08.333411Z"
+    },
+    "run_control": {
+     "marked": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "STUDENT_TEST_ACCT_FP = \"{}/private/test-accounts.xlsx\".format(environment.CONFIG.proj_base)\n",
+    "student_users_df = pd.read_excel(STUDENT_TEST_ACCT_FP)\n",
+    "tokens = student_users_df.token.dropna().tolist()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:12:08.782949Z",
+     "start_time": "2020-02-27T03:12:08.704076Z"
+    },
+    "run_control": {
+     "marked": true
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "dc7c81cc7d0a490fbb70c17451c1cd66",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "ToggleButton(value=False, button_style='warning', description='LIVE', tooltip='Click to set to TEST')"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "439381ffb38845f69350c41f91b5a37f",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 1', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "5bf4162318d249ee991c82426f7e5229",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 2', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "4a5df36b1b30430bba34c71ca71e5794",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 3', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "5a5d60efcdb742849e2c8cae55cf6ad8",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 4', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "c90854c890ed4acbaeeba147be76d349",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 5', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "cd86a482147c4776aabc0dfbe4920117",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 6', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      " TEST   TEST   TEST   TEST   TEST \n",
+      "17 assignments in course\n",
+      "4 assignments found for unit # 2\n",
+      "No access code for Unit 2: Content assignment (non-quiz)\n"
+     ]
+    }
+   ],
+   "source": [
+    "make_test_selector()\n",
+    "make_unit_chooser()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:13:22.665549Z",
+     "start_time": "2020-02-27T03:13:22.656859Z"
+    },
+    "run_control": {
+     "marked": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Load definitions of unit components\n",
+    "# course = canvas.get_course(COURSE_ID)\n",
+    "# unit = Unit(course, UNIT_NUMBER)\n",
+    "\n",
+    "canvas = environment.CONFIG.canvas\n",
+    "course = environment.CONFIG.course\n",
+    "unit = environment.CONFIG.unit\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Populate survey"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Peer review"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:13:41.625555Z",
+     "start_time": "2020-02-27T03:13:32.775012Z"
+    },
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Answers created for user 169957\n",
+      "Answers created for user 169908\n",
+      "Answers created for user 169955\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[[{'id': 3209217, 'answer': 2807},\n",
+       "  {'id': 3209218, 'answer': 2376},\n",
+       "  {'id': 3209219, 'answer': 3889},\n",
+       "  {'id': 3209220, 'answer': 9717},\n",
+       "  {'id': 3209221, 'answer': 3476},\n",
+       "  {'id': 3209222, 'answer': 6950},\n",
+       "  {'id': 3209223, 'answer': 7036}],\n",
+       " [{'id': 3209217, 'answer': 2807},\n",
+       "  {'id': 3209218, 'answer': 7920},\n",
+       "  {'id': 3209219, 'answer': 3367},\n",
+       "  {'id': 3209220, 'answer': 17},\n",
+       "  {'id': 3209221, 'answer': 3476},\n",
+       "  {'id': 3209222, 'answer': 6122},\n",
+       "  {'id': 3209223, 'answer': 8578}],\n",
+       " [{'id': 3209217, 'answer': 298},\n",
+       "  {'id': 3209218, 'answer': 4776},\n",
+       "  {'id': 3209219, 'answer': 5156},\n",
+       "  {'id': 3209220, 'answer': 9717},\n",
+       "  {'id': 3209221, 'answer': 5554},\n",
+       "  {'id': 3209222, 'answer': 4653},\n",
+       "  {'id': 3209223, 'answer': 9710}]]"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "questions = course.get_quiz(unit.review.quiz_id).get_questions()\n",
+    "essay_questions = [q for q in questions if q.question_type == 'essay_question']\n",
+    "multiple_choice = [q for q in questions if q.question_type == 'multiple_choice_question']\n",
+    "\n",
+    "answers = []\n",
+    "for t in tokens:\n",
+    "    a = answer_survey(t, COURSE_ID, unit.review.quiz_id, essay_questions, multiple_choice)\n",
+    "    answers.append(a)\n",
+    "answers"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Metareview"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-27T03:38:13.434733Z",
+     "start_time": "2020-02-27T03:38:05.831889Z"
+    },
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Answers created for user 169957\n",
+      "Answers created for user 169908\n",
+      "Answers created for user 169955\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[[{'id': 3209251,\n",
+       "   'answer': 'Sea notice develop want go not. Fish everyone stand position middle certain. Surface everything newspaper.\\nWork story right girl year world various. Walk admit maintain training stuff. Well professor kitchen community.\\nUsually your network certain. Able magazine gas matter. Election way until policy dog street I.\\nMuch prove be employee.\\nLevel hit as stock less. Receive resource less reduce modern.'},\n",
+       "  {'id': 3209250, 'answer': 2290},\n",
+       "  {'id': 3209252, 'answer': 3619},\n",
+       "  {'id': 3209253, 'answer': 9621},\n",
+       "  {'id': 3209254, 'answer': 6324}],\n",
+       " [{'id': 3209251,\n",
+       "   'answer': 'Structure its history resource finish customer real. Discuss source think worker all become world add.\\nManage threat stage forward. Carry little body organization.\\nBefore require newspaper market back. Above feel girl box.\\nSimply nearly throughout too there. Almost piece ready very marriage organization. Front everyone each body.\\nHard perform drive great company learn down. More anything issue cold maintain activity home. Hotel foreign buy she why have best.'},\n",
+       "  {'id': 3209250, 'answer': 7905},\n",
+       "  {'id': 3209252, 'answer': 9463},\n",
+       "  {'id': 3209253, 'answer': 1623},\n",
+       "  {'id': 3209254, 'answer': 6324}],\n",
+       " [{'id': 3209251,\n",
+       "   'answer': 'Great interview room act get. Prove lead control development board somebody. Lay trip wide maybe good case.\\nDescribe scientist generation attorney. Operation away recently show.\\nFind million capital trouble. Fact base at military.\\nGuess cold born kid strategy.\\nGlass skin standard. Believe month interest whose. General always expert this might. Provide economic trial actually condition eye.'},\n",
+       "  {'id': 3209250, 'answer': 4316},\n",
+       "  {'id': 3209252, 'answer': 960},\n",
+       "  {'id': 3209253, 'answer': 9717},\n",
+       "  {'id': 3209254, 'answer': 2653}]]"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "questions = course.get_quiz(unit.metareview.quiz_id).get_questions()\n",
+    "essay_questions = [q for q in questions if q.question_type == 'essay_question']\n",
+    "multiple_choice = [q for q in questions if q.question_type == 'multiple_choice_question']\n",
+    "\n",
+    "answers = []\n",
+    "for t in tokens:\n",
+    "    a = answer_survey(t, COURSE_ID, unit.metareview.quiz_id, essay_questions, multiple_choice)\n",
+    "    answers.append(a)\n",
+    "answers\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-03T22:01:36.477865Z",
+     "start_time": "2020-02-03T22:01:36.471958Z"
+    }
+   },
+   "source": [
+    "# Populate quiz\n",
+    "\n",
+    "The process for creating dummy data for a quiz is as follows:\n",
+    "\n",
+    "- As instructor, get list of questions on the quiz\n",
+    "\n",
+    "- As student, create submission\n",
+    "s = s1.assignment.create_submission()\n",
+    "\n",
+    "- submit answers\n",
+    "\n",
+    ".answer_submission_questions(quiz_questions=[{\n",
+    "    \"id\": \"3134771\",\n",
+    "    \"answer\": \"Hello World! d\"\n",
+    "  }])\n",
+    "  \n",
+    "  - mark submission complete"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "populate_quiz_w_text_answers(COURSE_ID, quiz_id, tokens)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T03:49:53.923375Z",
+     "start_time": "2020-01-22T03:49:52.864448Z"
+    }
+   },
+   "source": [
+    "# Populate assignments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-26T19:58:19.577532Z",
+     "start_time": "2020-02-26T19:58:19.574429Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "assign_id = 640461"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-26T19:58:39.266245Z",
+     "start_time": "2020-02-26T19:58:35.322431Z"
+    },
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[Submission(_requester=<canvasapi.requester.Requester object at 0x1230e8be0>, assignment_id=640461, id=24364570, grading_period_id=None, user_id=169957, body=Heart investment how weight yes. Door scene toward move., url=None, submission_type=online_text_entry, submitted_at=2020-02-26T19:58:36Z, submitted_at_date=2020-02-26 19:58:36+00:00, late_policy_status=None, score=None, grade_matches_current_submission=True, workflow_state=submitted, grade=None, points_deducted=None, extra_attempts=None, graded_at=None, grader_id=None, attempt=1, cached_due_date=None, excused=None, posted_at=None, late=False, missing=False, seconds_late=0, entered_grade=None, entered_score=None, preview_url=https://canvas.csun.edu/courses/85210/assignments/640461/submissions/169957?preview=1&version=1, submission_comments=[], course_id=85210),\n",
+       " Submission(_requester=<canvasapi.requester.Requester object at 0x12312d320>, assignment_id=640461, id=24364567, grading_period_id=None, user_id=169908, body=Total worker stand key drop agency third. Lay out factor because use. Great out current condition probably sort., url=None, submission_type=online_text_entry, submitted_at=2020-02-26T19:58:37Z, submitted_at_date=2020-02-26 19:58:37+00:00, late_policy_status=None, score=None, grade_matches_current_submission=True, workflow_state=submitted, grade=None, points_deducted=None, extra_attempts=None, graded_at=None, grader_id=None, attempt=1, cached_due_date=None, excused=None, posted_at=None, late=False, missing=False, seconds_late=0, entered_grade=None, entered_score=None, preview_url=https://canvas.csun.edu/courses/85210/assignments/640461/submissions/169908?preview=1&version=1, submission_comments=[], course_id=85210),\n",
+       " Submission(_requester=<canvasapi.requester.Requester object at 0x12313fac8>, assignment_id=640461, id=24364569, grading_period_id=None, user_id=169955, body=Then personal capital management. Court charge less lawyer when fast everything., url=None, submission_type=online_text_entry, submitted_at=2020-02-26T19:58:38Z, submitted_at_date=2020-02-26 19:58:38+00:00, late_policy_status=None, score=None, grade_matches_current_submission=True, workflow_state=submitted, grade=None, points_deducted=None, extra_attempts=None, graded_at=None, grader_id=None, attempt=1, cached_due_date=None, excused=None, posted_at=None, late=False, missing=False, seconds_late=0, entered_grade=None, entered_score=None, preview_url=https://canvas.csun.edu/courses/85210/assignments/640461/submissions/169955?preview=1&version=1, submission_comments=[], course_id=85210)]"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "populate_assignment(tokens, assign_id, COURSE_ID)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T03:03:45.658690Z",
+     "start_time": "2020-01-22T03:03:45.649522Z"
+    }
+   },
+   "source": [
+    "# Populate discussion forum"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-07T00:46:16.323838Z",
+     "start_time": "2020-02-07T00:46:15.582899Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "0cdf9e0c8f0c4cd2be6f047d46e0610d",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Unit 1: Discussion forum', layout=Layout(width='50%'), style=Butto…"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "8dc4307cec124d3fa4e5854a6535cab4",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='new discussion', layout=Layout(width='50%'), style=ButtonStyle())"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "b9277c8b74a94dd4aa7be58c1667257a",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='mod1 main discuss', layout=Layout(width='50%'), style=ButtonStyle(…"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "a33356cf020848528ca36a0769cbff95",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='Learn lockpicking', layout=Layout(width='50%'), style=ButtonStyle(…"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "application/vnd.jupyter.widget-view+json": {
+       "model_id": "fd021ebabf874308b2c4778be2a2ccc7",
+       "version_major": 2,
+       "version_minor": 0
+      },
+      "text/plain": [
+       "Button(button_style='primary', description='CSUN and student life survival forum', layout=Layout(width='50%'),…"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "make_discussion_chooser(course)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-07T00:49:17.350816Z",
+     "start_time": "2020-02-07T00:49:01.773127Z"
+    },
+    "editable": false,
+    "run_control": {
+     "frozen": true,
+     "marked": false
+    }
+   },
+   "outputs": [
+    {
+     "ename": "TypeError",
+     "evalue": "object of type 'NoneType' has no len()",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-8-823c6950bc6d>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      2\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mtopic_id\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mname\u001b[0m \u001b[0;32min\u001b[0m \u001b[0menvironment\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mCONFIG\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdiscussions\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m     \u001b[0mresults\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mpopulate_discussion\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mtokens\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtopic_id\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mdepth\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mCOURSE_ID\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 4\u001b[0;31m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mresults\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[0;31mTypeError\u001b[0m: object of type 'NoneType' has no len()"
+     ]
+    }
+   ],
+   "source": [
+    "depth =2\n",
+    "for topic_id, name in environment.CONFIG.discussions:\n",
+    "    populate_discussion(tokens, topic_id, depth, COURSE_ID)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Attic"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-03T22:01:36.477865Z",
+     "start_time": "2020-02-03T22:01:36.471958Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# def get_question_ids(course, quiz_id):\n",
+    "#     \"\"\"Returns list of ids for questions comprising quiz\"\"\"\n",
+    "#     qids = [q.id for q in course.get_quiz(quiz_id).get_questions()]\n",
+    "#     print(\"{} question ids retrieved for quiz {}\".format(len(qids), quiz_id))\n",
+    "#     return qids\n",
+    "\n",
+    "\n",
+    "# def answer_quiz_for_student(student_token, course_id, quiz_id, question_ids):\n",
+    "#     student = StudentUser(student_token, course_id, quiz_id=quiz_id)\n",
+    "#     quiz = student.course.get_quiz(quiz_id)\n",
+    "    \n",
+    "#     # Create a submission object\n",
+    "#     try:\n",
+    "#         submission = quiz.create_submission()\n",
+    "#     except canvasapi.exceptions.Conflict:\n",
+    "#         # a submission was already created\n",
+    "#         # so get that one\n",
+    "#         submission = [s for s in quiz.get_submissions()][0]\n",
+    "\n",
+    "        \n",
+    "#     # make answers\n",
+    "#     answers = []\n",
+    "#     for qid in question_ids:\n",
+    "#         answers.append({\n",
+    "#             'id' : qid,\n",
+    "#             'answer': fake.paragraph()\n",
+    "#         })\n",
+    "    \n",
+    "#     # submit answers\n",
+    "#     question_subs = submission.answer_submission_questions(quiz_questions=answers)\n",
+    "    \n",
+    "#     # Complete the quiz\n",
+    "#     submission.complete()\n",
+    "#     print(\"Answers created for user {}\".format(submission.user_id))\n",
+    "\n",
+    "#     # return quizSubmissionQuestions for use in testing\n",
+    "#     # answer text will be stored on answer attribute\n",
+    "#     return question_subs\n",
+    "\n",
+    "\n",
+    "# def populate_quiz_w_text_answers(course, quiz_id, student_tokens):\n",
+    "#     \"\"\"\n",
+    "#     Answers all text entry questions for a quiz for all students\n",
+    "    \n",
+    "#     Returns a list of QuizSubmissionQuestions which contains the answer text\n",
+    "#     in answer attribute\"\"\"\n",
+    "#     answers = []\n",
+    "#     question_ids = get_question_ids(course, quiz_id)\n",
+    "#     for t in student_tokens:\n",
+    "#         r = answer_quiz_for_student(t, course.id, quiz_id, question_ids)\n",
+    "#         answers.append(r)\n",
+    "#     return answers\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T04:17:49.522411Z",
+     "start_time": "2020-01-22T04:17:49.516714Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# def populate_assignment(tokens, assignment_id, course_id=COURSE_ID):\n",
+    "#     \"\"\"Uploads a paragraph of response text for each token provided\n",
+    "#     in tokens. \n",
+    "#     Returns a list of the submission objects returned\"\"\"\n",
+    "#     submissions = []\n",
+    "    \n",
+    "#     for t in tokens:\n",
+    "#         msg = fake.paragraph()\n",
+    "#         sub = {\n",
+    "#             'submission_type': 'online_text_entry',\n",
+    "#             'body': msg,\n",
+    "#         }\n",
+    "#         s1 = StudentUser(t, course_id, assignment_id=assignment_id)\n",
+    "#         result = s1.assignment.submit(sub)\n",
+    "#         submissions.append(result)\n",
+    "#     return submissions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-02-03T21:02:33.032847Z",
+     "start_time": "2020-02-03T21:02:13.213494Z"
+    },
+    "run_control": {
+     "marked": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# def populate_discussion(tokens, topic_id, deep, course_id=COURSE_ID):\n",
+    "#     posts = []\n",
+    "#     student_users = []\n",
+    "#     for t in tokens:\n",
+    "#         student_users.append(StudentUser(t, COURSE_ID, topic_id=topic_id))\n",
+    "\n",
+    "#     for su in student_users:\n",
+    "#         msg = fake.paragraph()\n",
+    "#         e = su.post_entry(msg)\n",
+    "#         posts.append(e)\n",
+    "#     for i in range(0, deep):\n",
+    "#         for s1 in student_users:\n",
+    "#             for entry in s1.discussion_entries:\n",
+    "#                 # every other student comments on each entry\n",
+    "#                 for s2 in student_users:\n",
+    "#                     msg = fake.paragraph()\n",
+    "#                     e = s2.discussion.get_entries([entry.id])\n",
+    "#                     r = e[0].post_reply(message=msg)\n",
+    "#                     posts.append(r)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# def answer_quiz_for_student(student_token, course_id, quiz_id, question_ids):\n",
+    "#     student = StudentUser(student_token, course_id, quiz_id=quiz_id)\n",
+    "#     quiz = student.course.get_quiz(quiz_id)\n",
+    "    \n",
+    "#     # Create a submission object\n",
+    "#     try:\n",
+    "#         submission = quiz.create_submission()\n",
+    "#     except canvasapi.exceptions.Conflict:\n",
+    "#         # a submission was already created\n",
+    "#         # so get that one\n",
+    "#         submission = [s for s in quiz.get_submissions()][0]\n",
+    "\n",
+    "        \n",
+    "#     # make answers\n",
+    "#     answers = []\n",
+    "#     for qid in question_ids:\n",
+    "#         answers.append({\n",
+    "#             'id' : qid,\n",
+    "#             'answer': fake.paragraph()\n",
+    "#         })\n",
+    "    \n",
+    "#     # submit answers\n",
+    "#     question_subs = submission.answer_submission_questions(quiz_questions=answers)\n",
+    "    \n",
+    "#     # Complete the quiz\n",
+    "#     submission.complete()\n",
+    "#     print(\"Answers created for user {}\".format(submission.user_id))\n",
+    "\n",
+    "#     # return quizSubmissionQuestions for use in testing\n",
+    "#     # answer text will be stored on answer attribute\n",
+    "#     return question_subs\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T02:44:31.917934Z",
+     "start_time": "2020-01-22T02:44:31.175209Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "msg = fake.paragraph()\n",
+    "entry = s_discussion.post_entry(message=msg)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T02:44:51.995820Z",
+     "start_time": "2020-01-22T02:44:51.484775Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "entry.post_reply(message=fake.paragraph())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2020-01-22T03:46:21.009175Z",
+     "start_time": "2020-01-22T03:46:12.485359Z"
+    },
+    "run_control": {
+     "marked": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def make_course(token, course_id=COURSE_ID):\n",
+    "    # Student account\n",
+    "    canvas = Canvas(environment.CONFIG.canvas_url_base, token)\n",
+    "    course = canvas.get_course(course_id)\n",
+    "    return course"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "canvashacks",
+   "language": "python",
+   "name": "canvashacks"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.4"
+  },
+  "toc": {
+   "base_numbering": 1,
+   "colors": {
+    "hover_highlight": "#DAA520",
+    "navigate_num": "#000000",
+    "navigate_text": "#333333",
+    "running_highlight": "#FF0000",
+    "selected_highlight": "#FFD700",
+    "sidebar_border": "#EEEEEE",
+    "wrapper_background": "#FFFFFF"
+   },
+   "moveMenuLeft": true,
+   "nav_menu": {},
+   "navigate_menu": true,
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "threshold": 4,
+   "title_cell": "Table of Contents",
+   "title_sidebar": "Contents",
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": true,
+   "toc_window_display": false,
+   "widenNotebook": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

@@ -56,6 +56,7 @@ def unit_factory(course=None, unit_number=None, initial_is_quiz_type=True):
     review.activity_link = fake.uri()
     meta = MetaReview( **test_data[ 'metareview' ] )
     meta.id = random.randint( 0, 10000 )
+    meta.access_code = fake.ean8()
     meta.quiz_id = meta.id
     unit = Unit( course, unit_number )
     unit.components = [initial, review, meta]

@@ -5,8 +5,8 @@ from CanvasHacks import environment as env
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import ConversationMessageSender, send_message_to_student
-from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, METAREVIEW_NOTICE_TEMPLATE, \
-    REVIEW_NOTICE_TEMPLATE
+from CanvasHacks.Messaging.templates import DISCUSSION_REVIEW_NOTICE_TEMPLATE, METAREVIEW_CONTENT_TEMPLATE, \
+    METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE, DISCUSSION_REVIEW_FEEDBACK_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.PeerReviewed.Definitions import Unit
 from CanvasHacks.Repositories.status import StatusRepository
@@ -62,6 +62,7 @@ class SkaaMessenger:
         and create the message content
         This is abstracted out to make testing easier
         """
+
         d = {
             'intro': self.activity_inviting_to_complete.email_intro,
 
@@ -71,15 +72,25 @@ class SkaaMessenger:
             'responses': content,
 
             # Add any materials from me
-            'other': other,
+            'other': other if other is not None else "",
 
             # Add code and link to do reviewing assignment
             'review_assignment_name': self.activity_inviting_to_complete.name,
-            'access_code': self.activity_inviting_to_complete.access_code,
+            'access_code_message': self._make_access_code_message(),
             'review_url': self.activity_inviting_to_complete.html_url,
             'due_date': self.activity_inviting_to_complete.string_due_date
         }
         return d
+
+    def _make_access_code_message( self ):
+        """Adds text with the access code for the next assignment if a code
+        exists otherwise returns an empty string
+        """
+        tmpl = "Here's the access code: {}"
+
+        if self.activity_inviting_to_complete.access_code is not None:
+            return tmpl.format( self.activity_inviting_to_complete.access_code )
+        return ""
 
     def prepare_message( self, review_assignment, other=None ):
         """Creates the message data for sending specific to the assignment"""
@@ -238,6 +249,75 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
                 'subject': self.subject,
                 'body': body
             }
+
+        except Exception as e:
+            # todo exception handling
+            print( e )
+            raise MessageDataCreationError( review_assignment )
+
+
+class DiscussionReviewInvitationMessenger( SkaaMessenger ):
+    """Handles invitation to complete discussion review"""
+    message_template = DISCUSSION_REVIEW_NOTICE_TEMPLATE
+
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
+        self.activity_inviting_to_complete = unit.discussion_review
+
+        super().__init__( unit, student_repository, content_repository, status_repository )
+
+        self.subject = "Discussion forum posts for you to review"
+        self.intro = "Here are some posts by another student for you to review. "
+
+    def prepare_message( self, review_assignment, other=None ):
+        """This looks up the appropriate data for a review
+        assignment and returns what will be the message body
+        """
+        try:
+            # todo
+
+            # We are going to send the posts to the reviewer
+            receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
+
+            # The assessor did the work that we want to send
+            # to the assessee
+            content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
+
+            return self._make_message_data( receiving_student, content, other=None )
+
+        except Exception as e:
+            # todo exception handling
+            print( e )
+            raise MessageDataCreationError( review_assignment )
+
+
+class FeedbackFromDiscussionReviewMessenger(SkaaMessenger):
+    message_template = DISCUSSION_REVIEW_FEEDBACK_TEMPLATE
+
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repository: StatusRepository ):
+        self.activity_inviting_to_complete = unit.discussion_review
+
+        super().__init__( unit, student_repository, content_repository, status_repository )
+
+        self.subject = "Discussion forum posts for you to review"
+        self.intro = "Here are some posts by another student for you to review. "
+
+    def prepare_message( self, review_assignment, other=None ):
+        """This looks up the appropriate data for a review
+        assignment and returns what will be the message body
+        """
+        try:
+            # todo
+
+            # We are going to send the posts to the reviewer
+            receiving_student = self.student_repository.get_student( review_assignment.assessee_id )
+
+            # The assessor did the work that we want to send
+            # to the assessee
+            content = self.content_repository.get_formatted_work_by( review_assignment.assessor_id )
+
+            return self._make_message_data( receiving_student, content, other=None )
 
         except Exception as e:
             # todo exception handling
