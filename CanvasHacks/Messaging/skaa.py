@@ -70,6 +70,9 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
         unit and returns what will be the message body
         """
         try:
+            if review_assignment is None:
+                raise MessageDataCreationError(review_assignment)
+
             # We are going to send the peer review feedback
             # created by the assessor to the student who was
             # assessed in the peer review stage

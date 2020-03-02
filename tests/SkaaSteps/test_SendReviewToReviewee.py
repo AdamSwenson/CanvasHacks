@@ -139,7 +139,9 @@ class TestFunctionalTests( TestingBase ):
                           "Send method called expected number of times" )
         messenger_args = [ (c[ 1 ][ 'student_id' ], c[ 1 ][ 'subject' ], c[ 1 ][ 'body' ]) for c in
                            messengerMock.call_args_list ]
-        # print(args)
+        # Check that all messages have the correct subject
+        for sid, subj, body in messenger_args:
+            self.assertEqual(self.unit.metareview.email_subject, subj, "Correct subject line")
 
         # Status repo calls on messenger
         obj.messenger.status_repository.record.assert_called()

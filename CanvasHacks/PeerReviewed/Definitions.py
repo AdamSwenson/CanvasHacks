@@ -8,6 +8,7 @@ from CanvasHacks.GradingTools.nonempty import CreditForNonEmpty
 from CanvasHacks.GradingTools.penalities import HalfLate
 
 __author__ = 'adam'
+
 import re
 
 import canvasapi
@@ -50,7 +51,7 @@ class Activity( Model ):
         self._unit_number = None
         self._description_text = ''
 
-        self.creation_dict = {}
+        self.creation_dict = { }
         """A dictionary of all the values needed to
         create one of these activities on canvas"""
 
@@ -115,14 +116,14 @@ class Activity( Model ):
     @property
     def description( self ):
         try:
-            if len(self._description_text) > 0:
+            if len( self._description_text ) > 0:
                 return self._description_text
-            fname = "{}/assignment-templates/{}".format(env.DATA_FOLDER, self.instructions_filename)
-            self._description_text = read_text_block(fname)
+            fname = "{}/assignment-templates/{}".format( env.DATA_FOLDER, self.instructions_filename )
+            self._description_text = read_text_block( fname )
             return self._description_text
 
         except (AttributeError, FileNotFoundError) as e:
-            print('no file for activity', e)
+            print( 'no file for activity', e )
             # In case there is no file for the activity
             return ""
 
@@ -134,7 +135,6 @@ class Activity( Model ):
     #     """A dictionary of all the values needed to
     #     create one of these activities on canvas"""
     #     exclude = ['title_base', 'instructions_filename']
-
 
     # @property
     # def dates_dict( self ):
@@ -150,7 +150,7 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.grace_period = pd.Timedelta('2 days')
+        self.grace_period = pd.Timedelta( '2 days' )
 
 
 class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
@@ -163,7 +163,7 @@ class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
         super().__init__( **kwargs )
-        self.grace_period = pd.Timedelta('2 days')
+        self.grace_period = pd.Timedelta( '2 days' )
 
         # Code for accessing the subsequent unit
         self.access_code_for_next_on = Review
@@ -192,8 +192,13 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.activity_link = None
 
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of content unit".format( self.unit_number )
         self.email_intro = "Here is another student's unit for you to review:"
+
+    @property
+    def email_subject( self ):
+        """Since unit number will be set after initialization
+        we need to do this as a property"""
+        return "Unit {} peer-review of content unit".format( self.unit_number )
 
 
 class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
@@ -209,8 +214,13 @@ class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} metareview of peer-review".format( self.unit_number) #env.CONFIG.unit_number )
-        self.email_intro = "Here is the feedback on your unit:"
+        self.email_intro = "Here is the feedback on your assignment:"
+
+    @property
+    def email_subject( self ):
+        """Since unit number will be set after initialization
+        we need to do this as a property"""
+        return "Unit {} metareview of peer-review".format( self.unit_number )
 
 
 class DiscussionForum( Activity ):
@@ -236,8 +246,13 @@ class DiscussionReview( Activity, QuizDataMixin, StoredDataFileMixin ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of discussion forum posts".format( self.unit_number)
         self.email_intro = "Here are the discussion forum posts from another student for you to review:"
+
+    @property
+    def email_subject( self ):
+        """Since unit number will be set after initialization
+        we need to do this as a property"""
+        return "Unit {} peer-review of discussion forum posts".format( self.unit_number )
 
 
 class UnitEndSurvey( Activity ):
@@ -246,6 +261,7 @@ class UnitEndSurvey( Activity ):
     instructions_filename = 'unit-end-survey-instructions.txt'
     regex = re.compile( r"\bunit-end survey\b" )
     creation_type = 'survey'
+
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
 
@@ -260,10 +276,10 @@ class Journal( Activity ):
     creation_type = 'assignment'
 
     def __init__( self, **kwargs ):
-        self.grace_period = pd.Timedelta('2 days')
+        self.grace_period = pd.Timedelta( '2 days' )
         super().__init__( **kwargs )
         # The object which will be used to penalize late assignments
-        self.penalizer = HalfLate(self.due_at, self.grace_period)
+        self.penalizer = HalfLate( self.due_at, self.grace_period )
         # The object which will be used to assign the score
         self.grade_method = CreditForNonEmpty()
 
@@ -304,7 +320,9 @@ class Unit:
         self.find_components( unit_assignments )
         for c in self.components:
             # todo access_code_for_next_on probably not needed; created without looking at what already have
-            self._set_access_code_for_next(c)
+            self._set_access_code_for_next( c )
+            # Set the unit number for the assignment
+            setattr( c, 'unit_number', self.unit_number )
 
     def find_components( self, unit_assignments ):
         # Parse components of unit
@@ -336,10 +354,10 @@ class Unit:
 
         try:
             if obj.access_code_for_next_on is not None:
-                next_assign = self.get_by_class(obj.access_code_for_next_on)
+                next_assign = self.get_by_class( obj.access_code_for_next_on )
                 obj.access_code_for_next = next_assign.access_code
         except AttributeError:
-            print("No access code for subsequent unit set for {}".format(obj.name))
+            print( "No access code for subsequent unit set for {}".format( obj.name ) )
 
     def _set_access_code( self, obj ):
         """Some things will have an access code stored

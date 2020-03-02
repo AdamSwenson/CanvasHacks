@@ -64,6 +64,8 @@ METAREVIEW_NOTICE_TEMPLATE = """
         
     Enjoy,
     /a
+    
+    PS, Please let me know if anything seems strange about the review I've sent you. I've tested my software as best I can, but....
    
     """
 

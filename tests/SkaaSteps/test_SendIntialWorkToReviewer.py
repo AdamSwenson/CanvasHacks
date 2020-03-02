@@ -366,6 +366,10 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
                            messengerMock.call_args_list ]
         # print(args)
 
+        # Check that all messages have the correct subject
+        for sid, subj, body in messenger_args:
+            self.assertEqual(self.unit.review.email_subject, subj, "Correct subject line")
+
         # Status repo calls on messenger
         obj.messenger.status_repository.record.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list

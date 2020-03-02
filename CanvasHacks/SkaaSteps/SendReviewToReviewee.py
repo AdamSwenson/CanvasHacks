@@ -1,6 +1,7 @@
 """
 Created by adam on 2/23/20
 """
+from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -77,22 +78,32 @@ class SendReviewToReviewee(IStep):
     def _assign_step( self ):
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
-            # Work repo contains submitted peer reviews. Thus we look up
-            # review pairings where a student submitting the peer review unit
-            # is the assessor
-            records = self.associationRepo.get_by_assessor( self.activity_for_review_pairings, student_id )
+            try:
+                # Work repo contains submitted peer reviews. Thus we look up
+                # review pairings where a student submitting the peer review assignment
+                # is the assessor
+                records = self.associationRepo.get_by_assessor( self.activity_for_review_pairings, student_id )
 
-            # records = self.associationRepo.get_assessor_object(self.activity_for_review_pairings, student_id)
-            self.associations.append( records )
+                if records is None:
+                    raise NoReviewPairingFound(student_id)
+                else:
+                    self.associations.append( records )
+            except NoReviewPairingFound:
+                pass
+
         print( "Going to send review results for {} students".format( len( self.associations ) ) )
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
+        prelen = len(self.work_repo.data)
+        print("Loaded work by {} students from {}".format(prelen, self.activity.name))
         # Filter out students who have already been notified.
         # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
         # since we could filter by who doesn't have a review partner
         self.work_repo.remove_student_records( self.notificationStatusRepo.previously_notified_students )
+        postlen = len(self.work_repo.data)
+        print("Filtered out {} students who have already been notified".format(prelen - postlen))
 
 
 if __name__ == '__main__':

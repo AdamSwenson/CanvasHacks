@@ -39,3 +39,10 @@ class NoAvailablePartner( Exception ):
 class NoReviewPairingsLoaded(Exception):
     pass
 
+class NoReviewPairingFound(Exception):
+    """Raised when no review assignment could be found
+    for the specified student
+    """
+    def __init__(self, student_id):
+        self.student_id = student_id
+        print("No review pairing found for student {}".format(self.student_id))
