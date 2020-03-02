@@ -104,6 +104,13 @@ def read_list_generator( csvFile ):
 
 # Get all subfolder paths
 
+def read_text_block(filename):
+    with open(filename, 'r') as f:
+        j = f.read()
+        j = "\n".join(j.split('\\n'))
+        # j = "\".join(j.split("\\")
+        return j
+
 
 if __name__ == '__main__':
     pass

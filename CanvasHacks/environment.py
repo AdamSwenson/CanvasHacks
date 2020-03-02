@@ -29,6 +29,8 @@ if CanvasHacks.testglobals.use_api:
         JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
         LOG_FOLDER = FileBasedConfiguration.log_folder
         DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
+        # Testing
+        TEST_DATA_PATH = "{}/tests/testdata".format( FileBasedConfiguration.proj_base )
 
         TOKEN = FileBasedConfiguration.canvas_token
         URL_BASE = FileBasedConfiguration.canvas_url_base
@@ -66,3 +68,4 @@ LIKERT_NUM_MAP = { 'Forgot': 0, 'Strongly disagree': 1, 'Disagree': 2, 'Agree': 
 REPORT_KEEP_COLUMNS = [ 'attempt', 'course_id', 'finished_at_date',
                         'fudge_points', 'id', 'name', 'quiz_id', 'score',
                         'section_sis_id', 'student_id', 'submission_id', 'user_id', 'workflow_state' ]
+

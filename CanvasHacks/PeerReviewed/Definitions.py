@@ -3,6 +3,7 @@ Objects which define the parameters/ values for the entire unit
 
 Created by adam on 12/24/19
 """
+from CanvasHacks.FileTools import read_text_block
 from CanvasHacks.GradingTools.nonempty import CreditForNonEmpty
 from CanvasHacks.GradingTools.penalities import HalfLate
 
@@ -46,7 +47,12 @@ class Activity( Model ):
         # // when to unlock the activity_inviting_to_complete
         self.unlock_at = None
         self.points_possible = None
-        self.unit_number = None
+        self._unit_number = None
+        self._description_text = ''
+
+        self.creation_dict = {}
+        """A dictionary of all the values needed to
+        create one of these activities on canvas"""
 
         super().__init__( **kwargs )
 
@@ -94,15 +100,53 @@ class Activity( Model ):
         if not, it tries to make it into one"""
         return check_is_date( date )
 
+    @property
+    def unit_number( self ):
+        try:
+            # preference if has been set internally
+            return self._unit_number
+        except AttributeError:
+            return env.CONFIG.unit.unit_number
+
+    @unit_number.setter
+    def unit_number( self, unit_number ):
+        self._unit_number = unit_number
+
+    @property
+    def description( self ):
+        try:
+            if len(self._description_text) > 0:
+                return self._description_text
+            fname = "{}/assignment-templates/{}".format(env.DATA_FOLDER, self.instructions_filename)
+            self._description_text = read_text_block(fname)
+            return self._description_text
+
+        except (AttributeError, FileNotFoundError) as e:
+            print('no file for activity', e)
+            # In case there is no file for the activity
+            return ""
+
+    @description.setter
+    def description( self, text ):
+        self._description_text = text
+
+    # def creation_dict( self ):
+    #     """A dictionary of all the values needed to
+    #     create one of these activities on canvas"""
+    #     exclude = ['title_base', 'instructions_filename']
+
+
     # @property
     # def dates_dict( self ):
     #     return {'assign' self.make_title
 
 
 class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
-    title_base = 'Topical unit'
+    title_base = 'Topical assignment'
+    instructions_filename = 'topical-assignment-instructions.txt'
+    creation_type = 'quiz'
 
-    regex = re.compile( r"\btopical unit\b" )
+    regex = re.compile( r"\btopical assignment\b" )
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
@@ -110,9 +154,11 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
 
 
 class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
-    title_base = "Content unit"
+    title_base = "Content assignment"
+    instructions_filename = 'content-assignment-instructions.txt'
+    creation_type = 'assignment'
 
-    regex = re.compile( r"\bcontent unit\b" )
+    regex = re.compile( r"\bcontent assignment\b" )
 
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
@@ -128,6 +174,9 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review component of the
      unit """
     title_base = "Peer review"
+    instructions_filename = 'peer-review-instructions.txt'
+    creation_type = 'survey'
+
     regex = re.compile( r"\breview\b" )
 
     def __init__( self, **kwargs ):
@@ -143,7 +192,7 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.activity_link = None
 
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of content unit".format( env.CONFIG.unit_number )
+        self.email_subject = "Unit {} peer-review of content unit".format( self.unit_number )
         self.email_intro = "Here is another student's unit for you to review:"
 
 
@@ -152,45 +201,51 @@ class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of 
     another student's submission"""
     title_base = "Metareview"
-
+    instructions_filename = 'metareview-instructions.txt'
     access_code_for_next_on = None
+    creation_type = 'survey'
 
     regex = re.compile( r"\bmetareview\b" )
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} metareview of peer-review".format( env.CONFIG.unit_number )
+        self.email_subject = "Unit {} metareview of peer-review".format( self.unit_number) #env.CONFIG.unit_number )
         self.email_intro = "Here is the feedback on your unit:"
 
 
 class DiscussionForum( Activity ):
     """Representation of the main discussion forum"""
     title_base = "Main discussion"
-
+    instructions_filename = 'discussion-forum-instructions.txt'
     regex = re.compile( r"\bforum\b" )
+    creation_type = 'discussion'
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+
+    def create_on_canvas( self, course ):
+        course.create_quiz()
 
 
 class DiscussionReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
-
+    instructions_filename = 'discussion-review-instructions.txt'
     regex = re.compile( r"\bdiscussion review\b" )
+    creation_type = 'survey'
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of discussion forum posts".format( env.CONFIG.unit )
+        self.email_subject = "Unit {} peer-review of discussion forum posts".format( self.unit_number)
         self.email_intro = "Here are the discussion forum posts from another student for you to review:"
 
 
 class UnitEndSurvey( Activity ):
     """Representation of the survey at the end of each unit"""
-    title_base = "Unit end survey"
-
+    title_base = "Unit-end survey"
+    instructions_filename = 'unit-end-survey-instructions.txt'
     regex = re.compile( r"\bunit-end survey\b" )
-
+    creation_type = 'survey'
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
 
@@ -202,6 +257,7 @@ class Journal( Activity ):
     title_base = "Journal"
 
     regex = re.compile( r"\bjournal\b" )
+    creation_type = 'assignment'
 
     def __init__( self, **kwargs ):
         self.grace_period = pd.Timedelta('2 days')
@@ -234,9 +290,9 @@ class Unit:
             # needing a dummy Course object
             self._initialize()
 
-    def __repr__(self):
-        """This way can still use unit in format statements """
-        return self.unit_number
+    # def __repr__(self):
+    #     """This way can still use unit in format statements """
+    #     return self.unit_number
 
     def _initialize( self ):
         # Get all assignments for the course

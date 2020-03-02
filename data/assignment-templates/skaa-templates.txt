@@ -1,0 +1,20 @@
+{ 'question_columns': [ ],
+  'due_at': '2020-02-05T07:59:59Z', 'quarter_credit_deadline': None,
+  'lock_at': '2020-02-10T07:59:59Z',
+  'unlock_at': '2020-01-29T08:00:00Z',
+  'points_possible': 4.0,
+  '_unit_number': None,
+  'id': 587445,
+  'description': '<div class="description user_content teacher-version enhanced">\n<p>To answer the question in this assignment, you will need to synthesize in your own words material covered in the lectures and do some independent thought which goes beyond the material in the lectures. You will not be able to successfully complete the assignment without reading / watching the course materials (probably several times as you work on this).</p>\n<p>You will receive a small amount of credit for completing this assignment. Most of your grade will be based on how well you answer the question.</p>\n<p>There is no official minimum page length / word count. However, I expect the vast majority of you will need the equivalent of at least 2.5 typed pages (double-spaced) to fully answer the question.</p>\n<p>There is no time-limit (other than its due date); you can open the assignment and look at it as many times as you want.</p>\n<p>It\'s a good idea to write your answers in a file on your computer (Google Docs, whatever) and then copy-paste them here. That way you won\'t lose your work if your connection times out, et cetera.</p>\n<p>Here is the rubric that will be used to grade your answer: <a class="instructure_file_link instructure_scribd_file" title="Unit 1 Rubric for the peer review.pdf" href="https://canvas.csun.edu/courses/77522/files/8173923/download?verifier=GsZ8RVm8u82SXaIdQo61YfSe4mBuA4WOforTfdrY&amp;wrap=1" data-api-endpoint="https://canvas.csun.edu/api/v1/courses/77522/files/8173923" data-api-returntype="File">Unit 1 Rubric for the peer review.pdf</a></p>\n</div>',
+  'grading_type': 'points',
+  'assignment_group_id': 116590,
+  'peer_reviews': False,
+  'course_id': 77522,
+  'name': 'Unit 1: Content assignment',
+  'submission_types': [ 'online_quiz' ],
+  'is_quiz_assignment': True,
+  'anonymous_submissions': False,
+  'published': True,
+  'access_code': None
+
+  }
