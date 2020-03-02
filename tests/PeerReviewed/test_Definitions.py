@@ -36,8 +36,8 @@ class TestActivity( TestCase ):
     def test_instantiates_properly( self ):
         test_data = test_data_factory()
         obj = Activity( **test_data[ 'initial' ] )
-        self.assertIsInstance( obj.due_date, pd.Timestamp, "due date is timestamp" )
-        self.assertIsInstance( obj.open_date, pd.Timestamp, "open date is timestamp" )
+        self.assertIsInstance( obj.due_at, pd.Timestamp, "due date is timestamp" )
+        self.assertIsInstance( obj.open_at, pd.Timestamp, "open date is timestamp" )
         pts = test_data[ 'initial' ][ 'max_points' ] - test_data[ 'initial' ][ 'completion_points' ]
         self.assertEqual( obj.assignable_points, pts, 'assignable points correctly calculated' )
 
@@ -59,12 +59,12 @@ class TestUnit( TestCase ):
 
     def test_find_components( self ):
         # assigns = []
-        # vs = ['Unit 1 Content assignment','Unit 1 metareview''Unit 1 review']
+        # vs = ['Unit 1 Content unit','Unit 1 metareview''Unit 1 review']
         # for v in vs:
-        #     a = canvasapi.assignment.Assignment()
+        #     a = canvasapi.unit.Assignment()
         #     a.name = v
         #     assigns.append(a)
-        assigns = [ DummyAssignment( name='Unit 1 Content assignment', id=5 ),
+        assigns = [ DummyAssignment( name='Unit 1 Content unit', id=5 ),
                     DummyAssignment( name='Unit 1 metareview', id=4 ),
                     DummyAssignment( name='Unit 1 review', id=3 )
                     ]
@@ -85,29 +85,29 @@ class TestUnit( TestCase ):
 class TestInitialWork( TestCase ):
     def setUp( self ):
         self.test_data = test_data_factory()
-        # Create the assignment
+        # Create the unit
         # self.initial = InitialWork( **self.test_data[ 'initial' ] )
         # self.review = Review( **self.test_data[ 'review' ] )
         # self.meta = MetaReview( **self.test_data[ 'metareview' ] )
         # self.obj = Assignment( self.initial, self.review, self.meta )
 
     def test_is_activity_type( self ):
-        # Create the assignment
+        # Create the unit
         self.assertFalse( InitialWork.is_activity_type( 'Unit 24 metareview' ) )
-        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 content assignment' ) )
+        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 content unit' ) )
 
 
 class TestReview( TestCase ):
     def setUp( self ):
         self.test_data = test_data_factory()
-        # Create the assignment
+        # Create the unit
         # self.initial = InitialWork( **self.test_data[ 'initial' ] )
         # self.review = Review( **self.test_data[ 'review' ] )
         # self.meta = MetaReview( **self.test_data[ 'metareview' ] )
         # self.obj = Assignment( self.initial, self.review, self.meta )
 
     def test_is_activity_type( self ):
-        # Create the assignment
+        # Create the unit
         self.assertFalse( Review.is_activity_type( 'Unit 24 metareview' ) )
         self.assertTrue( Review.is_activity_type( 'Unit 24 review' ) )
 
@@ -115,28 +115,28 @@ class TestReview( TestCase ):
 class TestMetaReview( TestCase ):
     def setUp( self ):
         self.test_data = test_data_factory()
-        # Create the assignment
+        # Create the unit
         # self.initial = InitialWork( **self.test_data[ 'initial' ] )
         # self.review = Review( **self.test_data[ 'review' ] )
         # self.meta = MetaReview( **self.test_data[ 'metareview' ] )
         # self.obj = Assignment( self.initial, self.review, self.meta )
 
     def test_is_activity_type( self ):
-        # Create the assignment
+        # Create the unit
         self.assertTrue( MetaReview.is_activity_type( 'Unit 24 metareview' ) )
         self.assertFalse( MetaReview.is_activity_type( 'Unit 24 review' ) )
 
 # class TestAssignment( TestCase ):
 #     def setUp( self ):
 #         self.test_data = test_data_factory()
-#         # Create the assignment
+#         # Create the unit
 #         self.initial = InitialWork( **self.test_data[ 'initial' ] )
 #         self.review = Review( **self.test_data[ 'review' ] )
 #         self.meta = MetaReview( **self.test_data[ 'metareview' ] )
 #         self.obj = Assignment( self.initial, self.review, self.meta )
 #
 #     def test_setup( self ):
-#         # Create the assignment
+#         # Create the unit
 #         initial = InitialWork( **self.test_data[ 'initial' ] )
 #         review = Review( **self.test_data[ 'review' ] )
 #         meta = MetaReview( **self.test_data[ 'metareview' ] )
@@ -148,14 +148,14 @@ class TestJournal( TestCase ):
     def setUp( self ):
         pass
         # self.test_data = test_data_factory()
-        # Create the assignment
+        # Create the unit
         # self.initial = InitialWork( **self.test_data[ 'initial' ] )
         # self.review = Review( **self.test_data[ 'review' ] )
         # self.meta = MetaReview( **self.test_data[ 'metareview' ] )
         # self.obj = Assignment( self.initial, self.review, self.meta )
 
     def test_is_activity_type( self ):
-        # Create the assignment
+        # Create the unit
         self.assertTrue( Journal.is_activity_type( 'Journal (week 4)' ) )
         self.assertFalse( Journal.is_activity_type( 'Unit 24 review' ) )
 

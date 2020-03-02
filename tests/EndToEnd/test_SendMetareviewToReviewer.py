@@ -32,7 +32,7 @@ __author__ = 'adam'
 #         """Check that each student receives the expected message
 #         containing the correct student's submission
 #         """
-#         # Load initial content assignment data
+#         # Load initial content unit data
 #
 #         # create review assignments
 #
@@ -43,7 +43,7 @@ __author__ = 'adam'
 #
 #
 #     def test_assignments_stored_correctly( self ):
-#         """Check that the students who have submitted the assignment
+#         """Check that the students who have submitted the unit
 #         (and none of the non-submitteers) have been paired up
 #         in the expected manner, and that the pairings have been stored
 #         """

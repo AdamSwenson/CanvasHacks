@@ -34,7 +34,7 @@ def download_submitted_file( url, filepath ):
 
 
 def get_submissions( course_id, assignment_id, assign_type='assignments', per_page=42 ):
-    """Makes request to the server for all submissions for the given assignment
+    """Makes request to the server for all submissions for the given unit
     Example
         course_id = SECTION_930
         assignment_id = 288480

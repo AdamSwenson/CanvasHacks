@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
 
 class PeerReviewInvitationMessenger( SkaaMessenger ):
-    """Handles sending message containg student work from the initial content assignment to the person who will conduct the peer review
+    """Handles sending message containg student work from the initial content unit to the person who will conduct the peer review
     """
     message_template = REVIEW_NOTICE_TEMPLATE
 
@@ -32,7 +32,7 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
-        assignment and returns what will be the message body
+        unit and returns what will be the message body
         """
         try:
             # We are going to send the original work to the assessor
@@ -67,7 +67,7 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
-        assignment and returns what will be the message body
+        unit and returns what will be the message body
         """
         try:
             # We are going to send the peer review feedback
@@ -92,6 +92,8 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     did the initial peer review
     """
     message_template = METAREVIEW_CONTENT_TEMPLATE
+    subject = "Feedback on your peer review"
+    intro = "Here is the feedback the author gave on your peer review. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repository: StatusRepository ):
@@ -100,12 +102,12 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
 
         super().__init__( unit, student_repository, content_repository, status_repository )
 
-        self.subject = "Feedback on your peer review"
-        self.intro = "Here is the feedback the author gave on your peer review. "
+        # self.subject = "Feedback on your peer review"
+        # self.intro = "Here is the feedback the author gave on your peer review. "
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
-        assignment and returns what will be the message body
+        unit and returns what will be the message body
         """
         try:
             # We are going to send the metareview feedback
@@ -195,7 +197,7 @@ def metareview_send_message_to_reviewers( review_assignments, studentRepo, conte
                     # Add any materials from me
                     'other': '',
 
-                    # Add code and link to do reviewing assignment
+                    # Add code and link to do reviewing unit
                     'review_assignment_name': activity.name,
                     'access_code': activity.access_code,
                     'review_url': activity.html_url,
@@ -245,7 +247,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
                 # Add any materials from me
                 'other': '',
 
-                # Add code and link to do reviewing assignment
+                # Add code and link to do reviewing unit
                 'review_assignment_name': activity.name,
                 'access_code': activity.access_code,
                 'review_url': activity.html_url,

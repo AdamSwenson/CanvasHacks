@@ -74,7 +74,7 @@
 #
 #     #
 #     # def test_assignments_stored_correctly( self ):
-#     #     """Check that the students who have submitted the assignment
+#     #     """Check that the students who have submitted the unit
 #     #     (and none of the non-submitteers) have been paired up
 #     #     in the expected manner, and that the pairings have been stored
 #     #     """
@@ -94,7 +94,7 @@
 #         self.fail()
 #
 #     def test_review_pairings_made_correctly( self ):
-#         """Check that the students who have submitted the assignment
+#         """Check that the students who have submitted the unit
 #         (and none of the non-submitteers) have been paired up
 #         in the expected manner, and that the pairings have been stored
 #         """

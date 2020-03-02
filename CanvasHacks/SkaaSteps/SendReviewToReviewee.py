@@ -78,7 +78,7 @@ class SendReviewToReviewee(IStep):
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             # Work repo contains submitted peer reviews. Thus we look up
-            # review pairings where a student submitting the peer review assignment
+            # review pairings where a student submitting the peer review unit
             # is the assessor
             records = self.associationRepo.get_by_assessor( self.activity_for_review_pairings, student_id )
 

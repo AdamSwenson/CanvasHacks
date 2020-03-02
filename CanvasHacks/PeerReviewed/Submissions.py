@@ -29,7 +29,7 @@ class Submission( StoreMixin ):
 
         self.process( query_result )
 
-        self.handle_kwargs( kwargs )
+        self.handle_kwargs( **kwargs )
 
     @property
     def on_time( self ):
@@ -56,7 +56,7 @@ class InitialSubmission( Submission ):
     def process( self, result ):
         """Takes the return from a query getting a peer review
         object and sets values of submission"""
-        self.submitter = Student( result[ 'user_id' ]) #, **result[ 'user' ] )
+        self.submitter = Student( student_id=result[ 'user_id' ]) #, **result[ 'user' ] )
         self.completion_date = result['submitted_at']
         self.handle_kwargs( result )
 
@@ -74,9 +74,9 @@ class ReviewSubmission( Submission ):
     def process( self, result ):
         """Takes the return from a query getting a peer review
         object and sets values of submission"""
-        self.submitter = Student( result[ 'user_id' ]) #, **result[ 'user' ] )
-        self.reviewer = Student( result[ 'assessor_id' ]) #, **result[ 'assessor' ] )
-        self.handle_kwargs( result )
+        self.submitter = Student( student_id=result[ 'user_id' ]) #, **result[ 'user' ] )
+        self.reviewer = Student( student_id=result[ 'assessor_id' ]) #, **result[ 'assessor' ] )
+        self.handle_kwargs( **result )
 
     @property
     def is_complete( self ):

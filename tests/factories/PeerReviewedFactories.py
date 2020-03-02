@@ -20,6 +20,7 @@ from tests.factories.CanvasApiFactories import peer_review_result_factory, submi
 
 def activity_data_factory(name=None):
     return {
+        'id': random.randint(1, 9999999999),
         'name' : fake.word() if name is None else name,
         'access_code' : fake.word(),
         'email_intro': fake.text(),
@@ -125,3 +126,15 @@ def discussion_entry_factory( **kwargs ):
         dummy[k] = kwargs[k]
     return dummy
 
+
+def content_repo_data_object_factory(**kwargs):
+    """Creates a dictionary with the keys representing columns
+    that the dataframe in self.data will be expected to have """
+    d = {
+        'student_id': fake.random.randint(11111, 999999999),
+        'workflow_state': 'submitted'
+    }
+
+    for k, v in kwargs.items():
+        d[k] = v
+    return d

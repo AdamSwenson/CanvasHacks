@@ -16,14 +16,14 @@ if __name__ == '__main__':
 
 
 class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWorkMixin, SelectableMixin, FrameStorageMixin ):
-    """Manages the data for a non-quiz type assignment
+    """Manages the data for a non-quiz type unit
     """
 
     def __init__( self, activity, course=None ):
         self.course = course
         self.activity = activity
 
-        # An assignment will only come in with a 'body' attribute
+        # An unit will only come in with a 'body' attribute
         # to line this up with things that use questions (i.e., quizzes)
         self.body_column_name = AssignmentSubmissionRepository.body_column_name
         self.question_columns = [ self.body_column_name ]
@@ -78,7 +78,7 @@ class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWork
 
     @property
     def assignment( self ):
-        """Returns the canvasapi.assignment.Assignment object associated
+        """Returns the canvasapi.unit.Assignment object associated
         with this repository.
         Automatically initializes it if not set
         """
@@ -96,7 +96,7 @@ class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWork
 
     @property
     def submitter_ids( self ):
-        """Returns a list of canvas ids of students who have submitted the assignment"""
+        """Returns a list of canvas ids of students who have submitted the unit"""
         # try:
         return list( set( self.data.reset_index().student_id.tolist() ) )
         # except (ValueError, KeyError):

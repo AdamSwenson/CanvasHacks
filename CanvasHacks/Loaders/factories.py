@@ -39,7 +39,7 @@ class LoaderFactory( ILoaderFactory ):
 
 
 class AssignmentLoaderFactory( ILoaderFactory ):
-    """Decides which loader to use for a non-quiz assignment"""
+    """Decides which loader to use for a non-quiz unit"""
 
     @staticmethod
     def make( **kwargs ):

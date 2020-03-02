@@ -41,13 +41,13 @@ class StatusRecord( Base, Model ):
     #
     # This is only relevant for the metareview since need to record when the
     # feedback from this student was sent out to the person who did the peer review.
-    # Notified already represents when they were invited to do the metareview assignment
+    # Notified already represents when they were invited to do the metareview unit
     results = Column(DATETIME, nullable=True)
 
     def record_submission( self, time_to_record=None ):
         """
         Called to record the timestamp of when this student submitted
-        their content assignment
+        their content unit
         :param time_to_record:
         :return:
         """
@@ -71,7 +71,7 @@ class StatusRecord( Base, Model ):
     def record_sent_results( self, time_to_record=None ):
         """
         Called to record the timestamp of when they were sent
-        feedback on the assignment
+        feedback on the unit
         :param time_to_record:
         :return:
         """
@@ -87,7 +87,7 @@ class ComplexStatusRecord( Base, Model ):
     # The student whom this record concerns
     student_id = Column( Integer, primary_key=True, nullable=False )
 
-    # The id of the content assignment
+    # The id of the content unit
     content_assignment_id = Column( Integer, primary_key=True, nullable=False )
 
     # Id of student being reviewed by this student
@@ -97,7 +97,7 @@ class ComplexStatusRecord( Base, Model ):
     reviewed_by = Column( Integer, nullable=True )
 
     # ------------------- Dates that this student did things
-    # When this student submitted their content assignment
+    # When this student submitted their content unit
     content_assignment_submitted = Column( DATETIME, nullable=True )
 
     # When this student submitted their review of the reviewer_of student
@@ -109,11 +109,11 @@ class ComplexStatusRecord( Base, Model ):
 
     # ------------------- Dates when this student was sent things
     # Date that the person who reviews this student was sent the
-    # reviewer_of student's content assignment to review
+    # reviewer_of student's content unit to review
     reviewer_assigned_on = Column( DATETIME, nullable=True )
 
     # If the student was sent a message that they must wait
-    # until someone else submits the assignment before they can review
+    # until someone else submits the unit before they can review
     # this is when that notificaion was sent
     wait_notification_on = Column( DATETIME, nullable=True )
 
@@ -127,7 +127,7 @@ class ComplexStatusRecord( Base, Model ):
 
     def is_under_review( self ):
         """Returns true if someone has been assigned to
-        review this students' content assignment, false otherwise
+        review this students' content unit, false otherwise
         """
         return self.reviewed_by is not None
 
@@ -169,7 +169,7 @@ class ComplexStatusRecord( Base, Model ):
     def record_content_assignment_submission( self, submitted_time=None ):
         """
         Called to record the timestamp of when this student submitted
-        their content assignment
+        their content unit
         :param submitted_time:
         :return:
         """

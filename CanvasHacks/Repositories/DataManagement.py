@@ -67,7 +67,7 @@ class DataStore(object):
     # @property
     # def ids_receiving_credit( self):
     #     # if assignment_id is not None:
-    #     #     c = list(filter(lambda x: x['assignment'] == assignment_id, self.credit))[0]
+    #     #     c = list(filter(lambda x: x['unit'] == assignment_id, self.credit))[0]
     #     #     return c['ids']
     #     return self.credit[0].ids
 
@@ -77,7 +77,7 @@ class BagStore(object):
     def __init__(self):
         # Preserves the distinct submissions from students
         self.assignment_bags = {}
-        # Holds 1 bag per assignment containing the contents of
+        # Holds 1 bag per unit containing the contents of
         # all student bags
         self.assignment_words = {}
 
@@ -109,7 +109,7 @@ class BagStore(object):
 
     def add_assignment_bags(self, name, bags):
         """bags is a list of lists. Each list should
-        contain words from 1 student's submission on the assignment"""
+        contain words from 1 student's submission on the unit"""
         self.assignment_bags[name] = bags
         self.assignment_words[name] = []
         for b in bags:

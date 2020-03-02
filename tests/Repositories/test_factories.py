@@ -31,16 +31,17 @@ class TestWorkRepositoryLoaderFactory( TestingBase ):
     def test__for_assignment_type_activity( self ):
 
         self.skipTest('todo')
-
-    @patch('CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory.QuizSubmissionRepository')
-    def test__for_quiz_type_activity( self, subRepoMock ):
-        loader = MagicMock(return_value=pd.DataFrame())
-        WorkRepositoryLoaderFactory
+    #
+    # @patch('CanvasHacks.Repositories.factories.WorkRepositoryLoaderFactory.QuizSubmissionRepository')
+    def test__for_quiz_type_activity( self ):
         self.skipTest( 'todo' )
-        subRepoMock.frame = pd.DataFrame()
 
-        # check
-        subRepoMock.frame.assert_called()
+        # loader = MagicMock(return_value=pd.DataFrame())
+        # WorkRepositoryLoaderFactory
+        # subRepoMock.frame = pd.DataFrame()
+        #
+        # # check
+        # subRepoMock.frame.assert_called()
 
 
 

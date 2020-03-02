@@ -83,7 +83,7 @@ def get_penalty( submitted_date, due_date, last_half_credit_date, grace_period=N
     """
     OLD
 
-    last_half_credit_date: Last moment they could receive half credit. If the assignment hasn't closed, submissions after this will be given 0.25 credit. This can just be set to the lock date if there's no need to give quarter credit
+    last_half_credit_date: Last moment they could receive half credit. If the unit hasn't closed, submissions after this will be given 0.25 credit. This can just be set to the lock date if there's no need to give quarter credit
     grace_period: Should be a pd.Timedelta object, e.g., pd.Timedelta('1 day').
     """
     assert (isinstance( submitted_date, pd.Timestamp ))

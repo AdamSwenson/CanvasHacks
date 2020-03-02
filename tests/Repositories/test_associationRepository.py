@@ -61,7 +61,7 @@ class TestAssociationRepository( TestingBase ):
         # obj case
         assoc = self.obj._make_associations(s)
         for a, b in assoc:
-            self.assertNotEqual(a, b,  "self-assignment multi submission; objects"  )
+            self.assertNotEqual(a, b,  "self-unit multi submission; objects"  )
 
     def test__make_associations_double_submissions_ids( self ):
         s = []
@@ -71,7 +71,7 @@ class TestAssociationRepository( TestingBase ):
         # obj case
         assoc = self.obj._make_associations(s)
         for a, b in assoc:
-            self.assertNotEqual(a, b,  "self-assignment multi submission; objects"  )
+            self.assertNotEqual(a, b,  "self-unit multi submission; objects"  )
 
     def test_assign_reviewer_raises_when_all_submitters_already_assigned( self ):
         preexisting_pairings = self.create_preexisting_review_pairings(self.activity_id, self.preexisting_students)

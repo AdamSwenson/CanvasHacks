@@ -19,7 +19,7 @@ from ipywidgets import widgets
 
 
 def make_assignment_header( store ):
-    """Displays the header for each assignment"""
+    """Displays the header for each unit"""
     entry = """
     <h1>{}</h1>
     <h2>Class id: {}</h2>"""

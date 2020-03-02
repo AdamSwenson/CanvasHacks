@@ -1,5 +1,5 @@
 """
-Objects which define the parameters/ values for the entire assignment
+Objects which define the parameters/ values for the entire unit
 
 Created by adam on 12/24/19
 """
@@ -29,8 +29,8 @@ class Activity( Model ):
 
     @classmethod
     def is_activity_type( cls, assignment_name ):
-        """Given the name of an assignment, determines
-        whether it is an instance of this assignment type"""
+        """Given the name of an unit, determines
+        whether it is an instance of this unit type"""
         return cls.regex.search( assignment_name.strip().lower() )
 
     def __init__( self, **kwargs ):
@@ -52,7 +52,7 @@ class Activity( Model ):
 
     @property
     def is_quiz_type( self ):
-        """Returns whether this is the sort of assignment
+        """Returns whether this is the sort of unit
         that uses a quiz report or not
         """
         try:
@@ -100,9 +100,9 @@ class Activity( Model ):
 
 
 class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
-    title_base = 'Topical assignment'
+    title_base = 'Topical unit'
 
-    regex = re.compile( r"\btopical assignment\b" )
+    regex = re.compile( r"\btopical unit\b" )
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
@@ -110,28 +110,28 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
 
 
 class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
-    title_base = "Content assignment"
+    title_base = "Content unit"
 
-    regex = re.compile( r"\bcontent assignment\b" )
+    regex = re.compile( r"\bcontent unit\b" )
 
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
         super().__init__( **kwargs )
         self.grace_period = pd.Timedelta('2 days')
 
-        # Code for accessing the subsequent assignment
+        # Code for accessing the subsequent unit
         self.access_code_for_next_on = Review
         self.access_code_for_next = None
 
 
 class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review component of the
-     assignment """
+     unit """
     title_base = "Peer review"
     regex = re.compile( r"\breview\b" )
 
     def __init__( self, **kwargs ):
-        # Code used to open the review assignment
+        # Code used to open the review unit
         self.access_code = None
 
         # todo access_code_for_next_on probably not needed; created without looking at what already have
@@ -143,8 +143,8 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.activity_link = None
 
         super().__init__( **kwargs )
-        self.email_subject = "Unit {} peer-review of content assignment".format( env.CONFIG.unit_number )
-        self.email_intro = "Here is another student's assignment for you to review:"
+        self.email_subject = "Unit {} peer-review of content unit".format( env.CONFIG.unit_number )
+        self.email_intro = "Here is another student's unit for you to review:"
 
 
 class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
@@ -160,7 +160,7 @@ class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
         self.email_subject = "Unit {} metareview of peer-review".format( env.CONFIG.unit_number )
-        self.email_intro = "Here is the feedback on your assignment:"
+        self.email_intro = "Here is the feedback on your unit:"
 
 
 class DiscussionForum( Activity ):
@@ -196,7 +196,7 @@ class UnitEndSurvey( Activity ):
 
 
 class Journal( Activity ):
-    """Representation of a journal assignment.
+    """Representation of a journal unit.
     Not related to assignments within a Unit
     """
     title_base = "Journal"
@@ -260,7 +260,7 @@ class Unit:
                     self.components.append( o )
 
     def find_for_unit( self, unit_number, assignments ):
-        """Given a list of assignment names finds the one's
+        """Given a list of unit names finds the one's
         relevant to this unit
         """
         rx = re.compile( r"\bunit {}\b".format( unit_number ) )
@@ -272,7 +272,7 @@ class Unit:
 
     def _set_access_code_for_next( self, obj ):
         """Sets the access code students will need for the subsequent
-        assignment on the present assignment as access_code_for_next.
+        unit on the present unit as access_code_for_next.
         NB, this must be run after all the unit.components have been
         discovered and had their access codes set
         """
@@ -283,14 +283,14 @@ class Unit:
                 next_assign = self.get_by_class(obj.access_code_for_next_on)
                 obj.access_code_for_next = next_assign.access_code
         except AttributeError:
-            print("No access code for subsequent assignment set for {}".format(obj.name))
+            print("No access code for subsequent unit set for {}".format(obj.name))
 
     def _set_access_code( self, obj ):
         """Some things will have an access code stored
         on them. Others have no access code. Some have
         the access code stored elsewhere.
         This sorts that out and sets the access code if possible.
-        NB, this sets the code for the present assignment, not the assignment
+        NB, this sets the code for the present unit, not the unit
         we will be notifying about
         """
         try:
@@ -358,7 +358,7 @@ class Unit:
                 return c
 
 # class Assignment( StoreMixin ):
-#     """Defines all constant values for the assignment"""
+#     """Defines all constant values for the unit"""
 #
 #     def __init__( self, initial_work: InitialWork, review: Review, meta_review: MetaReview, **kwargs ):
 #         """

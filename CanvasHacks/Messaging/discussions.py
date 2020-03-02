@@ -28,7 +28,7 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
-        assignment and returns what will be the message body
+        unit and returns what will be the message body
         """
         try:
             # todo
@@ -62,7 +62,7 @@ class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
-        assignment and returns what will be the message body
+        unit and returns what will be the message body
         """
         try:
             # todo

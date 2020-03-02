@@ -55,7 +55,7 @@ class AssociationRepository:
         self.session = dao.session
 
     def _make_associations( self, submitters ):
-        """Handles creating the review assignment associations.
+        """Handles creating the review unit associations.
         We use this since it builds in checks for problem cases given that
         for some assignments students may submit more than
         one item."""
@@ -72,7 +72,7 @@ class AssociationRepository:
                 # Note that this should work regardless of whether
                 # received list of student objects or just their ids
                 if b == c:
-                    # self assignment so start over
+                    # self unit so start over
                     bad = True
             if bad:
                 continue

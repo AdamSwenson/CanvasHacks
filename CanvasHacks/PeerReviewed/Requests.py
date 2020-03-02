@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
 
 def get_all_submissions( course_id, quiz_id, per_page=42 ):
-    """Downloads all initial submissions for the assignment"""
+    """Downloads all initial submissions for the unit"""
     # todo: query to server goes here
     # Holds the results from the request to server
     results = [ ]

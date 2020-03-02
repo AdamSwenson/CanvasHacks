@@ -67,7 +67,7 @@ class StatusRepository(StudentWorkMixin, IRepo):
 
     def get_record( self, student_or_id ):
         """
-        Returns the record for the student for this assignment or none
+        Returns the record for the student for this unit or none
         if no record has been created yet
         :param student_or_id:
         :return:
@@ -121,7 +121,7 @@ class StatusRepository(StudentWorkMixin, IRepo):
         This is only relevant for the metareview since need to record when the
         feedback from this student was sent out to the person who did the peer review.
         NB, notified already represents when they were
-        invited to do the metareview assignment, the results of which we are now sending
+        invited to do the metareview unit, the results of which we are now sending
         """
         print('record_sent', student)
         record = self.get_or_create_record(student)
@@ -185,7 +185,7 @@ class ComplexStatusRepository:
 
     def get_student_record( self, student_or_id ):
         """
-        Returns the record for the student for this assignment or none
+        Returns the record for the student for this unit or none
         if no record has been created yet
         :param student_or_id:
         :return:
@@ -230,7 +230,7 @@ class ComplexStatusRepository:
     def record_peer_review_results_sent( self, list_of_students ):
         """
         For each of the students (id or object), records that the initial
-        assignment has been sent to the reviewer
+        unit has been sent to the reviewer
         :param list_of_students:
         :return:
         """

@@ -14,7 +14,7 @@ from CanvasHacks.RequestTools import get_assignments_needing_grading, \
 
 def make_selection_button( item_id, name, get_func, add_func, remove_func, width='50%' ):
     """Creates a single selection button
-    style is success if the assignment has been selected
+    style is success if the unit has been selected
     style is primary if not selected
     """
 
@@ -90,7 +90,7 @@ def view_ungraded_assignments():
 
 def make_assignment_button( assignment_id, name, ):
     """Creates a single selection button
-    style is success if the assignment has been selected
+    style is success if the unit has been selected
     style is primary if not selected
     """
     return make_selection_button( assignment_id, name,

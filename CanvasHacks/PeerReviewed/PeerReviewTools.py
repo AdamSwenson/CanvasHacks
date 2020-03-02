@@ -1,7 +1,7 @@
 """
 Created by adam on 12/20/19
 """
-from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Assignment
+from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit
 from CanvasHacks.PeerReviewed.Submissions import Submission
 
 __author__ = 'adam'
@@ -30,16 +30,16 @@ def determine_overall_grade():
     }
 
 
-# -------------------------------- Elements of the assignment
+# -------------------------------- Elements of the unit
 
 
 # ---------------------------------- Student work
 
 
-class AssignmentScores( object ):
+class UnitScores( object ):
     """Holds all scores for one student"""
 
-    def __init__( self, assignment: Assignment, student: Student ):
+    def __init__( self, assignment: Unit, student: Student ):
         self.student = student
         self.assignment = assignment
 
@@ -62,12 +62,12 @@ class AssignmentScores( object ):
             ] )
 
 
-class AssignmentGradeCalculator( object ):
-    """Calculates the assignment grades for all students.
+class UnitGradeCalculator( object ):
+    """Calculates the unit grades for all students.
  """
 
-    def __init__( self, assignment: Assignment, submissions ):
-        self.assignment = assignment
+    def __init__( self, unit: Unit, submissions ):
+        self.assignment = unit
         self.submissions = submissions
         self.scores = []
 
@@ -133,7 +133,7 @@ class AssignmentGradeCalculator( object ):
     #     """Calculates the initial work portion of the
     #     score
     #     Includes:
-    #         - Credit for submitting the assignment
+    #         - Credit for submitting the unit
     #         - Credit assigned by the reviewer
     #     """
     #
@@ -164,7 +164,7 @@ class AssignmentGradeCalculator( object ):
         # Get a list of students and
         # populate our score data store
         for student in self.students:
-            scores = AssignmentScores(self.assignment, student)
+            scores = UnitScores( self.assignment, student )
 
             work = self.get_student_work( student )
 

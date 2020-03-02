@@ -88,7 +88,7 @@ class NewQuizReportDownloadLoader( INewLoader ):
 
 
 def load_student_work( csv_filepath, submissions ):
-    """Loads and processes a csv file containing all student work for the assignment
+    """Loads and processes a csv file containing all student work for the unit
     submissions: DataFrame containing student submission objects
     NB, process_work has been refactored out in CAN-11 but load_student_work
     is still here for legacy uses

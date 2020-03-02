@@ -17,7 +17,7 @@ from tests.factories.ModelFactories import *
 
 class TestAssignmentGradeCalculator( TestCase ):
     def setUp( self ):
-        # Create the assignment
+        # Create the unit
         self.assignment = unit_factory()
 
         self.student1 = student_factory()
@@ -25,7 +25,7 @@ class TestAssignmentGradeCalculator( TestCase ):
 
         self.submissions = submissions_factory( self.student1, self.student2, self.assignment )
 
-        self.obj = AssignmentGradeCalculator( self.assignment, self.submissions )
+        self.obj = UnitGradeCalculator( self.assignment, self.submissions )
 
     def test_get_submissions_for_all_subs( self ):
         c = self.obj._get_submissions( InitialWork )
@@ -75,13 +75,13 @@ class TestAssignmentGradeCalculator( TestCase ):
         self.assertEqual( len( self.obj.scores ), 2, "Number of scores matches number of students" )
 
         for s in self.obj.scores:
-            self.assertIsInstance( s, AssignmentScores )
+            self.assertIsInstance( s, UnitScores )
             self.assertGreater( s.total, 0, "Total score greater than 0" )
 
 
 class TestAssignmentGradeCalculatorAbarrentCases( TestCase ):
     def setUp( self ):
-        # Create the assignment
+        # Create the unit
         self.assignment = unit_factory()
 
         self.student1 = student_factory()
@@ -89,11 +89,11 @@ class TestAssignmentGradeCalculatorAbarrentCases( TestCase ):
 
         self.submissions = submissions_factory( self.student1, self.student2, self.assignment )
 
-        self.obj = AssignmentGradeCalculator( self.assignment, self.submissions )
+        self.obj = UnitGradeCalculator( self.assignment, self.submissions )
 
     def test_reviewer_flakes( self ):
         """The student should receive full credit for the
-        assignment if the reviewer doesn't do their part
+        unit if the reviewer doesn't do their part
         """
         pass
 

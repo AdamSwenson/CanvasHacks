@@ -82,7 +82,7 @@ def download_report( download_url, save_file_path=None ):
     will handle the download and load the data into a pandas
     dataframe
     """
-    # Request the results file for assignment
+    # Request the results file for unit
     # Open it with pandas
     frame = pd.read_csv( download_url )
 

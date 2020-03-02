@@ -62,7 +62,7 @@ class SendMetareviewToReviewer( IStep ):
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             # Work repo contains submitted meta reviews. Thus we look up
-            # review pairings where a student submitting the metareview assignment
+            # review pairings where a student submitting the metareview unit
             # is the assessee
             record = self.associationRepo.get_by_assessee( self.activity_for_review_pairings, student_id )
             if record is not None:

@@ -20,7 +20,7 @@ LOG_FOLDER = environment.CONFIG.log_folder
 # ----------------- create files
 
 def journal_folder_name( journal_name, course_id, journal_folder=JOURNAL_ARCHIVE_FOLDER ):
-    """Creates a folder to store student work for the assignment"""
+    """Creates a folder to store student work for the unit"""
     folder_name = journal_name.replace( '(', '' ).replace( ')', '' ).replace( ' ', '-' )
     return "%s/%s-%s" % (journal_folder, course_id, folder_name)
 

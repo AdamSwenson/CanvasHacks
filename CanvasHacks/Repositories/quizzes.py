@@ -46,7 +46,7 @@ from CanvasHacks.Repositories.interfaces import IContentRepository
 
 
 class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, StudentWorkMixin, SelectableMixin, FrameStorageMixin ):
-    """Manages the data for a quiz type assignment"""
+    """Manages the data for a quiz type unit"""
 
     def __init__( self, activity, course=None ):
         self.course = course
@@ -136,7 +136,7 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
 
     @property
     def submitter_ids( self ):
-        """Returns a list of canvas ids of students who have submitted the assignment"""
+        """Returns a list of canvas ids of students who have submitted the unit"""
         # try:
         return list( set( self.data.reset_index().student_id.tolist() ) )
         # except (ValueError, KeyError):
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
 
 def make_quiz_repo( course, activity, save=True ):
-    """Gets all student work data for the activity_inviting_to_complete that's part of the assignment
+    """Gets all student work data for the activity_inviting_to_complete that's part of the unit
     loads it into a QuizRepository or ReviewRepository and
     returns the repository.
     This is the main method called to get data

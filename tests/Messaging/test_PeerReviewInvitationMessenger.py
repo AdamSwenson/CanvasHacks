@@ -4,17 +4,18 @@ Created by adam on 2/22/20
 __author__ = 'adam'
 
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, create_autospec
 
 from faker import Faker
 
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.PeerReviewed.Definitions import *
 from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
+from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory
-from tests.factories.PeerReviewedFactories import activity_data_factory
+from tests.factories.PeerReviewedFactories import activity_data_factory, unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
 fake = Faker()
@@ -24,26 +25,27 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
-        self.activity_data = activity_data_factory()
-        self.activity = InitialWork( **self.activity_data )
+        self.unit = unit_factory()
+        # self.activity_data = activity_data_factory()
+        self.activity = self.unit.review #InitialWork( **self.activity_data )
 
         # student recieiving the message
         self.author = student_factory()
         self.reviewer = student_factory()
 
-        # This would be the content assignment
+        # This would be the content unit
         self.work = fake.text()
 
         self.studentRepo = StudentRepository()
         self.studentRepo.get_student = MagicMock( return_value=self.reviewer )
         self.contentRepo = ContentRepositoryMock()
         self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
-        self.statusRepository = MagicMock()
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
+        self.statusRepo = MagicMock() #create_autospec(StatusRepository)
 
     def test_prepare_message( self ):
         # student recieiving the message
-        self.obj = PeerReviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo )
+        self.obj = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.contentRepo, self.statusRepo )
 
         # call
         message_data = self.obj.prepare_message( self.review_assign )
@@ -61,15 +63,15 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         self.assertEqual( expected_content, message_data[ 'body' ], "Expected message body" )
 
         # Super important: makes sure going to right person
-        # We are sending the content assignment out for review, so the
+        # We are sending the content unit out for review, so the
         #  receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
-    @patch('CanvasHacks.Messaging.Messengers.MessageLogger')
-    @patch( 'CanvasHacks.Messaging.Messengers.ConversationMessageSender.send' )
+    @patch('CanvasHacks.Messaging.base.MessageLogger')
+    @patch( 'CanvasHacks.Messaging.SendTools.ConversationMessageSender.send' )
     def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'this would be the result of sending'
-        self.obj = PeerReviewInvitationMessenger( self.activity, self.studentRepo, self.contentRepo, self.statusRepository )
+        self.obj = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.contentRepo,  self.statusRepo )
 
         # Call
         result = self.obj.notify( [ self.review_assign ], send=True )
@@ -91,11 +93,11 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         self.assertEqual(kwargs['body'], b, "Sent with expected body")
 
         # Super important: makes sure going to right person
-        # We are sending the content assignment out for review, so the
+        # We are sending the content unit out for review, so the
         #  receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
-        self.statusRepository.record_opened.assert_called()
-        self.statusRepository.record_opened.assert_called_with(self.reviewer.id)
+        self.statusRepo.record.assert_called()
+        self.statusRepo.record.assert_called_with(self.reviewer.id)
 
-        self.obj.logger.write.assert_called()
+        # self.obj.logger.write.assert_called()

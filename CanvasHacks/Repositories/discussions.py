@@ -9,7 +9,7 @@ __author__ = 'adam'
 
 
 class DiscussionRepository( StudentWorkMixin ):
-    """Manages the data for one discussion assignment"""
+    """Manages the data for one discussion unit"""
 
     def __init__( self, course, topic_id ):
         self.topic_id = topic_id
@@ -58,18 +58,18 @@ class DiscussionRepository( StudentWorkMixin ):
         independently for testing
         """
         topic = self.course.get_discussion_topic( topic_id )
-        # Graded discussions will be tied to an assignment, so
+        # Graded discussions will be tied to an unit, so
         # we need the id
         self.assignment_id = topic.assignment_id
         print( "Assignment {} is associated with topic {}".format( self.assignment_id, topic_id ) )
-        # Load the assignment object
+        # Load the unit object
         self.assignment = self.course.get_assignment( self.assignment_id )
-        # Load all submissions for the assignment
+        # Load all submissions for the unit
         self.submissions = { s.user_id: s for s in self.assignment.get_submissions() }
-        print( "Loaded {} submissions for the assignment".format( len( self.submissions.keys() ) ) )
+        print( "Loaded {} submissions for the unit".format( len( self.submissions.keys() ) ) )
 
     def _parse_posts_from_submissions( self ):
-        """The submission objects downloaded for the assignment will
+        """The submission objects downloaded for the unit will
         have the post information stored in a list called dicussion_entries.
         This takes all of those and loads the user id, name and text into
         posts"""

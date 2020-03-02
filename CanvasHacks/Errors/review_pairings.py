@@ -11,14 +11,14 @@ if __name__ == '__main__':
 class AllAssigned(Exception):
     """Raised when every student who has submitted new has
     previously been assigned a partner. This could arise
-    if they resubmitted the assignment after the deadline and
+    if they resubmitted the unit after the deadline and
     were thus treated as new
     """
     def __init__(self, submitters):
         self.submitters = submitters
 
 class AlreadyAssigned( Exception ):
-    """Raised when the student whose work is being considered for assignment
+    """Raised when the student whose work is being considered for unit
     has already had someone else assigned to grade it
     """
     pass

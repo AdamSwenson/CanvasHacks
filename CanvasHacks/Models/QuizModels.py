@@ -65,7 +65,7 @@ class QuizDataMixin:
 
 class QuizData(Model, QuizDataMixin):
     """Holds the data which defines the properties of a
-    canvas quiz type assignment
+    canvas quiz type unit
     """
 
     def __init__(self, **kwargs):

@@ -26,7 +26,7 @@ class ReviewAssociation( Base, Model ):
 
     @property
     def is_self_assignment( self ):
-        """This will be an invalid assignment
+        """This will be an invalid unit
         but we will leave it up to something checking this property
         to raise an error or determine what to do"""
         return self.assessee_id == self.assessor_id

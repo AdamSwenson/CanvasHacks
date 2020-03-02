@@ -22,17 +22,17 @@ if __name__ == '__main__':
 def submission_result_factory(activity, student, on_time=True):
     """"""
     return {
-        # The submission's assignment id
+        # The submission's unit id
         "assignment_id": activity.id,
-        # The submission's assignment (see the assignments API) (optional)
-        "assignment": None,
+        # The submission's unit (see the assignments API) (optional)
+        "unit": None,
         # The submission's course (see the course API) (optional)
         "course": None,
         # This is the submission attempt number.
         "attempt": 1,
         # The content of the submission, if it was submitted directly in a text field.
         "body": fake.paragraph(),
-        # The grade for the submission, translated into the assignment grading scheme
+        # The grade for the submission, translated into the unit grading scheme
         # (so a letter grade, for example).
         "grade": "A-",
         # A boolean flag which is false if the student has re-submitted since the
@@ -49,7 +49,7 @@ def submission_result_factory(activity, student, on_time=True):
         # The types of submission ex:
         # ('online_text_entry'|'online_url'|'online_upload'|'media_recording')
         "submission_type": "online_text_entry",
-        # The timestamp when the assignment was submitted
+        # The timestamp when the unit was submitted
         "submitted_at": activity.due_date - pd.Timedelta("1 Day") if on_time else activity.due_date + pd.Timedelta("1 Day") ,
         # The URL of the submission (for 'online_url' submissions).
         "url": None,
@@ -68,28 +68,28 @@ def submission_result_factory(activity, student, on_time=True):
         "user": None,
         # Whether the submission was made after the applicable due date
         "late": False,
-        # Whether the assignment is visible to the user who submitted the assignment.
+        # Whether the unit is visible to the user who submitted the unit.
         # Submissions where `assignment_visible` is false no longer count towards the
-        # student's grade and the assignment can no longer be accessed by the student.
+        # student's grade and the unit can no longer be accessed by the student.
         # `assignment_visible` becomes false for submissions that do not have a grade
-        # and whose assignment is no longer assigned to the student's section.
+        # and whose unit is no longer assigned to the student's section.
         "assignment_visible": True,
-        # Whether the assignment is excused.  Excused assignments have no impact on a
+        # Whether the unit is excused.  Excused assignments have no impact on a
         # user's grade.
         "excused": True,
-        # Whether the assignment is missing.
+        # Whether the unit is missing.
         "missing": True,
         # The status of the submission in relation to the late policy. Can be late,
         # missing, none, or None.
         "late_policy_status": "missing",
         # The amount of points automatically deducted from the score by the
-        # missing/late policy for a late or missing assignment.
+        # missing/late policy for a late or missing unit.
         "points_deducted": 12.3,
         # The amount of time, in seconds, that an submission is late by.
         "seconds_late": 300,
         # The current state of the submission
         "workflow_state": "submitted",
-        # Extra submission attempts allowed for the given user and assignment.
+        # Extra submission attempts allowed for the given user and unit.
         "extra_attempts": 10,
         # A unique short ID identifying this submission without reference to the owning
         # user. Only included if the caller has administrator access for the current

@@ -70,7 +70,7 @@ class TestCallsAllExpected( TestingBase ):
 
         # check
         workLoaderMock.make.assert_called()
-        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course, only_new=False, rest_timeout=5 )
+        workLoaderMock.make.assert_called_with( self.unit.initial_work, self.course) # only_new=False, rest_timeout=5 )
 
         obj.studentRepo.download.assert_called()
 
@@ -89,7 +89,7 @@ class TestCallsAllExpected( TestingBase ):
 class TestFunctionalTestWhenQuizType( TestingBase ):
     """
     Tests the entire process in various use cases using
-    local data when the assignment is some flavor of quiz (and thus
+    local data when the unit is some flavor of quiz (and thus
     uses a quiz report)
 
     For tests of whole process which hit server, see tests.EndToEnd
@@ -104,6 +104,11 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # self.dao = SqliteDAO()
         # self.session = self.dao.session
         self.create_new_and_preexisting_students()
+        # Prepare fake work repo to give values to calling  objects
+        self.workRepo = ContentRepositoryMock()
+        self.workRepo.create_test_content( self.student_ids )
+        self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
+
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
@@ -124,12 +129,12 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         """
 
         # Prepare fake work repo to give values to calling  objects
-        workRepo = ContentRepositoryMock()
-        workRepo.create_test_content( self.student_ids )
+        # workRepo = ContentRepositoryMock()
+        # workRepo.create_test_content( self.student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
-        workRepo.submitter_ids = self.new_students_ids
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = self.new_students_ids
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         # prepare student repo
         students = { s.student_id: s for s in self.students }
@@ -201,7 +206,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # Check the content sent
         for record in obj.new_assignments:
             # print(record.assessee_id)
-            author_text = workRepo.get_formatted_work_by( record.assessee_id )
+            author_text = self.workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
             sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
             rx = r'{}'.format( author_text )
@@ -212,16 +217,16 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
     def test_raises_when_all_submitters_already_assigned( self, workLoaderMock, studentRepoMock ):
 
         # Prepare fake work repo to give values to calling  objects
-        workRepo = ContentRepositoryMock()
-        workRepo.create_test_content( self.preexisting_student_ids )
+        # workRepo = ContentRepositoryMock()
+        # workRepo.create_test_content( self.preexisting_student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
         # and the errror raised
-        workRepo.submitter_ids = self.preexisting_student_ids
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = self.preexisting_student_ids
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         studentRepoMock.download = MagicMock( return_value=self.students )
 
@@ -238,16 +243,16 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
     def test_raises_when_only_one_submission( self, workLoaderMock, studentRepoMock ):
 
         # Prepare fake work repo to give values to calling  objects
-        workRepo = ContentRepositoryMock()
-        workRepo.create_test_content( self.preexisting_student_ids )
+        # workRepo = ContentRepositoryMock()
+        # workRepo.create_test_content( self.preexisting_student_ids )
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
         # and the errror raised
-        workRepo.submitter_ids = self.preexisting_student_ids
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = self.preexisting_student_ids
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         studentRepoMock.download = MagicMock( return_value=self.students )
 
@@ -265,7 +270,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 class TestFunctionalTestWhenNonQuizType( TestingBase ):
     """
     Tests the entire process in various use cases using
-    local data when the assignment is NOT some flavor of quiz (and thus
+    local data when the unit is NOT some flavor of quiz (and thus
     does not use a quiz report)
 
     For tests of whole process which hit server, see tests.EndToEnd
@@ -282,6 +287,13 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         self.dao = SqliteDAO()
         self.session = self.dao.session
         self.create_new_and_preexisting_students()
+        # Prepare fake work repo to give values to calling  objects
+        self.workRepo = ContentRepositoryMock()
+        self.workRepo.create_test_content( self.student_ids )
+        self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
+
+        # workRepo = create_autospec( QuizRepository )
+        # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
@@ -300,13 +312,9 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         :param messengerMock:
         :return:
         """
-        # Prepare fake work repo to give values to calling  objects
-        workRepo = ContentRepositoryMock()
-        workRepo.create_test_content( self.student_ids )
-        # workRepo = create_autospec( QuizRepository )
-        # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
-        workRepo.submitter_ids = self.new_students_ids
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = self.new_students_ids
+
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         # prepare student repo
         students = { s.student_id: s for s in self.students }
@@ -377,7 +385,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # Check the content sent
         for record in obj.new_assignments:
             # print(record.assessee_id)
-            author_text = workRepo.get_formatted_work_by( record.assessee_id )
+            author_text = self.workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
             sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
             rx = r'{}'.format( author_text )
@@ -387,14 +395,15 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
     def test_raises_when_all_submitters_already_assigned( self, workLoaderMock, studentRepoMock ):
         # Prepare fake work repo to give values to calling  objects
-        workRepo = ContentRepositoryMock()
-        workRepo.create_test_content( self.preexisting_student_ids )
+        # workRepo = ContentRepositoryMock()
+        # workRepo.create_test_content( self.preexisting_student_ids )
+        # workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
         # and the errror raised
-        workRepo.submitter_ids = self.preexisting_student_ids
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = self.preexisting_student_ids
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         studentRepoMock.download = MagicMock( return_value=self.students )
 
@@ -413,12 +422,13 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
         workRepo.create_test_content( self.new_students_ids )
+        workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
         # Setting to return all the previously assigned students.
         # this should cause all the students to be filtered out
         # and the errror raised
-        workRepo.submitter_ids = [ self.new_students[ 0 ] ]
-        workLoaderMock.make = MagicMock( return_value=workRepo )
+        self.workRepo.submitter_ids = [ self.new_students[ 0 ] ]
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         studentRepoMock.download = MagicMock( return_value=self.students )
 

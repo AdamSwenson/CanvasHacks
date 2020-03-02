@@ -102,7 +102,7 @@ class WorkRepositoryLoaderFactory:
     @classmethod
     def _for_assignment_type_activity(cls, activity, course, loader, **kwargs):
         """
-        Handles the loading if the activity_inviting_to_complete uses an assignment (with no report)
+        Handles the loading if the activity_inviting_to_complete uses an unit (with no report)
         :param activity:
         :param course:
         :param loader:

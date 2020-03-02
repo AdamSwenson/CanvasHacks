@@ -62,7 +62,7 @@ class TestCallsAllExpected( TestingBase ):
 
         # check
         workLoaderMock.make.assert_called()
-        workLoaderMock.make.assert_called_with( self.unit.review, self.course, only_new=False, rest_timeout=5 )
+        workLoaderMock.make.assert_called_with( self.unit.review, self.course) # only_new=False, rest_timeout=5 )
 
         obj.studentRepo.download.assert_called()
 
@@ -83,6 +83,10 @@ class TestFunctionalTests( TestingBase ):
         self.activity_id = self.unit.review.id
         # self.dao = SqliteDAO()
         self.create_new_and_preexisting_students()
+        # Prepare fake work repo to give values to calling  objects
+        self.workRepo = ContentRepositoryMock()
+        self.workRepo.create_test_content( self.student_ids )
+        self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
     def test_instantiates_correct_status_repo( self ):
         """The sending of metareview results requires a

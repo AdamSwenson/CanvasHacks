@@ -20,13 +20,13 @@ class AssignmentDownloadLoader( ILoader ):
     @staticmethod
     def load( activity, course, save=True, **kwargs ):
         """
-        Handles loading data for a non-quiz assignment
+        Handles loading data for a non-quiz unit
         :param activity:
         :param course:
         :param kwargs:
         :return: DataFrame
         """
-        # We need the canvas.api.assignment object
+        # We need the canvas.api.unit object
         assignment = AssignmentDownloadLoader.get_assignment( course, activity )
         subRepo = AssignmentSubmissionRepository( assignment )
 

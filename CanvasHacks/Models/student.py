@@ -73,7 +73,8 @@ class Student( Base, StoreMixin ):
     short_name = Column(String)
     sis_user_id = Column(Integer)
 
-    # def __init__( self, student_id=None, **kwargs ):
+    def __init__( self, **kwargs ):
+        self.handle_kwargs(**kwargs)
     #     self.student_id = int(student_id)
     #     # self.name = name
     #

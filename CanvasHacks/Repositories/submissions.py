@@ -20,7 +20,7 @@ class SubmissionRepository( ISubmissionRepo ):
     def __init__( self, assignment: canvasapi.assignment.Assignment ):
         """
 
-        :param assignment: Canvas api assignment object for use in downloading
+        :param assignment: Canvas api unit object for use in downloading
         """
         self.assignment = assignment
         self.download()
@@ -30,7 +30,7 @@ class SubmissionRepository( ISubmissionRepo ):
         self.data = [ s for s in self.assignment.get_submissions() ]
         for d in self.data:
             d.body = extract_body( d )
-        print( "Downloaded {} submissions for assignment id {}".format( len( self.data ), self.assignment.id ) )
+        print( "Downloaded {} submissions for unit id {}".format( len( self.data ), self.assignment.id ) )
 
     @property
     def ungraded_submissions( self ):
@@ -54,8 +54,8 @@ class SubmissionRepository( ISubmissionRepo ):
                         'workflow_state': r.workflow_state,
                         'late': r.late
                         } )
-            # s.append( { 'course_id': int( self.assignment.course_id ),
-            #             'quiz_id': int( self.assignment.id ),
+            # s.append( { 'course_id': int( self.unit.course_id ),
+            #             'quiz_id': int( self.unit.id ),
             #             'student_id': int( r[ 'user_id' ] ),
             #             'submission_id': int( r[ 'id' ] ),
             #             'attempt': int( r[ 'attempt' ] )
@@ -83,7 +83,7 @@ class AssignmentSubmissionRepository( SubmissionRepository ):
     def __init__( self, assignment: canvasapi.assignment.Assignment ):
         """
 
-        :param assignment: Canvas api assignment object for use in downloading
+        :param assignment: Canvas api unit object for use in downloading
         """
         self.assignment = assignment
         self.download()
@@ -135,7 +135,7 @@ class QuizSubmissionRepository( ISubmissionRepo ):
         """
         Should get quiz object with something like
             quiz = environment.CONFIG.course.get_quiz(activity_inviting_to_complete.quiz_id)
-        :param quiz: Canvas api assignment object for use in downloading
+        :param quiz: Canvas api unit object for use in downloading
         """
         self.quiz = quiz
         self.download()

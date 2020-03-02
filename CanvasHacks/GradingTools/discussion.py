@@ -20,7 +20,7 @@ class DiscussionGrader(IGrader):
         super().__init__(**kwargs)
 
     def grade( self ):
-        """Assigns a provisional grade for the discussion assignment
+        """Assigns a provisional grade for the discussion unit
         Will return as a list of tuples
         todo: Add logging of details of how grade assigned
         """
@@ -47,7 +47,7 @@ class DiscussionGrader(IGrader):
 
 #
 # def assign_grades(discussion_repo, num_posts_required):
-#     """Assigns a provisional grade for the discussion assignment
+#     """Assigns a provisional grade for the discussion unit
 #     """
 #     credit_per_post = 100 / num_posts_required
 #

@@ -10,7 +10,7 @@ __author__ = 'adam'
 
 class TestEnsure_timestamps( TestCase ):
     def test_ensure_timestamps( self ):
-        self.fail()
+        self.skipTest('todo')
 
 
 class TestGet_penalty( TestCase ):

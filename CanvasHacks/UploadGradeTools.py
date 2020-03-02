@@ -16,7 +16,7 @@ from CanvasHacks.UrlTools import make_url
 
 def upload_students_receiving_credit( store: DataStore ):
     """Makes the requests to the server to assign each of the students credit
-    for the assignment
+    for the unit
     Hits https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.update
     """
     if isinstance(store, DataStoreNew):
@@ -56,7 +56,7 @@ def upload_credit( course_id, assignment_id, student_id, pct_credit ):
 
 def assign_no_credit( course_id, assignment_id, students ):
     """Makes the requests to the server to assign each of the students no credit
-    for the assignment
+    for the unit
     """
     data = { 'submission': { 'posted_grade': 'fail' } }
 
@@ -72,7 +72,7 @@ def assign_no_credit( course_id, assignment_id, students ):
 
 
 def make_upload_button( store ):
-    """Displays a button for each assignment. When the button
+    """Displays a button for each unit. When the button
     is clicked it uploads grades for all students in the complete list
     The button's styling changes while uploading and again when complete
     """

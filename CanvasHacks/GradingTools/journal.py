@@ -21,7 +21,7 @@ class JournalGrader( IGrader ):
         self.grade_method = self.activity.grade_method
 
     def grade( self ):
-        """Assigns a provisional grade for the discussion assignment
+        """Assigns a provisional grade for the discussion unit
         Will return as a list of tuples
         todo: Add logging of details of how grade assigned
 

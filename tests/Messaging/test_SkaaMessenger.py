@@ -1,7 +1,7 @@
 """
 Created by adam on 12/26/19
 """
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, create_autospec
 
 from faker import Faker
 
@@ -11,7 +11,7 @@ fake = Faker()
 
 from CanvasHacks.Messaging.skaa import *
 from CanvasHacks.PeerReviewed.Definitions import *
-from tests.factories.PeerReviewedFactories import activity_data_factory
+from tests.factories.PeerReviewedFactories import activity_data_factory, unit_factory
 from tests.factories.ModelFactories import student_factory
 from CanvasHacks.Repositories.students import StudentRepository
 from tests.factories.RepositoryMocks import ContentRepositoryMock
@@ -61,7 +61,7 @@ class TestStudentNotices( TestingBase ):
 #         # Add any materials from me
 #         'other': other,
 #
-#         # Add code and link to do reviewing assignment
+#         # Add code and link to do reviewing unit
 #         'review_assignment_name': activity_inviting_to_complete.name,
 #         'access_code': activity_inviting_to_complete.access_code,
 #         'review_url': activity_inviting_to_complete.html_url,
@@ -75,6 +75,7 @@ class TestSkaaMessenger(TestingBase):
 
     def setUp(self):
         self.config_for_test()
+        self.unit = unit_factory()
         self.activity_data = activity_data_factory()
         self.activity = Activity(**self.activity_data)
         # student recieiving the message
@@ -84,6 +85,7 @@ class TestSkaaMessenger(TestingBase):
         self.studentRepo = StudentRepository()
         self.studentRepo.get_student = MagicMock( return_value=self.receiving_student )
         self.contentRepo = ContentRepositoryMock()
+        self.statusRepo = create_autospec( StatusRepository )
 
     def test__make_message_data(self):
         self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.reviewed_student_work)
@@ -91,12 +93,13 @@ class TestSkaaMessenger(TestingBase):
 
         # parent class doesn't define message_template
         testing_template = """{intro} {name} {responses} {other} 
-        {review_assignment_name} {access_code} {review_url} {due_date}
+        {review_assignment_name} {access_code_message} {review_url} {due_date}
         """
 
-        self.obj = SkaaMessenger(self.activity, self.studentRepo, self.contentRepo)
+        self.obj = SkaaMessenger(self.activity, self.studentRepo, self.contentRepo, self.statusRepo)
 
         self.obj.message_template = testing_template
+        self.obj.activity_inviting_to_complete = self.activity
 
         # Call
         result = self.obj._make_message_data( self.receiving_student, self.reviewed_student_work )

@@ -65,7 +65,7 @@ class TestBagStore( TestCase ):
         for name in test_data.keys():
             # check that bag was stored
             self.assertTrue(test_data[name] is store.assignment_bags[name])
-            # check assignment words
+            # check unit words
             self.assertTrue(len(store.assignment_words[name]) is 4)
 
 

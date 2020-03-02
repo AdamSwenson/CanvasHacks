@@ -13,25 +13,25 @@ if __name__ == '__main__':
 
 class TestQuizData( TestCase ):
     def test_course_id( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test_due_date( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test_quarter_credit_date( self ):
-        self.fail()
+        self.skipTest( 'todo ' )
 
     def test_quarter_credit_date( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test_lock_date( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test_name( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test_set_question_columns( self ):
-        self.fail()
+        self.skipTest('todo ')
 
     def test__detect_question_columns( self ):
         test = [ 'submitted', 'attempt', "1785114: \nWhat is an example of persuasive advertising?", '1.0' ]

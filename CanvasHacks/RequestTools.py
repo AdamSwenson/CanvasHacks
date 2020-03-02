@@ -70,7 +70,7 @@ def send_put_request( url, data ):
 
 
 # Assignments
-# Get assignment list
+# Get unit list
 def get_all_course_assignments( course_id ):
     """Returns a list of all the assignments for the course
     Uses api: GET /api/v1/courses/:course_id/assignments
@@ -81,7 +81,7 @@ def get_all_course_assignments( course_id ):
 
 
 def get_assignment( course_id, assignment_id ):
-    """Retrieves the specified assignment and returns it as a dictionary"""
+    """Retrieves the specified unit and returns it as a dictionary"""
     url = make_url( course_id, 'assignments' )
     url = "%s/%s" % (url, assignment_id)
     #     print(url)

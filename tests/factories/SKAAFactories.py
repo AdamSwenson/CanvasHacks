@@ -104,7 +104,7 @@ def populate_discussion( tokens: list, topic_id: int, deep: int, course_id: int 
 def populate_assignment( tokens: list, assignment_id: int, course_id: int ):
     """Uploads a paragraph of response text for each token provided
     in tokens.
-    :param assignment_id: The identifier of the canvas assignment to populate
+    :param assignment_id: The identifier of the canvas unit to populate
     :param course_id: The canvas id of the course
     :param tokens: List of student access token strings
     :returns List of Submission objects returned from server

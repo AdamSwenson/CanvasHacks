@@ -26,7 +26,9 @@ class SkaaMessenger:
         self.unit = unit
         self.student_repository = student_repository
         self.content_repository = content_repository
+
         # self.activity_inviting_to_complete = activity_inviting_to_complete
+
         # Object responsible for actually sending message
         self.sender = ConversationMessageSender()
         # Objec in charge of logging statuses
@@ -69,7 +71,7 @@ class SkaaMessenger:
             # Add any materials from me
             'other': other if other is not None else "",
 
-            # Add code and link to do reviewing assignment
+            # Add code and link to do reviewing unit
             'review_assignment_name': self.activity_inviting_to_complete.name,
             'access_code_message': self._make_access_code_message(),
             'review_url': self.activity_inviting_to_complete.html_url,
@@ -78,7 +80,7 @@ class SkaaMessenger:
         return d
 
     def _make_access_code_message( self ):
-        """Adds text with the access code for the next assignment if a code
+        """Adds text with the access code for the next unit if a code
         exists otherwise returns an empty string
         """
         tmpl = "Here's the access code: {}"
@@ -88,13 +90,13 @@ class SkaaMessenger:
         return ""
 
     def prepare_message( self, review_assignment, other=None ):
-        """Creates the message data for sending specific to the assignment"""
+        """Creates the message data for sending specific to the unit"""
         raise NotImplementedError
 
     def notify( self, review_assignments, send=False, other=None ):
-        """Given a list of review assignment objects, sends the
+        """Given a list of review unit objects, sends the
         appropriate notification message to the correct person
-        for the assignment
+        for the unit
         """
         messages = [ ]
         for rev in review_assignments:
