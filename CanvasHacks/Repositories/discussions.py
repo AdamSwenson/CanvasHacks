@@ -1,23 +1,24 @@
 """
 Created by adam on 1/27/20
 """
-from CanvasHacks.Repositories.interfaces import IRepo
+from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Repositories.mixins import StudentWorkMixin
 from CanvasHacks.UploadGradeTools import upload_credit
 
 __author__ = 'adam'
 
 
-class DiscussionRepository( StudentWorkMixin ):
+class DiscussionRepository( IContentRepository, StudentWorkMixin ):
     """Manages the data for one discussion unit"""
 
-    def __init__( self, course, topic_id ):
-        self.topic_id = topic_id
+    def __init__( self, activity, course ):
+        self.activity = activity
+        self.topic_id = activity.topic_id
         self.course = course
-        # List of dictionaries from arsed data:
+
+        # List of dictionaries from parsed data:
         # [{'student_id', 'student_name', 'text'}]
-        self.data = []
-        # self.posts = []
+        self.data = [ ]
 
     @property
     def course_id( self ):
@@ -28,29 +29,6 @@ class DiscussionRepository( StudentWorkMixin ):
         self._get_submissions( self.topic_id )
         self._parse_posts_from_submissions()
         print( "Loaded {} posts".format( len( self.data ) ) )
-
-    # def _get_discussion_entries(self, topic_id):
-    #     """
-    #     THIS WON'T WORK BECAUSE ONLY RETURNS TOP LEVEL ENTRIES
-    #     Loads and returns a list of discussion objects.
-    #         Objects look something like:
-    #         {'id': 2132485, 'user_id': 169155,
-    #         'parent_id': None, 'created_at': '2020-01-16T23:01:53Z',
-    #         'updated_at': '2020-01-16T23:01:53Z', 'rating_count': None,
-    #         'rating_sum': None, 'user_name': 'Test Student',
-    #         'message': '<p>got em</p>', 'user': {'id': 169155,
-    #         'display_name': 'Test Student',
-    #         'avatar_image_url': 'https://canvas.csun.edu/images/messages/avatar-50.png',
-    #         'html_url': 'https://canvas.csun.edu/courses/85210/users/169155',
-    #         'pronouns': None, 'fake_student': True},
-    #         'read_state': 'unread', 'forced_read_state': False,
-    #         'discussion_id': 737847, 'course_id': 85210}
-    #     """
-    #     discussion = self.course.get_discussion_topic(topic_id)
-    #     # result is lazy loaded, so iterate through it
-    #     # self.data = [e for e in discussion.get_entries()]
-    #     self.data = [e for e in discussion.get_topic_entries()]
-    #     return self.data
 
     def _get_submissions( self, topic_id ):
         """Retrieves all the information we'll need for grading
@@ -84,16 +62,16 @@ class DiscussionRepository( StudentWorkMixin ):
 
     def get_student_posts( self, student_id ):
         """Returns a list of all posts by student for the topic"""
-        return [ p['text'] for p in self.data if p['student_id'] == student_id ]
+        return [ p[ 'text' ] for p in self.data if p[ 'student_id' ] == student_id ]
 
         # return [ p.message for p in self.data if p.user_id == student_id ]
 
-    def get_formatted_work( self, student_id ):
+    def get_formatted_work_by( self, student_id ):
         """Returns all posts by the student, formatted for
         sending out for review or display"""
-        posts = self.get_student_posts(student_id)
+        posts = self.get_student_posts( student_id )
         # self._check_empty(posts)
-        posts = "\n        -------        \n".join(posts)
+        posts = "\n        -------        \n".join( posts )
         return posts
 
     def upload_student_grade( self, student_id, pct_credit ):
@@ -113,6 +91,12 @@ class DiscussionRepository( StudentWorkMixin ):
         return self.data
         # [ e for e in self.data ]
 
+    @property
+    def submitter_ids( self ):
+        """Returns a list of canvas ids of students who have submitted the unit"""
+        # try:
+        return list( set( [ s[ 'student_id' ] for s in self.data ] ) )
+
     # return [ (e.user_id, e.user_name, e.message) for e in self.data ]
 
     # @property
@@ -126,10 +110,33 @@ class DiscussionRepository( StudentWorkMixin ):
         """Returns list of tuples
         ( student id, # of posts )
         """
-        counts = []
+        counts = [ ]
         for sid in self.student_ids:
-            counts.append((sid, len([ s for s in self.data if s['student_id'] == sid])))
+            counts.append( (sid, len( [ s for s in self.data if s[ 'student_id' ] == sid ] )) )
         return counts
+
+    # def _get_discussion_entries(self, topic_id):
+    #     """
+    #     THIS WON'T WORK BECAUSE ONLY RETURNS TOP LEVEL ENTRIES
+    #     Loads and returns a list of discussion objects.
+    #         Objects look something like:
+    #         {'id': 2132485, 'user_id': 169155,
+    #         'parent_id': None, 'created_at': '2020-01-16T23:01:53Z',
+    #         'updated_at': '2020-01-16T23:01:53Z', 'rating_count': None,
+    #         'rating_sum': None, 'user_name': 'Test Student',
+    #         'message': '<p>got em</p>', 'user': {'id': 169155,
+    #         'display_name': 'Test Student',
+    #         'avatar_image_url': 'https://canvas.csun.edu/images/messages/avatar-50.png',
+    #         'html_url': 'https://canvas.csun.edu/courses/85210/users/169155',
+    #         'pronouns': None, 'fake_student': True},
+    #         'read_state': 'unread', 'forced_read_state': False,
+    #         'discussion_id': 737847, 'course_id': 85210}
+    #     """
+    #     discussion = self.course.get_discussion_topic(topic_id)
+    #     # result is lazy loaded, so iterate through it
+    #     # self.data = [e for e in discussion.get_entries()]
+    #     self.data = [e for e in discussion.get_topic_entries()]
+    #     return self.data
 
 
 if __name__ == '__main__':

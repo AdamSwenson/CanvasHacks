@@ -6,6 +6,7 @@ Created by adam on 2/24/20
 from unittest.mock import MagicMock
 
 from CanvasHacks.Loaders.assignment import AssignmentDownloadLoader
+from CanvasHacks.Loaders.discussion import DiscussionDownloadLoader, DiscussionFileLoader
 from CanvasHacks.Loaders.factories import LoaderFactory, QuizLoaderFactory
 from CanvasHacks.Loaders.quiz import AllQuizReportDownloader, AllQuizReportFileLoader, NewQuizReportDownloadLoader, \
     NewQuizReportFileLoader
@@ -21,6 +22,14 @@ class TestLoaderFactory( TestingBase ):
         self.config_for_test()
         self.course = MagicMock()
         self.unit = unit_factory()
+
+    def test_returns_discussion_download_loader( self ):
+        r = LoaderFactory.make(is_discussion=True)
+        self.assertEqual(r, DiscussionDownloadLoader)
+
+    def test_returns_discussion_file_loader( self ):
+        r = LoaderFactory.make(is_discussion=True, download=False)
+        self.assertEqual(r, DiscussionFileLoader)
 
     def test_returns_assignment_loader( self ):
         r = LoaderFactory.make( is_quiz=False )

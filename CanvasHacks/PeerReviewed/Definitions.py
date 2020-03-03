@@ -68,6 +68,14 @@ class Activity( Model ):
             return False
 
     @property
+    def is_discussion_type( self ):
+        """Returns whether this is a discussion.
+        Mainly used to simplify decisions elsewhere
+        so that we don't have to check for discussion
+        type """
+        return isinstance(self, DiscussionForum)
+
+    @property
     def last_half_credit_date( self ):
         """If a quarter credit deadline has been set
         this will return that value, otherwise it will just
@@ -235,6 +243,13 @@ class DiscussionForum( Activity ):
 
     def create_on_canvas( self, course ):
         course.create_quiz()
+
+    @property
+    def topic_id( self ):
+        try:
+            return self.discussion_topic['id']
+        except KeyError:
+            print("No topic id set on discussion ")
 
 
 class DiscussionReview( Activity, QuizDataMixin, StoredDataFileMixin ):

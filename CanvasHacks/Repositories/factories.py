@@ -5,8 +5,9 @@ __author__ = 'adam'
 
 from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded
 from CanvasHacks.Loaders.quiz import NewQuizReportFileLoader, AllQuizReportFileLoader
-from CanvasHacks.PeerReviewed.Definitions import Review
+from CanvasHacks.PeerReviewed.Definitions import Review, DiscussionForum
 from CanvasHacks.Repositories.assignments import AssignmentRepository
+from CanvasHacks.Repositories.discussions import DiscussionRepository
 from CanvasHacks.Repositories.quizzes import ReviewRepository, QuizRepository
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 from CanvasHacks.Loaders.factories import LoaderFactory
@@ -60,7 +61,10 @@ class WorkRepositoryLoaderFactory:
         """
         # Get the object which handles loading student data
         # The params will determine whether this is from file or download
-        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, **kwargs) #download=True, only_new=only_new, **kwargs )
+        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, is_discussion=activity.is_discussion_type, **kwargs)
+
+        if activity.is_discussion_type:
+            return cls._for_discussion_type_activity(activity, course, loader, **kwargs)
 
         if activity.is_quiz_type:
             # If uses a quiz report, downloads report and populates the
@@ -120,4 +124,17 @@ class WorkRepositoryLoaderFactory:
 
         return repo
 
+    @classmethod
+    def _for_discussion_type_activity( cls, activity, course, loader, **kwargs ):
+        repo = DiscussionRepository(activity, course)
+        # todo refactor the downloading stuff out of the repository and into the loader
+        repo.download()
+        #
+        # student_work_frame = loader.load( activity, course, **kwargs )
+        #
+        if len(repo.data) == 0:
+            raise NoStudentWorkDataLoaded
+        #
+        # repo.process( student_work_frame )
 
+        return repo

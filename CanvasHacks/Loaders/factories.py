@@ -4,6 +4,7 @@ Created by adam on 2/26/20
 __author__ = 'adam'
 
 from CanvasHacks.Loaders.assignment import AssignmentDownloadLoader
+from CanvasHacks.Loaders.discussion import DiscussionFileLoader, DiscussionDownloadLoader
 from CanvasHacks.Loaders.interfaces import ILoaderFactory
 from CanvasHacks.Loaders.quiz import AllQuizReportDownloader, AllQuizReportFileLoader, NewQuizReportDownloadLoader, \
     NewQuizReportFileLoader
@@ -27,6 +28,13 @@ class LoaderFactory( ILoaderFactory ):
         :param kwargs:
         :return:
         """
+        try:
+            if kwargs['is_discussion']:
+                return DiscussionLoaderFactory.make(*args, **kwargs)
+        except KeyError:
+            # Fall through to next set
+            pass
+
         try:
             if kwargs[ 'is_quiz' ]:
                 return QuizLoaderFactory.make( *args, **kwargs )
@@ -64,3 +72,14 @@ class QuizLoaderFactory( ILoaderFactory ):
             return NewQuizReportFileLoader
 
         return AllQuizReportFileLoader
+
+
+class DiscussionLoaderFactory(ILoaderFactory):
+
+    @staticmethod
+    def make( download=True, **kwargs ):
+
+        if download:
+            return DiscussionDownloadLoader
+
+        return DiscussionFileLoader

@@ -20,6 +20,12 @@ class ConversationMessageSender( ISender ):
 
     def __init__( self ):
         self.url = 'https://canvas.csun.edu/api/v1/conversations'
+        self.sent_count = 0
+        self.errors = []
+
+    @property
+    def error_count( self ):
+        return len(self.errors)
 
     def make_conversation_data( self, student_id, subject, body ):
         """Creates the request data to be sent to canvas"""
@@ -38,9 +44,12 @@ class ConversationMessageSender( ISender ):
        """
         try:
             d = self.make_conversation_data( student_id, subject, body )
+            result = send_post_request( self.url, d )
+            self.sent_count += 1
+            return result
 
-            return send_post_request( self.url, d )
         except Exception as e:
+            self.errors.append(e)
             raise MessageSendError(e)
 
 

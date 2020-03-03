@@ -12,7 +12,8 @@ import random
 import pandas as pd
 import pytz
 fake = Faker()
-from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit
+from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit, DiscussionReview, \
+    DiscussionForum
 
 from CanvasHacks.PeerReviewed.Submissions import SubmissionFactory
 from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_comment_result_factory, submission_result_factory
@@ -37,7 +38,9 @@ def test_data_factory():
     return {
         'initial': activity_data_factory(),
         'review': activity_data_factory(),
-        'metareview': activity_data_factory()
+        'metareview': activity_data_factory(),
+        'discussion_forum': activity_data_factory(),
+        'discussion_review' : activity_data_factory()
     }
 
 
@@ -50,17 +53,28 @@ def unit_factory(course=None, unit_number=None, initial_is_quiz_type=True):
     initial.id = random.randint( 0, 10000 )
     if initial_is_quiz_type:
         initial.quiz_id = initial.id
+    # review
     review = Review( **test_data[ 'review' ] )
     review.id = random.randint( 0, 10000 )
     review.quiz_id = review.id
     review.access_code = fake.ean8()
     review.activity_link = fake.uri()
+    # metareview
     meta = MetaReview( **test_data[ 'metareview' ] )
     meta.id = random.randint( 0, 10000 )
     meta.access_code = fake.ean8()
     meta.quiz_id = meta.id
+    # discussion forum
+    discussion_forum = DiscussionForum(**test_data['discussion_forum'])
+    discussion_forum.id = random.randint( 0, 10000 )
+    discussion_forum.access_code = fake.ean8()
+    # discussion review
+    discussion_review = DiscussionReview(**test_data['discussion_review'])
+    discussion_review.id = random.randint( 0, 10000 )
+    discussion_review.access_code = fake.ean8()
+
     unit = Unit( course, unit_number )
-    unit.components = [initial, review, meta]
+    unit.components = [initial, review, meta, discussion_forum, discussion_review]
     return unit
 
 

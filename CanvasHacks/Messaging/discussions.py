@@ -23,21 +23,19 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
 
         super().__init__( unit, student_repository, content_repository, status_repository )
 
-        self.subject = "Discussion forum posts for you to review"
-        self.intro = "Here are some posts by another student for you to review. "
+        # self.subject = "Discussion forum posts for you to review"
+        # self.intro = "Here are some posts by another student for you to review. "
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
         unit and returns what will be the message body
         """
         try:
-            # todo
-
             # We are going to send the posts to the reviewer
             receiving_student = self.student_repository.get_student( review_assignment.assessor_id )
 
-            # The assessor did the work that we want to send
-            # to the assessee
+            # The assessee did the work (i.e., posts) that we want to send
+            # to the assesor
             content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
             return self._make_message_data( receiving_student, content, other=None )
@@ -50,6 +48,7 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
 
 class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
     message_template = DISCUSSION_REVIEW_FEEDBACK_TEMPLATE
+    email_subject = "Feedback on your discussion forum posts"
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repository: StatusRepository ):
@@ -57,7 +56,7 @@ class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
 
         super().__init__( unit, student_repository, content_repository, status_repository )
 
-        self.subject = "Discussion forum posts for you to review"
+        # self.subject = "Discussion forum posts for you to review"
         self.intro = "Here are some posts by another student for you to review. "
 
     def prepare_message( self, review_assignment, other=None ):

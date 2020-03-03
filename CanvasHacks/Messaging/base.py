@@ -35,6 +35,14 @@ class SkaaMessenger:
         self.status_repository = status_repository
         self.logger = MessageLogger()
 
+    @property
+    def sent_count( self ):
+        return self.sender.sent_count
+
+    @property
+    def send_errors( self ):
+        return self.sender.errors
+
     def _make_message_data( self, receiving_student, content, other=None ):
         """
         Creates a dictionary with data to be passed to the
@@ -118,7 +126,7 @@ class SkaaMessenger:
                     # For the peer review, the reviewer will be marked as notified
                     # For the metareview the author will be marked as notified
                     # self.status_repository.record_opened( message_data[ 'student_id' ] )
-                print( "Message sent", m )
+                # print( "Message sent", m )
             else:
                 # For test runs
                 messages.append( message_data )

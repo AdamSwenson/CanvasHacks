@@ -1,4 +1,11 @@
 """
+Created by adam on 3/2/20
+"""
+__author__ = 'adam'
+
+from CanvasHacks.Messaging.discussions import DiscussionReviewInvitationMessenger
+
+"""
 Created by adam on 2/23/20
 """
 import CanvasHacks.testglobals
@@ -15,7 +22,7 @@ __author__ = 'adam'
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 
 
-class SendInitialWorkToReviewer( IStep ):
+class SendForumPostsToReviewer( IStep ):
 
     def __init__( self, course=None, unit=None, is_test=None, send=True, **kwargs ):
         """
@@ -26,19 +33,19 @@ class SendInitialWorkToReviewer( IStep ):
         """
         super().__init__( course, unit, is_test, send, **kwargs )
         # The activity_inviting_to_complete whose results we are going to be doing something with
-        self.activity = unit.initial_work
+        self.activity = unit.discussion_forum
 
-        # The activity_inviting_to_complete which we are inviting the receiving student to complete
-        self.activity_notifying_about = unit.review
+        # The activity which we are inviting the receiving student to complete
+        self.activity_notifying_about = unit.discussion_review
 
         # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
-        self.activity_for_review_pairings = unit.initial_work
+        self.activity_for_review_pairings = unit.discussion_forum
 
         self._initialize()
 
     def run( self, **kwargs):
         """
-        Loads content assignments, assigns reviewers, and sends formatted
+        Loads discussion forum posts, assigns reviewers, and sends formatted
         work to reviewer
          only_new=False, rest_timeout=5
         :param rest_timeout: Number of seconds to wait for canvas to generate report
@@ -56,7 +63,7 @@ class SendInitialWorkToReviewer( IStep ):
             # Check if new submitters, bail if not
             print( "No new submissions" )
             # todo Log run failure
-            RunLogger.log_no_submissions(self.unit.initial_work)
+            RunLogger.log_no_submissions(self.activity)
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise NoNewSubmissions
@@ -85,14 +92,16 @@ class SendInitialWorkToReviewer( IStep ):
         # Send the work to the reviewers
         # Note that we still do this even if send is false because
         # the messenger will print out the messages rather than sending them
-        self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+        self.messenger = DiscussionReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
         self.messenger.notify( self.new_assignments, self.send )
-        # self.messenger.notify( self.associationRepo.data, self.send )
+
         #  todo Want some way of tracking if messages fail to send so can resend
         # Log the run
-        msg = "Created {} peer review assignments \n {}".format( len( self.new_assignments ), self.new_assignments )
+        msg = "New peer review assignments: \t {} \n Notices sent successfully: \t {} \n Send errors: \t {} \n Errors: {}".format( len( self.new_assignments ), self.messenger.sent_count, len(self.messenger.send_errors), self.messenger.send_errors )  # self.new_assignments )
+        print(msg)
         RunLogger.log_reviews_assigned( self.activity_notifying_about, msg )
 
     def _assign_step( self ):
@@ -110,18 +119,17 @@ class SendInitialWorkToReviewer( IStep ):
         print("downloaded {} records".format(prelen))
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
-        # hotfix needed to filter unsubmitted for non quiz ca
-        self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
-        if isinstance(self.work_repo.data, pd.DataFrame):
-            self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
-
-        print("Removed {} empty or non submitted".format(prelen - len(self.work_repo.data)))
+        # if isinstance(self.work_repo.data, pd.DataFrame):
+        #     self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
+        #
+        # print("Removed {} empty or non submitted".format(prelen - len(self.work_repo.data)))
 
     @property
     def audit_frame( self ):
-        return self.associationRepo.audit_frame(self.studentRepo)
-
+        return self.associationRepo.audit_frame( self.studentRepo )
 
 
 if __name__ == '__main__':
     pass
+
+

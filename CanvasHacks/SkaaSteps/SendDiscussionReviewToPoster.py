@@ -1,7 +1,11 @@
 """
-Created by adam on 2/23/20
+Created by adam on 3/2/20
 """
+__author__ = 'adam'
+
+
 from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
+from CanvasHacks.Messaging.discussions import FeedbackFromDiscussionReviewMessenger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -12,9 +16,8 @@ from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 __author__ = 'adam'
 
 
-class SendReviewToReviewee(IStep):
-    """Handles loading the submitted reviews and routing them to the authors'
-    with instructions for completing the metareview
+class SendDiscussionReviewToPoster(IStep):
+    """Handles loading the submitted reviews and routing them to the authors
     """
 
     def __init__(self, course=None, unit=None, is_test=None, send=True, **kwargs):
@@ -26,13 +29,13 @@ class SendReviewToReviewee(IStep):
         """
         super().__init__(course, unit, is_test, send, **kwargs)
         # The activity whose results we are going to be doing something with
-        self.activity = unit.review
+        self.activity = unit.discussion_review
 
         # The activity_inviting_to_complete which we are inviting the receiving student to complete
-        self.activity_notifying_about = unit.metareview
+        self.activity_notifying_about = unit.discussion_review
 
         # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
-        self.activity_for_review_pairings = unit.initial_work
+        self.activity_for_review_pairings = unit.discussion_review
 
         self.associations = [ ]
 
@@ -65,17 +68,20 @@ class SendReviewToReviewee(IStep):
 
     def _message_step( self ):
         # Handle sending the results of the review to the original author
-        # so they can do the metareview
-        self.messenger = MetareviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+        self.messenger = FeedbackFromDiscussionReviewMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
         self.messenger.notify( self.associations, self.send )
-        # messages = self.messenger.notify(self.associationRepo.data, self.send)
+
         # Log the run
         msg = "Sent {} peer review results \n {}".format( len( self.associations ), self.associations )
         # Note we are distributing the material for the metareview, that's
         # why we're using that activity_inviting_to_complete.
-        RunLogger.log_review_feedback_distributed( self.unit.metareview, msg )
+        RunLogger.log_review_feedback_distributed( self.unit.discussion_review, msg )
 
     def _assign_step( self ):
+        """
+        Do stuff with the review assignments
+        :return:
+        """
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             try:
@@ -104,6 +110,7 @@ class SendReviewToReviewee(IStep):
         self.work_repo.remove_student_records( self.notificationStatusRepo.previously_notified_students )
         postlen = len(self.work_repo.data)
         print("Filtered out {} students who have already been notified".format(prelen - postlen))
+
 
 
 if __name__ == '__main__':
