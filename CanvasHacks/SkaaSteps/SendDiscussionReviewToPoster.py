@@ -31,10 +31,13 @@ class SendDiscussionReviewToPoster(IStep):
         # The activity whose results we are going to be doing something with
         self.activity = unit.discussion_review
 
-        # The activity_inviting_to_complete which we are inviting the receiving student to complete
+        # The activity which we are sending stuff about
+        # NB, since both activity and activity_notifying_about are the discussion review
+        # the initialization step will load the status repository which records when
+        # people are sent feedback from their reviewer
         self.activity_notifying_about = unit.discussion_review
 
-        # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
+        # The activity whose id is used to store review pairings for the whole SKAA
         self.activity_for_review_pairings = unit.discussion_review
 
         self.associations = [ ]
@@ -69,7 +72,9 @@ class SendDiscussionReviewToPoster(IStep):
     def _message_step( self ):
         # Handle sending the results of the review to the original author
         self.messenger = FeedbackFromDiscussionReviewMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
-        self.messenger.notify( self.associations, self.send )
+
+        sent = self.messenger.notify( self.associations, self.send )
+        self.display_manager.number_sent = sent
 
         # Log the run
         msg = "Sent {} peer review results \n {}".format( len( self.associations ), self.associations )
@@ -82,6 +87,8 @@ class SendDiscussionReviewToPoster(IStep):
         Do stuff with the review assignments
         :return:
         """
+        self._filter_notified()
+
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             try:
@@ -95,21 +102,48 @@ class SendDiscussionReviewToPoster(IStep):
                 else:
                     self.associations.append( records )
             except NoReviewPairingFound:
+                # todo Handler for this situation
                 pass
 
-        print( "Going to send review results for {} students".format( len( self.associations ) ) )
+        self.display_manager.number_to_send = self.associations
+        # print( "Going to send review results for {} students".format( len( self.associations ) ) )
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
-        # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
-        prelen = len(self.work_repo.data)
-        print("Loaded work by {} students from {}".format(prelen, self.activity.name))
-        # Filter out students who have already been notified.
-        # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
-        # since we could filter by who doesn't have a review partner
-        self.work_repo.remove_student_records( self.notificationStatusRepo.previously_notified_students )
-        postlen = len(self.work_repo.data)
-        print("Filtered out {} students who have already been notified".format(prelen - postlen))
+        self.display_manager.initially_loaded = self.work_repo.data
+
+    def _filter_notified( self ):
+        """
+        Remove records from the store of downloaded
+        student work where the person whom we would notify has
+        already been notified.
+        :return:
+        """
+        # The load step has retrieved all submissions by reviewers
+        # However, since the status repository records who has been sent
+        # reviewer feedback, we need to get a list of submitters whose
+        # work (feedback) has been sent to the author of the posts.
+        records = [ self.associationRepo.get_by_assessor( self.activity_for_review_pairings, sid ) for sid in self.work_repo.submitter_ids]
+
+        # At this point, records contains a review pairing for everyone who has
+        # submitted the review (as the reviewer).
+
+        # Now we make a list of reviewer ids whose feedback has already been sent out.
+        records = [r.assessor_id for r in records if self.notificationStatusRepo.has_received_message(r.assessee_id)]
+
+        # Records now has the ids of reviewers whose assessee has previously
+        # received results.
+
+        # We can remove those from the repo
+        self.work_repo.remove_student_records( records)
+        self.display_manager.post_filter = self.work_repo.data
+
+        # NB, statusRepo.previously_sent_students contains a list of students
+        # whose REVIEWS have been sent out. Thus we can use this directly
+        # on the workRepo.data since that contains reviews
+        # field has already been used when invited to do review
+        # self.work_repo.remove_student_records( self.notificationStatusRepo.previously_sent_students )
+
 
 
 

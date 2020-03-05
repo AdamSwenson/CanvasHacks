@@ -81,9 +81,9 @@ class TestCallsAllExpected( TestingBase ):
         obj.messenger.notify.assert_called_with( assignments, True )
         # obj.messenger.notify.assert_called_with( obj.associationRepo.data, True )
 
-        # obj.statusRepo.record_opened.assert_called()
-        # obj.statusRepo.record_opened.assert_called_with(submitter_ids[0])
-        # obj.statusRepo.record_opened.assert_called_with(submitter_ids[1])
+        # obj.statusRepo.record_invited.assert_called()
+        # obj.statusRepo.record_invited.assert_called_with(submitter_ids[0])
+        # obj.statusRepo.record_invited.assert_called_with(submitter_ids[1])
 
 
 class TestFunctionalTestWhenQuizType( TestingBase ):
@@ -144,7 +144,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # studentRepoMock.get_student = MagicMock(side_effect=se)
         # studentRepoMock.download = MagicMock( return_value=self.students )
-        # statusRepoMock.record_opened = MagicMock()
+        # statusRepoMock.record_invited = MagicMock()
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         # obj.studentRepo = MagicMock()
@@ -190,12 +190,12 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # print(args)
 
         # Status repo calls on messenger
-        # statusRepoMock.record_opened.assert_called()
+        # statusRepoMock.record_invited.assert_called()
         obj.messenger.status_repository.record.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
-                          "Status repo record_opened called expected number of times" )
+                          "Status repo record_invited called expected number of times" )
         for sid in self.new_students_ids:
             self.assertIn( sid, status_args, "StatusRepo.record called on all students" )
 
@@ -374,13 +374,13 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         obj.messenger.status_repository.record.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list
 
-        # obj.messenger.status_repository.record_opened.assert_called()
-        # call_list = obj.messenger.status_repository.record_opened.call_args_list
+        # obj.messenger.status_repository.record_invited.assert_called()
+        # call_list = obj.messenger.status_repository.record_invited.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
-                          "Status repo record_opened called expected number of times" )
+                          "Status repo record_invited called expected number of times" )
         for sid in self.new_students_ids:
-            self.assertIn( sid, status_args, "StatusRepo.record_opened called on all students" )
+            self.assertIn( sid, status_args, "StatusRepo.record_invited called on all students" )
 
         # student repo calls on messenger
         for sid in self.new_students_ids:

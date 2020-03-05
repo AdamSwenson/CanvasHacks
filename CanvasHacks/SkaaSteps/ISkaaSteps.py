@@ -2,10 +2,12 @@
 Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.Logging.display import DisplayManager
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
-from CanvasHacks.Repositories.status import StatusRepository, MetareviewResultsStatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, SentFeedbackStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
-from CanvasHacks.PeerReviewed.Definitions import MetaReview
+from CanvasHacks.PeerReviewed.Definitions import MetaReview, DiscussionReview
+
 __author__ = 'adam'
 
 from CanvasHacks import environment as env
@@ -43,12 +45,20 @@ class IStep:
         self._initialize_db()
         self.associationRepo = AssociationRepository( self.dao, self.activity_for_review_pairings)
 
+        self.display_manager = DisplayManager(self.activity)
+
         if isinstance(self.activity, MetaReview) and isinstance(self.activity_notifying_about, MetaReview):
             # If both of these are the metareview, then we are on the final
             # step (sending the metareview results to the reviewer). Thus
             # we need a special status repository since the notified field
             # for the metareview will have already been populated in the previous step
-            self.notificationStatusRepo = MetareviewResultsStatusRepository(self.dao, self.activity_notifying_about)
+            self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        elif isinstance(self.activity, DiscussionReview) and isinstance(self.activity_notifying_about, DiscussionReview):
+            # If both of these are the discussion review, then we are on the final
+            # step (sending the review results to the poster). Thus
+            # we need a special status repository since the notified field
+            # for the review will have already been populated in the previous step
+            self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
         else:
             self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 

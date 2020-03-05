@@ -121,13 +121,13 @@ class TestSendForumPostsToReviewer( TestingBase ):
         obj.messenger.status_repository.record.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list
 
-        # obj.messenger.status_repository.record_opened.assert_called()
-        # call_list = obj.messenger.status_repository.record_opened.call_args_list
+        # obj.messenger.status_repository.record_invited.assert_called()
+        # call_list = obj.messenger.status_repository.record_invited.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
-                          "Status repo record_opened called expected number of times" )
+                          "Status repo record_invited called expected number of times" )
         for sid in self.new_students_ids:
-            self.assertIn( sid, status_args, "StatusRepo.record_opened called on all students" )
+            self.assertIn( sid, status_args, "StatusRepo.record_invited called on all students" )
 
         # student repo calls on messenger
         for sid in self.new_students_ids:

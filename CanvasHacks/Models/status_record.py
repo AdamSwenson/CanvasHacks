@@ -37,7 +37,7 @@ class StatusRecord( Base, Model ):
     # by other party
     notified = Column( DATETIME, nullable=True )
 
-    # When their metareview feedback was sent out
+    # When they were sent metareview feedback was sent out
     #
     # This is only relevant for the metareview since need to record when the
     # feedback from this student was sent out to the person who did the peer review.

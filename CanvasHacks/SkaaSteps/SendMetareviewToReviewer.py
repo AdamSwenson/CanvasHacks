@@ -77,7 +77,7 @@ class SendMetareviewToReviewer( IStep ):
         # Filter out students who have already been notified.
         # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
         # since we could filter by who doesn't have a review partner
-        self.work_repo.remove_student_records( self.notificationStatusRepo.previously_sent_results )
+        self.work_repo.remove_student_records( self.notificationStatusRepo.previously_received_feedback )
 
 
 if __name__ == '__main__':

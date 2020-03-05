@@ -15,6 +15,14 @@ if __name__ == '__main__':
 
 
 class StatusRepository(StudentWorkMixin, IRepo):
+    """
+    The status repository tracks when things were sent to
+    particular students.
+
+    There are two kinds of things that are sent to students:
+        Invitations to complete some activity
+        Feedback created by another student on that student's work
+    """
 
     def __init__( self, dao: SqliteDAO, activity: Activity):
         """
@@ -36,7 +44,7 @@ class StatusRepository(StudentWorkMixin, IRepo):
         return rec
 
     @property
-    def previously_notified_students( self ):
+    def previously_invited( self ):
         """Returns a list of ids of students who have
         already been notified
         """
@@ -55,9 +63,9 @@ class StatusRepository(StudentWorkMixin, IRepo):
         # return False
 
     @property
-    def previously_sent_results( self ):
+    def previously_received_feedback( self ):
         """Returns a list of ids of students who have
-        already been notified
+        already received feedback from another student
         """
         records = self.session.query( StatusRecord ) \
             .filter( StatusRecord.activity_id == self.activity.id ) \
@@ -89,34 +97,37 @@ class StatusRepository(StudentWorkMixin, IRepo):
 
     def record( self, student, time_to_record=None ):
         """
-        Generic version which will normally record via
-        record_opened. However, can be overriden by other
+        Main method called.
+        The invitiation repo will record when the student was
+        invited to do a review.
+        The version which will normally record via
+        record_invited. However, can be overriden by other
         repos
         :param student:
         :param time_to_record:
         :return:
         """
-        self.record_opened(student, time_to_record)
+        raise NotImplementedError
 
-    def record_opened( self, student, time_to_record=None ):
+    def record_invited( self, student, time_to_record=None ):
         """Record that the student was notified that the activity_inviting_to_complete
          is available
         """
-        print("record_opened", student)
+        print("record_invited", student)
         record = self.get_or_create_record(student)
         record.record_opened( time_to_record )
         self.session.commit()
 
-    def record_submitted( self, student, time_to_record=None):
-        """Record that the student has submitted
-        the activity_inviting_to_complete
-        """
-        record = self.get_or_create_record(student)
-        record.record_submission(time_to_record)
-        self.session.commit()
+    # def record_submitted( self, student, time_to_record=None):
+    #     """Record that the student has submitted
+    #     the activity_inviting_to_complete
+    #     """
+    #     record = self.get_or_create_record(student)
+    #     record.record_submission(time_to_record)
+    #     self.session.commit()
 
-    def record_sent_results( self, student, time_to_record=None ):
-        """Records when feedback from this student was sent out
+    def record_sent_feedback( self, student, time_to_record=None ):
+        """Records when feedback was sent to this student
 
         This is only relevant for the metareview since need to record when the
         feedback from this student was sent out to the person who did the peer review.
@@ -128,8 +139,15 @@ class StatusRepository(StudentWorkMixin, IRepo):
         record.record_sent_results(time_to_record)
         self.session.commit()
 
+    def has_received_message( self, student_id ):
+        raise NotImplementedError
 
-class MetareviewResultsStatusRepository(StatusRepository):
+
+class SentInvitationStatusRepository( StatusRepository ):
+    """
+    This repository handles records of when a student
+    was invited to do a particular activity.
+    """
     def __init__( self, dao: SqliteDAO, activity: Activity):
         """
         Create a repository to handle events for a
@@ -139,8 +157,54 @@ class MetareviewResultsStatusRepository(StatusRepository):
         self.session = dao.session
 
     def record( self, student, time_to_record=None ):
-        self.record_sent_results(student, time_to_record)
+        self.record_invited( student, time_to_record )
 
+    def has_received_message( self, student_id ):
+        """
+        Returns true if the student has been invited to
+        complete the assignment
+        :param student_id:
+        :return:
+        """
+        record = self.session.query( StatusRecord ) \
+            .filter(StatusRecord.student_id == student_id)\
+            .filter( StatusRecord.activity_id == self.activity.id ) \
+            .filter( StatusRecord.notified.isnot( None ) ) \
+            .one_or_none()
+
+        return record is not None
+
+
+class SentFeedbackStatusRepository( StatusRepository ):
+    """
+    Handles records of when a student received feedback
+    for the activity.
+    """
+    def __init__( self, dao: SqliteDAO, activity: Activity):
+        """
+        Create a repository to handle events for a
+        particular activity_inviting_to_complete
+        """
+        self.activity = activity
+        self.session = dao.session
+
+    def record( self, student, time_to_record=None ):
+        self.record_sent_feedback( student, time_to_record )
+
+    def has_received_message( self, student_id ):
+        """
+        Returns true if the student has been sent feedback on
+        the assignment
+        :param student_id:
+        :return:
+        """
+        record = self.session.query( StatusRecord )\
+            .filter( StatusRecord.student_id == student_id )\
+            .filter( StatusRecord.activity_id == self.activity.id ) \
+            .filter( StatusRecord.results.isnot( None ) ) \
+            .one_or_none()
+
+        return record is not None
 
 
 class ComplexStatusRepository:

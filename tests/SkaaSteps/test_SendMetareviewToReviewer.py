@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import CanvasHacks.environment as env
 import CanvasHacks.testglobals
 from CanvasHacks.Models.status_record import StatusRecord
-from CanvasHacks.Repositories.status import MetareviewResultsStatusRepository
+from CanvasHacks.Repositories.status import SentFeedbackStatusRepository
 from factories.RepositoryMocks import ContentRepositoryMock
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
@@ -101,9 +101,9 @@ class TestFunctionalTests( TestingBase ):
         """The sending of metareview results requires a
         special status repository"""
         obj = SendMetareviewToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
-        self.assertIsInstance(obj.notificationStatusRepo, MetareviewResultsStatusRepository, "Correct status repo instantiated")
+        self.assertIsInstance( obj.notificationStatusRepo, SentFeedbackStatusRepository, "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.MetareviewResultsStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.SentFeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
@@ -152,14 +152,14 @@ class TestFunctionalTests( TestingBase ):
 
         # Status repo calls on messenger
         obj.messenger.status_repository.record.assert_called()
-        # obj.messenger.status_repository.record_opened.assert_called()
+        # obj.messenger.status_repository.record_invited.assert_called()
         call_list = obj.messenger.status_repository.record.call_args_list
-        # call_list = obj.messenger.status_repository.record_opened.call_args_list
+        # call_list = obj.messenger.status_repository.record_invited.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.students ), len( call_list ),
-                          "Status repo record_opened called expected number of times" )
+                          "Status repo record_invited called expected number of times" )
         for sid in self.student_ids:
-            self.assertIn( sid, status_args, "StatusRepo.record_opened called on all students" )
+            self.assertIn( sid, status_args, "StatusRepo.record_invited called on all students" )
 
         # student repo calls on messenger
         for sid in self.student_ids:
@@ -175,7 +175,7 @@ class TestFunctionalTests( TestingBase ):
             self.assertRegex( sent_text, rx, "Author's review of review in message sent to reviewer" )
 
             # check marked as sent
-            obj.notificationStatusRepo.previously_sent_results
+            obj.notificationStatusRepo.previously_received_feedback
 
 
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
@@ -216,7 +216,7 @@ class TestFunctionalTests( TestingBase ):
         self.assertEqual( len( obj.associations ), len( self.students ), "Correct number of students notified" )
 
         # check marked as sent
-        self.assertEqual(len(self.students), len(obj.notificationStatusRepo.previously_sent_results))
+        self.assertEqual( len(self.students), len( obj.notificationStatusRepo.previously_received_feedback ) )
 
         # Check the content sent
         for record in obj.associations:
@@ -227,7 +227,7 @@ class TestFunctionalTests( TestingBase ):
             self.assertIsNotNone(status_record, "Record exists")
             self.assertIsNotNone(status_record.results, "Value set for results")
 
-    # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.MetareviewResultsStatusRepository' )
+    # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.SentFeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
@@ -291,9 +291,9 @@ class TestFunctionalTests( TestingBase ):
 
         # # Status repo calls on messenger
         # obj.messenger.status_repository.record.assert_called()
-        # # obj.messenger.status_repository.record_opened.assert_called()
+        # # obj.messenger.status_repository.record_invited.assert_called()
         # call_list = obj.messenger.status_repository.record.call_args_list
-        # # call_list = obj.messenger.status_repository.record_opened.call_args_list
+        # # call_list = obj.messenger.status_repository.record_invited.call_args_list
         # status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         # self.assertEqual( num_to_notify, len( call_list ), "Status repo record called expected number of times" )
         # for sid in self.student_ids:

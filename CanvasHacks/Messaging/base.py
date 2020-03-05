@@ -125,7 +125,7 @@ class SkaaMessenger:
                     # if isinstance(self.content_repository.activity, Metareview):
                     # For the peer review, the reviewer will be marked as notified
                     # For the metareview the author will be marked as notified
-                    # self.status_repository.record_opened( message_data[ 'student_id' ] )
+                    # self.status_repository.record_invited( message_data[ 'student_id' ] )
                 # print( "Message sent", m )
             else:
                 # For test runs
