@@ -52,6 +52,9 @@ else:
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
 STATUS_TABLE_NAME = 'status'
 COMPLEX_STATUS_TABLE_NAME = 'complexstatus'
+FEEDBACK_RECEIVED_STATUS_TABLE_NAME = 'feedback_received'
+INVITATION_RECEIVED_STATUS_TABLE_NAME = 'invitation_received'
+
 STUDENT_TABLE_NAME = 'students'
 
 # Logging
@@ -68,4 +71,3 @@ LIKERT_NUM_MAP = { 'Forgot': 0, 'Strongly disagree': 1, 'Disagree': 2, 'Agree': 
 REPORT_KEEP_COLUMNS = [ 'attempt', 'course_id', 'finished_at_date',
                         'fudge_points', 'id', 'name', 'quiz_id', 'score',
                         'section_sis_id', 'student_id', 'submission_id', 'user_id', 'workflow_state' ]
-

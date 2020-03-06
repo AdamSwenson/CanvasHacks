@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import CanvasHacks.testglobals
 from CanvasHacks.Models.review_association import ReviewAssociation
+from CanvasHacks.Repositories.status import SentInvitationStatusRepository
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
@@ -37,7 +38,7 @@ class TestCallsAllExpected( TestingBase ):
         self.unit = unit_factory()
         # self.unit.components.append(review)
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.PeerReviewInvitationMessenger' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.AssociationRepository' )
@@ -109,8 +110,13 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.workRepo.create_test_content( self.student_ids )
         self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
+    def test_instantiates_correct_status_repo( self ):
+        """The sending of metareview results requires a
+        special status repository"""
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        self.assertIsInstance( obj.notificationStatusRepo, SentInvitationStatusRepository, "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
@@ -159,19 +165,19 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         obj.run()
 
         # check
-        self.assertEqual( len( obj.new_assignments ), len( self.new_students_ids ),
+        self.assertEqual( len( obj.associations ), len( self.new_students_ids ),
                           "Correct number of students assigned" )
 
         # Check that new assignments don't involve previously assigned sudents
-        for rec in obj.new_assignments:
+        for rec in obj.associations:
             self.assertNotIn( rec.assessor_id, self.preexisting_student_ids,
                               "Newly assigned assessor not among previously assigned students" )
             self.assertNotIn( rec.assessee_id, self.preexisting_student_ids,
                               "Newly assigned assessee not among previously assigned students" )
 
         # Check whether each new student has been assigned
-        new_assessor_ids = [ r.assessor_id for r in obj.new_assignments ]
-        new_assessee_ids = [ r.assessee_id for r in obj.new_assignments ]
+        new_assessor_ids = [ r.assessor_id for r in obj.associations ]
+        new_assessee_ids = [ r.assessee_id for r in obj.associations ]
         self.assertEqual( len( set( new_assessor_ids ) ), len( self.new_students_ids ),
                           "No duplicate assessor assignments" )
         self.assertEqual( len( set( new_assessee_ids ) ), len( self.new_students_ids ),
@@ -204,7 +210,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
             obj.messenger.student_repository.get_student.assert_any_call( sid )
 
         # Check the content sent
-        for record in obj.new_assignments:
+        for record in obj.associations:
             # print(record.assessee_id)
             author_text = self.workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
@@ -295,7 +301,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
@@ -336,19 +342,19 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         obj.run()
 
         # check
-        self.assertEqual( len( obj.new_assignments ), len( self.new_students_ids ),
+        self.assertEqual( len( obj.associations ), len( self.new_students_ids ),
                           "Correct number of students assigned" )
 
         # Check that new assignments don't involve previously assigned sudents
-        for rec in obj.new_assignments:
+        for rec in obj.associations:
             self.assertNotIn( rec.assessor_id, self.preexisting_student_ids,
                               "Newly assigned assessor not among previously assigned students" )
             self.assertNotIn( rec.assessee_id, self.preexisting_student_ids,
                               "Newly assigned assessee not among previously assigned students" )
 
         # Check whether each new student has been assigned
-        new_assessor_ids = [ r.assessor_id for r in obj.new_assignments ]
-        new_assessee_ids = [ r.assessee_id for r in obj.new_assignments ]
+        new_assessor_ids = [ r.assessor_id for r in obj.associations ]
+        new_assessee_ids = [ r.assessee_id for r in obj.associations ]
         self.assertEqual( len( set( new_assessor_ids ) ), len( self.new_students_ids ),
                           "No duplicate assessor assignments" )
         self.assertEqual( len( set( new_assessee_ids ) ), len( self.new_students_ids ),
@@ -387,7 +393,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
             obj.messenger.student_repository.get_student.assert_any_call( sid )
 
         # Check the content sent
-        for record in obj.new_assignments:
+        for record in obj.associations:
             # print(record.assessee_id)
             author_text = self.workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor

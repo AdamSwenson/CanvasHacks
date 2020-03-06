@@ -3,7 +3,7 @@ Created by adam on 2/23/20
 """
 from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, SentFeedbackStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
 from CanvasHacks.Logging.run_data import RunLogger
@@ -37,6 +37,11 @@ class SendReviewToReviewee(IStep):
         self.associations = [ ]
 
         self._initialize()
+
+        #Initialize the relevant status repo
+        self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+
+        # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
     def run(self, **kwargs):
         """
@@ -76,6 +81,8 @@ class SendReviewToReviewee(IStep):
         RunLogger.log_review_feedback_distributed( self.unit.metareview, msg )
 
     def _assign_step( self ):
+        self._filter_notified()
+
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             try:
@@ -95,15 +102,29 @@ class SendReviewToReviewee(IStep):
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
+        self.display_manager.initially_loaded = self.work_repo.data
+
+
+    def _filter_notified( self ):
+        """
+        Filter out students who have already been invited to
+        complete the metareview.
+        (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
+        since we could filter by who doesn't have a review partner
+
+        :return:
+        """
+        records = self.notificationStatusRepo.reviewers_with_notified_authors
+        self.work_repo.remove_student_records( records )
+        self.display_manager.post_filter = self.work_repo.data
+
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
-        prelen = len(self.work_repo.data)
-        print("Loaded work by {} students from {}".format(prelen, self.activity.name))
-        # Filter out students who have already been notified.
-        # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
-        # since we could filter by who doesn't have a review partner
-        self.work_repo.remove_student_records( self.notificationStatusRepo.previously_invited )
-        postlen = len(self.work_repo.data)
-        print("Filtered out {} students who have already been notified".format(prelen - postlen))
+        # prelen = len( self.work_repo.data )
+        # print( "Loaded work by {} students from {}".format( prelen, self.activity.name ) )
+        # self.work_repo.remove_student_records( self.notificationStatusRepo.previously_invited )
+
+        # postlen = len( self.work_repo.data )
+        # print( "Filtered out {} students who have already been notified".format( prelen - postlen ) )
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
 # from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Logging.review_pairings import make_review_audit_file
+from CanvasHacks.Repositories.status import StatusRepository, SentInvitationStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 import pandas as pd
 __author__ = 'adam'
@@ -35,6 +36,12 @@ class SendInitialWorkToReviewer( IStep ):
         self.activity_for_review_pairings = unit.initial_work
 
         self._initialize()
+
+        #Initialize the relevant status repo
+        self.notificationStatusRepo = SentInvitationStatusRepository(self.dao, self.activity_notifying_about)
+
+        # todo replace with InvitationSentRepo
+        # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
     def run( self, **kwargs):
         """
@@ -88,17 +95,18 @@ class SendInitialWorkToReviewer( IStep ):
         self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
-        self.messenger.notify( self.new_assignments, self.send )
+        self.messenger.notify( self.associations, self.send )
         # self.messenger.notify( self.associationRepo.data, self.send )
         #  todo Want some way of tracking if messages fail to send so can resend
         # Log the run
-        msg = "Created {} peer review assignments \n {}".format( len( self.new_assignments ), self.new_assignments )
+        msg = "Created {} peer review assignments \n {}".format( len( self.associations ), self.associations )
         RunLogger.log_reviews_assigned( self.activity_notifying_about, msg )
 
     def _assign_step( self ):
         # Assign reviewers to each submitter and store in db
-        # NB, assocs will be
-        self.new_assignments = self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
+        # NB, the repository will take care of removing already assigned
+        # reviewers, so we just give them all submitters
+        self.associations = self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
         if not self.is_test:
             # Save a more readable copy of all the assignments
             # to file
@@ -106,16 +114,14 @@ class SendInitialWorkToReviewer( IStep ):
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
-        prelen = len(self.work_repo.data)
-        print("downloaded {} records".format(prelen))
-        # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
+        self.display_manager.initially_loaded = self.work_repo.data
 
         # hotfix needed to filter unsubmitted for non quiz ca
         self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
         if isinstance(self.work_repo.data, pd.DataFrame):
             self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
 
-        print("Removed {} empty or non submitted".format(prelen - len(self.work_repo.data)))
+        self.display_manager.post_filter = self.work_repo.data
 
     @property
     def audit_frame( self ):

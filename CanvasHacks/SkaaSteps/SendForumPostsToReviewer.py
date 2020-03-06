@@ -4,6 +4,7 @@ Created by adam on 3/2/20
 __author__ = 'adam'
 
 from CanvasHacks.Messaging.discussions import DiscussionReviewInvitationMessenger
+from CanvasHacks.Repositories.status import StatusRepository, SentInvitationStatusRepository
 
 """
 Created by adam on 2/23/20
@@ -42,6 +43,13 @@ class SendForumPostsToReviewer( IStep ):
         self.activity_for_review_pairings = unit.discussion_forum
 
         self._initialize()
+
+
+        #Initialize the relevant status repo
+        self.notificationStatusRepo = SentInvitationStatusRepository(self.dao, self.activity_notifying_about)
+        # todo replace with InvitationSentRepo
+
+        # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
     def run( self, **kwargs):
         """
@@ -96,18 +104,19 @@ class SendForumPostsToReviewer( IStep ):
 
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
-        self.messenger.notify( self.new_assignments, self.send )
+        self.messenger.notify( self.associations, self.send )
 
         #  todo Want some way of tracking if messages fail to send so can resend
         # Log the run
-        msg = "New peer review assignments: \t {} \n Notices sent successfully: \t {} \n Send errors: \t {} \n Errors: {}".format( len( self.new_assignments ), self.messenger.sent_count, len(self.messenger.send_errors), self.messenger.send_errors )  # self.new_assignments )
+        msg = "New peer review assignments: \t {} \n Notices sent successfully: \t {} \n Send errors: \t {} \n Errors: {}".format( len( self.associations ), self.messenger.sent_count, len( self.messenger.send_errors ), self.messenger.send_errors )  # self.associations )
         print(msg)
         RunLogger.log_reviews_assigned( self.activity_notifying_about, msg )
 
     def _assign_step( self ):
         # Assign reviewers to each submitter and store in db
-        # NB, assocs will be
-        self.new_assignments = self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
+        # NB, the repository will take care of removing already assigned
+        # reviewers, so we just give them all submitters
+        self.associations = self.associationRepo.assign_reviewers( self.work_repo.submitter_ids )
         if not self.is_test:
             # Save a more readable copy of all the assignments
             # to file
@@ -115,8 +124,10 @@ class SendForumPostsToReviewer( IStep ):
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
-        prelen = len(self.work_repo.data)
-        print("downloaded {} records".format(prelen))
+        self.display_manager.initially_loaded = self.work_repo.data
+
+        # prelen = len(self.work_repo.data)
+        # print("downloaded {} records".format(prelen))
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
 
         # if isinstance(self.work_repo.data, pd.DataFrame):

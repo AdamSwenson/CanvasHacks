@@ -47,20 +47,21 @@ class IStep:
 
         self.display_manager = DisplayManager(self.activity)
 
-        if isinstance(self.activity, MetaReview) and isinstance(self.activity_notifying_about, MetaReview):
-            # If both of these are the metareview, then we are on the final
-            # step (sending the metareview results to the reviewer). Thus
-            # we need a special status repository since the notified field
-            # for the metareview will have already been populated in the previous step
-            self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
-        elif isinstance(self.activity, DiscussionReview) and isinstance(self.activity_notifying_about, DiscussionReview):
-            # If both of these are the discussion review, then we are on the final
-            # step (sending the review results to the poster). Thus
-            # we need a special status repository since the notified field
-            # for the review will have already been populated in the previous step
-            self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
-        else:
-            self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
+        # Moved to child classes while working on CAN-53
+        # if isinstance(self.activity, MetaReview) and isinstance(self.activity_notifying_about, MetaReview):
+        #     # If both of these are the metareview, then we are on the final
+        #     # step (sending the metareview results to the reviewer). Thus
+        #     # we need a special status repository since the notified field
+        #     # for the metareview will have already been populated in the previous step
+        #     self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        # elif isinstance(self.activity, DiscussionReview) and isinstance(self.activity_notifying_about, DiscussionReview):
+        #     # If both of these are the discussion review, then we are on the final
+        #     # step (sending the review results to the poster). Thus
+        #     # we need a special status repository since the notified field
+        #     # for the review will have already been populated in the previous step
+        #     self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        # else:
+        #     self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:

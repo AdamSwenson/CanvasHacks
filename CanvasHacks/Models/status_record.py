@@ -82,6 +82,59 @@ class StatusRecord( Base, Model ):
 
 
 
+class FeedbackReceivedRecord( Base, Model ):
+    """
+    Keeps track of when a student was sent feedback from
+    another student
+
+    Created in CAN-53
+
+    """
+    __tablename__ = env.FEEDBACK_RECEIVED_STATUS_TABLE_NAME
+
+    activity_id = Column(Integer, primary_key=True, nullable=False)
+    """Id of the activity in which the feedback was created"""
+
+    student_id = Column( Integer, primary_key=True, nullable=False )
+    """ The student whom this record concerns """
+
+    sent_at = Column(DATETIME, nullable=True)
+    """ Timestamp of when the feedback was sent to them"""
+
+
+
+class InvitationReceivedRecord( Base, Model ):
+    """
+    Keeps track of when a student was sent an invitation to
+     provide feedback on another student
+
+    Created in CAN-53
+
+    """
+    __tablename__ = env.INVITATION_RECEIVED_STATUS_TABLE_NAME
+
+    # Id of the relevant activity_inviting_to_complete
+    activity_id = Column(Integer, primary_key=True, nullable=False)
+    """Id of the activity which we are inviting the student to complete"""
+
+    # The student whom this record concerns
+    student_id = Column( Integer, primary_key=True, nullable=False )
+    """ The student whom this record concerns """
+
+    sent_at = Column(DATETIME, nullable=True)
+    """ Timestamp of when the feedback was sent to them"""
+
+
+
+
+
+
+
+
+
+
+
+
 class ComplexStatusRecord( Base, Model ):
     __tablename__ = env.COMPLEX_STATUS_TABLE_NAME
     # The student whom this record concerns

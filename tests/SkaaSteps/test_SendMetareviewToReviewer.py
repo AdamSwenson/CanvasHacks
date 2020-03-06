@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import CanvasHacks.environment as env
 import CanvasHacks.testglobals
-from CanvasHacks.Models.status_record import StatusRecord
+from CanvasHacks.Models.status_record import StatusRecord, InvitationReceivedRecord, FeedbackReceivedRecord
 from CanvasHacks.Repositories.status import SentFeedbackStatusRepository
 from factories.RepositoryMocks import ContentRepositoryMock
 from tests.factories.ModelFactories import student_factory
@@ -30,6 +30,7 @@ fake = Faker()
 # Make sure correct students involved (have more than the 2 in db)
 # Make sure correct text is sent
 # Make sure addressing params are correct
+
 
 
 class TestCallsAllExpected( TestingBase ):
@@ -103,7 +104,7 @@ class TestFunctionalTests( TestingBase ):
         obj = SendMetareviewToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         self.assertIsInstance( obj.notificationStatusRepo, SentFeedbackStatusRepository, "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.SentFeedbackStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.SentFeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
@@ -206,8 +207,8 @@ class TestFunctionalTests( TestingBase ):
         # Sets up data for the association repo to use
         self.preexisting_pairings = self.create_preexisting_review_pairings( self.unit.initial_work.id, self.students )
 
-        r = self.session.query(StatusRecord).filter(StatusRecord.activity_id == self.unit.metareview.id).all()
-        self.assertTrue(len(r) == 0, "No records beforehand")
+        r = self.session.query(FeedbackReceivedRecord).filter(FeedbackReceivedRecord.activity_id == self.unit.metareview.id).all()
+        self.assertTrue(len(r) == 0, "No sent records beforehand")
 
         # call
         obj.run()
@@ -216,22 +217,24 @@ class TestFunctionalTests( TestingBase ):
         self.assertEqual( len( obj.associations ), len( self.students ), "Correct number of students notified" )
 
         # check marked as sent
-        self.assertEqual( len(self.students), len( obj.notificationStatusRepo.previously_received_feedback ) )
+        self.assertEqual( len(self.students), len( obj.notificationStatusRepo.previously_received ) )
 
         # Check the content sent
         for record in obj.associations:
             # we need to check each of the reviewers to see that results has a value
-            status_record = self.session.query( StatusRecord )\
-                .filter( StatusRecord.activity_id == self.unit.metareview.id )\
-                .filter(StatusRecord.student_id == record.assessor_id).one_or_none()
+            status_record = self.session\
+                .query( FeedbackReceivedRecord )\
+                .filter( FeedbackReceivedRecord.activity_id == self.unit.metareview.id )\
+                .filter(FeedbackReceivedRecord.student_id == record.assessor_id)\
+                .one_or_none()
             self.assertIsNotNone(status_record, "Record exists")
-            self.assertIsNotNone(status_record.results, "Value set for results")
+            self.assertIsNotNone(status_record.sent_at, "Value set for timestamp")
 
     # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.SentFeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
-    def test_run_some_already_notified( self, workLoaderMock, studentRepoMock, messengerMock): #, statusRepoMock ):
+    def test_run_some_already_notified( self, workLoaderMock, studentRepoMock, messengerMock):
         # Set up status repo with some students already notified
         num_previously_sent = fake.random.randint( 1, len( self.students ) - 1 )
         previously_sent = self.student_ids[ : num_previously_sent ]
@@ -243,9 +246,6 @@ class TestFunctionalTests( TestingBase ):
         # Prepare fake work repo to give values to calling  objects
         # workRepo = ContentRepositoryMock()
         # workRepo.create_test_content( self.student_ids )
-        self.workRepo.submitter_ids = to_notify
-        # workRepo.remove_student_records = MagicMock()
-        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         # prepare student repo
         students = { s.student_id: s for s in self.students }
@@ -264,8 +264,17 @@ class TestFunctionalTests( TestingBase ):
         # Sets up data for the association repo to use
         self.preexisting_pairings = self.create_preexisting_review_pairings( self.unit.initial_work.id, self.students )
         # Set up previous notifications
+
         for sid in previously_sent:
             obj.notificationStatusRepo.record(sid)
+
+        authors_with_notified_reviewers = [ r.assessee_id for r in self.preexisting_pairings if r.assessor_id in previously_sent ]
+        authors_without_notified_reviewers = [ s for s in self.student_ids if s not in authors_with_notified_reviewers ]
+
+        # have to fake this since using a dummy
+        self.workRepo.submitter_ids = authors_without_notified_reviewers
+        # workRepo.remove_student_records = MagicMock()
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
 
         # call
         obj.run()

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from faker import Faker
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
-from CanvasHacks.Repositories.students import StudentRepository
+from CanvasHacks.Repositories.status import SentInvitationStatusRepository
 from CanvasHacks.SkaaSteps.SendForumPostsToReviewer import SendForumPostsToReviewer
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory
@@ -51,10 +51,16 @@ class TestSendForumPostsToReviewer( TestingBase ):
         # Prepare fake work repo to give values to calling  objects
         self.workRepo = ContentRepositoryMock()
         self.workRepo.create_test_content( self.student_ids )
-        self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
+        self.workRepo.add_students_to_data( self.student_ids, make_dataframe=True )
 
+    def test_instantiates_correct_status_repo( self ):
+        """The sending of metareview results requires a
+        special status repository"""
+        obj = SendForumPostsToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+        self.assertIsInstance( obj.notificationStatusRepo, SentInvitationStatusRepository,
+                               "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.SentInvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.WorkRepositoryLoaderFactory' )
@@ -83,19 +89,19 @@ class TestSendForumPostsToReviewer( TestingBase ):
         obj.run()
 
         # check
-        self.assertEqual( len( obj.new_assignments ), len( self.new_students_ids ),
+        self.assertEqual( len( obj.associations ), len( self.new_students_ids ),
                           "Correct number of students assigned" )
 
         # Check that new assignments don't involve previously assigned sudents
-        for rec in obj.new_assignments:
+        for rec in obj.associations:
             self.assertNotIn( rec.assessor_id, self.preexisting_student_ids,
                               "Newly assigned assessor not among previously assigned students" )
             self.assertNotIn( rec.assessee_id, self.preexisting_student_ids,
                               "Newly assigned assessee not among previously assigned students" )
 
         # Check whether each new student has been assigned
-        new_assessor_ids = [ r.assessor_id for r in obj.new_assignments ]
-        new_assessee_ids = [ r.assessee_id for r in obj.new_assignments ]
+        new_assessor_ids = [ r.assessor_id for r in obj.associations ]
+        new_assessee_ids = [ r.assessee_id for r in obj.associations ]
         self.assertEqual( len( set( new_assessor_ids ) ), len( self.new_students_ids ),
                           "No duplicate assessor assignments" )
         self.assertEqual( len( set( new_assessee_ids ) ), len( self.new_students_ids ),
@@ -134,7 +140,7 @@ class TestSendForumPostsToReviewer( TestingBase ):
             obj.messenger.student_repository.get_student.assert_any_call( sid )
 
         # Check the content sent
-        for record in obj.new_assignments:
+        for record in obj.associations:
             # print(record.assessee_id)
             author_text = self.workRepo.get_formatted_work_by( record.assessee_id )
             # see if sent to assessor
@@ -142,15 +148,30 @@ class TestSendForumPostsToReviewer( TestingBase ):
             rx = r'{}'.format( author_text )
             self.assertRegex( sent_text, rx, "Author's work in message sent to reviewer" )
 
-
     def test__message_step( self ):
-        self.skipTest("todo")
+        self.skipTest( "todo" )
 
     def test__assign_step( self ):
-        self.skipTest("todo")
+        self.skipTest( "todo" )
 
-    def test__load_step( self ):
-        self.skipTest("todo")
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.DisplayManager' )
+    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.WorkRepositoryLoaderFactory' )
+    def test__load_step( self, workLoaderMock, displayManagerMock ):
+        self.workRepo.remove_student_records = MagicMock()
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
+
+        obj = SendForumPostsToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+
+        # call
+        obj._load_step()
+
+        # check
+        workLoaderMock.make.assert_called()
+        displayManagerMock.assert_called()
+
+        call_args = [ c[ 0 ][ 0 ] for c in workLoaderMock.call_args_list ]
+        # print( call_args )
+        # self.assertEqual()
 
     def test_audit_frame( self ):
-        self.skipTest("todo")
+        self.skipTest( "todo" )

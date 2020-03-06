@@ -4,7 +4,7 @@ Created by adam on 2/22/20
 __author__ = 'adam'
 
 import CanvasHacks.testglobals
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, SentFeedbackStatusRepository
 
 CanvasHacks.testglobals.use_api = False
 import unittest
@@ -92,9 +92,9 @@ class TestFunctionalTests( TestingBase ):
         """The sending of metareview results requires a
         special status repository"""
         obj = SendReviewToReviewee( course=self.course, unit=self.unit, is_test=True, send=True )
-        self.assertIsInstance( obj.notificationStatusRepo, StatusRepository, "Correct status repo instantiated" )
+        self.assertIsInstance( obj.notificationStatusRepo, SentFeedbackStatusRepository, "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendReviewToReviewee.SentFeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendReviewToReviewee.WorkRepositoryLoaderFactory' )
@@ -181,9 +181,6 @@ class TestFunctionalTests( TestingBase ):
         # Prepare fake work repo to give values to calling  objects
         workRepo = ContentRepositoryMock()
         workRepo.create_test_content( self.student_ids )
-        workRepo.submitter_ids = to_notify
-        # workRepo.remove_student_records = MagicMock()
-        workLoaderMock.make = MagicMock( return_value=workRepo )
 
         # prepare student repo
         students = { s.student_id: s for s in self.students }
@@ -201,6 +198,14 @@ class TestFunctionalTests( TestingBase ):
         self.session = obj.dao.session
         # Sets up data for the association repo to use
         self.preexisting_pairings = self.create_preexisting_review_pairings( self.unit.initial_work.id, self.students )
+
+        reviewers_without_prev_notified_authors = [s.assessor_id for s in self.preexisting_pairings if s.assessee_id not in previously_sent]
+
+        # setting this since filter step doesn't happen on dummy
+        workRepo.submitter_ids = reviewers_without_prev_notified_authors
+        # workRepo.remove_student_records = MagicMock()
+        workLoaderMock.make = MagicMock( return_value=workRepo )
+
         # Set up previous notifications
         for sid in previously_sent:
             obj.notificationStatusRepo.record( sid )

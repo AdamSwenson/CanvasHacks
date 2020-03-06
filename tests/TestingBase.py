@@ -2,7 +2,9 @@
 Created by adam on 2/22/20
 """
 from CanvasHacks.Models.review_association import ReviewAssociation
+from CanvasHacks.Models.status_record import FeedbackReceivedRecord, InvitationReceivedRecord
 from CanvasHacks.Repositories.reviewer_associations import assign_reviewers
+from CanvasHacks.TimeTools import current_utc_timestamp
 from factories.ModelFactories import make_students
 
 __author__ = 'adam'
@@ -15,21 +17,22 @@ CanvasHacks.testglobals.use_api = False
 from CanvasHacks import environment as env
 
 import unittest
-
+from faker import Faker
 
 if __name__ == '__main__':
     pass
 
 
-class TestingBase(unittest.TestCase):
+class TestingBase( unittest.TestCase ):
 
     def config_for_test( self ):
-        print('setting test')
+        print( 'setting test' )
         env.CONFIG.set_test()
+        self.fake = Faker()
 
     def student_getter( self, sid ):
         """Retrieves a test student from the list of test students"""
-        print("student_getter called on ", sid)
+        # print("student_getter called on ", sid)
         return [ s for s in self.students if s.student_id == sid ][ 0 ]
 
     def create_new_and_preexisting_students( self, new=5, old=5 ):
@@ -49,7 +52,7 @@ class TestingBase(unittest.TestCase):
         self.students = self.new_students + self.preexisting_students
 
         # Store lists of the ids for convienience
-        self.student_ids = [s.student_id for s in self.students]
+        self.student_ids = [ s.student_id for s in self.students ]
         self.preexisting_student_ids = [ s.student_id for s in self.preexisting_students ]
         self.new_students_ids = [ s.student_id for s in self.new_students ]
 
@@ -63,13 +66,44 @@ class TestingBase(unittest.TestCase):
         session = session if session is not None else self.session
 
         for assessor, assessee in old_assigns:
-            ra = ReviewAssociation( activity_id=activity_id,
-                                    assessor_id=int( assessor.student_id ), assessee_id=int( assessee.student_id )
-                                    )
+            ra = ReviewAssociation( activity_id=activity_id, assessor_id=int( assessor.student_id ),
+                                    assessee_id=int( assessee.student_id ) )
             session.add( ra )
             session.commit()
-        pairings = session.query( ReviewAssociation ) \
-            .filter( ReviewAssociation.activity_id == activity_id ).all()
-        self.assertEqual( len( preexisting_students ), len( pairings  ),  "PRE-RUN CHECK: {} students in db".format( len(preexisting_students ) ) )
-        return pairings
 
+        self.pairings = session.query( ReviewAssociation ).filter( ReviewAssociation.activity_id == activity_id ).all()
+
+        self.assertEqual( len( preexisting_students ), len( self.pairings ),
+                          "PRE-RUN CHECK: {} students in db".format( len( preexisting_students ) ) )
+
+        return self.pairings
+
+    def make_feedback_received_records( self, number, session=None ):
+        session = session if session is not None else self.session
+        self.previously_sent = [ ]
+
+        for i in range( 0, number ):
+            student_id = self.student_ids[ i ]
+            rec = FeedbackReceivedRecord( student_id=student_id,
+                                          activity_id=self.activity.id,
+                                          sent_at=current_utc_timestamp() )
+            session.add( rec )
+            session.commit()
+            self.previously_sent.append( student_id )
+
+        self.assertEqual( number, len( self.previously_sent ), "dummy check" )
+
+    def make_invitation_received_records( self, number, session=None ):
+        session = session if session is not None else self.session
+        self.previously_sent = [ ]
+
+        for i in range( 0, number ):
+            student_id = self.student_ids[ i ]
+            rec = InvitationReceivedRecord( student_id=student_id,
+                                            activity_id=self.activity.id,
+                                            sent_at=current_utc_timestamp() )
+            session.add( rec )
+            session.commit()
+            self.previously_sent.append( student_id )
+
+        self.assertEqual( number, len( self.previously_sent ), "dummy check" )

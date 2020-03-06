@@ -5,6 +5,7 @@ from CanvasHacks.Errors.review_pairings import NoReviewPairingsLoaded
 from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Messaging.skaa import FeedbackFromMetareviewMessenger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
+from CanvasHacks.Repositories.status import SentFeedbackStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
 __author__ = 'adam'
@@ -30,6 +31,9 @@ class SendMetareviewToReviewer( IStep ):
         self.activity_for_review_pairings = unit.initial_work
 
         self._initialize()
+
+        self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+
         self.associations = [ ]
 
     def run( self, **kwargs ):
@@ -59,6 +63,8 @@ class SendMetareviewToReviewer( IStep ):
         RunLogger.log_metareview_feedback_distributed( self.unit.metareview, msg )
 
     def _assign_step( self ):
+        self._filter_notified()
+
         # Filter the review pairs to just those in the work repo.
         for student_id in self.work_repo.submitter_ids:
             # Work repo contains submitted meta reviews. Thus we look up
@@ -74,10 +80,27 @@ class SendMetareviewToReviewer( IStep ):
     def _load_step( self, **kwargs ):
         # Get work
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
+        self.display_manager.initially_loaded = self.work_repo.data
+
         # Filter out students who have already been notified.
         # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
         # since we could filter by who doesn't have a review partner
-        self.work_repo.remove_student_records( self.notificationStatusRepo.previously_received_feedback )
+        # self.work_repo.remove_student_records( self.notificationStatusRepo.previously_received_feedback )
+        #
+
+    def _filter_notified( self ):
+        """
+        The downloaded store of student work contains reviews completed
+        by every reviewer who has turned in the assignment.
+        We need to remove reviewers who have already had their work sent to
+        the original poster.
+        That's the job of this method.
+        :return:
+        """
+        records = self.notificationStatusRepo.reviewers_with_notified_authors
+        # We can remove those from the repo
+        self.work_repo.remove_student_records( records )
+        self.display_manager.post_filter = self.work_repo.data
 
 
 if __name__ == '__main__':
