@@ -37,9 +37,9 @@ class SendDiscussionReviewToPoster(IStep):
         # people are sent feedback from their reviewer
         self.activity_notifying_about = unit.discussion_review
 
-        # todo change back to this after run for unit 2
-        self.activity_for_review_pairings = unit.discussion_review
         # The activity whose id is used to store review pairings for the whole SKAA
+        self.activity_for_review_pairings = unit.discussion_review
+        # did it this way for unit 2; leaving commented version in case have to go back
         # self.activity_for_review_pairings = unit.discussion_forum
 
         self.associations = [ ]
