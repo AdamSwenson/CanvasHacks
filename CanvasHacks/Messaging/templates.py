@@ -128,6 +128,7 @@ Hi {name},
     =======================
     {other}
     
+    I hope you find this useful. If they have made points with which you disagree, read over your posts and practice trying to see what they had in mind. You might still disagree. But please remember the secondary goal of this is to learn to see your own work through someone else's eyes. That skill is incredibly important, rare, and difficult to learn; it will help you in any industry. So please seize every opportunity for practice. 
     
     All best wishes,
     /a

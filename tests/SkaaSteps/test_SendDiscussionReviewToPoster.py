@@ -30,7 +30,7 @@ class TestSendDiscussionReviewToPoster( TestingBase ):
     def setUp( self ):
         self.config_for_test()
         self.unit = unit_factory()
-        self.activity = self.unit.discussion_forum
+        self.activity = self.unit.discussion_review
         self.course = MagicMock()
 
         # student recieiving the message
@@ -67,9 +67,9 @@ class TestSendDiscussionReviewToPoster( TestingBase ):
         self.assertIsInstance(obj.activity_notifying_about, DiscussionReview, "Notifying about expected type of activity")
         self.assertEqual(obj.activity_notifying_about, self.unit.discussion_review, "Expected activity")
 
-        self.assertIsInstance( obj.activity_for_review_pairings, DiscussionForum,
-                               "Review pairings based on expected activity type" )
-        self.assertEqual( obj.activity_for_review_pairings, self.unit.discussion_forum, "Expected activity" )
+        self.assertIsInstance( obj.activity_for_review_pairings, DiscussionReview,
+                               "Review pairings based on expected activity type: Discussion review" )
+        self.assertEqual( obj.activity_for_review_pairings, self.unit.discussion_review, "Expected activity" )
 
         self.assertIsInstance( obj.activity, DiscussionReview,
                                "Working on results from expected  activity type" )
@@ -113,7 +113,8 @@ class TestSendDiscussionReviewToPoster( TestingBase ):
 
         # Check that all messages have the correct subject
         for sid, subj, body in messenger_args:
-            self.assertEqual( FeedbackFromDiscussionReviewMessenger.email_subject, subj, "Correct subject line" )
+            expect_subj = FeedbackFromDiscussionReviewMessenger.email_subject_templ.format( self.unit.unit_number )
+            self.assertEqual( expect_subj, subj, "Correct subject line" )
 
         # Status repo calls on messenger
         obj.messenger.status_repository.record.assert_called()
@@ -181,7 +182,8 @@ class TestSendDiscussionReviewToPoster( TestingBase ):
 
         # Check that all messages have the correct subject
         for sid, subj, body in messenger_args:
-            self.assertEqual( FeedbackFromDiscussionReviewMessenger.email_subject, subj, "Correct subject line" )
+            expect_subj = FeedbackFromDiscussionReviewMessenger.email_subject_templ.format( self.unit.unit_number )
+            self.assertEqual( expect_subj, subj, "Correct subject line" )
 
         # Status repo calls on messenger which
         # record the message having been sent to authors
@@ -331,7 +333,8 @@ class TestSendDiscussionReviewToPoster( TestingBase ):
 
         # Check that all messages have the correct subject
         for sid, subj, body in messenger_args:
-            self.assertEqual( FeedbackFromDiscussionReviewMessenger.email_subject, subj, "Correct subject line" )
+            expect_subj = FeedbackFromDiscussionReviewMessenger.email_subject_templ.format(self.unit.unit_number)
+            self.assertEqual( expect_subj, subj, "Correct subject line" )
 
         # Status repo calls on messenger
         obj.messenger.status_repository.record.assert_called()

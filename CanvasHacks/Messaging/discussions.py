@@ -49,7 +49,7 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
 
 class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
     message_template = DISCUSSION_REVIEW_FEEDBACK_TEMPLATE
-    email_subject = "Feedback on your discussion forum posts"
+    email_subject_templ = "Feedback on your Unit {} discussion forum posts"
     intro = "Here is the feedback from another student on your discussion forum posts. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
@@ -58,6 +58,8 @@ class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
         # We will use the subject and intro
         # stored on this class rather than deferring to the activity
         self.activity_inviting_to_complete = None
+
+        self.email_subject = self.email_subject_templ.format(unit.unit_number)
 
         super().__init__( unit, student_repository, content_repository, status_repository )
 
