@@ -197,6 +197,15 @@ class SentInvitationStatusRepository( IStatusRepository ):
         record = self.get( student )
         return record is not None
 
+    def received_at( self, student ):
+        """Returns the timestamp of when the
+        student was invited or None if they haven't been
+        """
+        rec = self.get(student)
+        if rec is not None:
+            return rec.sent_at
+        return None
+
     @property
     def previously_received( self ):
         """
@@ -277,7 +286,6 @@ class SentFeedbackStatusRepository( IStatusRepository ):
         :return:
         """
         record = self.get( student )
-
         return record is not None
 
     @property
@@ -323,6 +331,18 @@ class SentFeedbackStatusRepository( IStatusRepository ):
         self.session.commit()
 
         return rec
+
+    def received_at( self, student ):
+        """
+        Returns the timestamp of when the student was notified or
+        None if they haven't been
+        :param student:
+        :return:
+        """
+        rec = self.get(student)
+        if rec is not None:
+            return rec.sent_at
+        return None
 
     @property
     def reviewers_with_notified_authors( self ):

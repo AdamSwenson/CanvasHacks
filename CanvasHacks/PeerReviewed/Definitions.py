@@ -22,6 +22,16 @@ if __name__ == '__main__':
     pass
 
 
+class SkaaReviewGroup:
+    """Activities which are part of a skaa"""
+    pass
+
+
+class DiscussionGroup:
+    """Activities which are part of a discussion-review sequence"""
+    pass
+
+
 class Activity( Model ):
     """A wrapper around the canvas provided properties for a quiz which adds
      properties and methods specific to the peer review assignments
@@ -73,7 +83,7 @@ class Activity( Model ):
         Mainly used to simplify decisions elsewhere
         so that we don't have to check for discussion
         type """
-        return isinstance(self, DiscussionForum)
+        return isinstance( self, DiscussionForum )
 
     @property
     def last_half_credit_date( self ):
@@ -161,7 +171,7 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.grace_period = pd.Timedelta( '2 days' )
 
 
-class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
+class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     title_base = "Content assignment"
     instructions_filename = 'content-assignment-instructions.txt'
     creation_type = 'assignment'
@@ -178,7 +188,7 @@ class InitialWork( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.access_code_for_next = None
 
 
-class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
+class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review component of the
      unit """
     title_base = "Peer review"
@@ -209,7 +219,7 @@ class Review( Activity, QuizDataMixin, StoredDataFileMixin ):
         return "Unit {} peer-review of content unit".format( self.unit_number )
 
 
-class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
+class MetaReview( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     """The review review"""
     """Representation of the peer review of 
     another student's submission"""
@@ -231,7 +241,7 @@ class MetaReview( Activity, QuizDataMixin, StoredDataFileMixin ):
         return "Unit {} metareview of peer-review".format( self.unit_number )
 
 
-class DiscussionForum( Activity ):
+class DiscussionForum(DiscussionGroup, Activity ):
     """Representation of the main discussion forum"""
     title_base = "Main discussion"
     instructions_filename = 'discussion-forum-instructions.txt'
@@ -247,12 +257,12 @@ class DiscussionForum( Activity ):
     @property
     def topic_id( self ):
         try:
-            return self.discussion_topic['id']
+            return self.discussion_topic[ 'id' ]
         except KeyError:
-            print("No topic id set on discussion ")
+            print( "No topic id set on discussion " )
 
 
-class DiscussionReview( Activity, QuizDataMixin, StoredDataFileMixin ):
+class DiscussionReview(DiscussionGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
     instructions_filename = 'discussion-review-instructions.txt'

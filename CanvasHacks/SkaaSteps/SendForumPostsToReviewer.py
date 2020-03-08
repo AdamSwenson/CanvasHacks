@@ -40,14 +40,13 @@ class SendForumPostsToReviewer( IStep ):
         self.activity_notifying_about = unit.discussion_review
 
         # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
-        self.activity_for_review_pairings = unit.discussion_forum
+        self.activity_for_review_pairings = unit.discussion_review
 
         self._initialize()
 
 
         #Initialize the relevant status repo
         self.notificationStatusRepo = SentInvitationStatusRepository(self.dao, self.activity_notifying_about)
-        # todo replace with InvitationSentRepo
 
         # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
 
