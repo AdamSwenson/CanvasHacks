@@ -19,30 +19,49 @@ class DiscussionGrader(IGrader):
         self.work_repo = work_repo
         super().__init__(**kwargs)
 
+        self.credit_per_post = 100 / self.num_posts_required
+
+        # Internal store for in between grading steps
+        self._raw = [
+            # ( sid, percent credit)
+        ]
+
+        # Externally usable store
+        self.graded = []
+
+    def _calc_scores( self ):
+        """Iterate through repo data and store individual
+        student scores in _raw
+        """
+        for p in self.work_repo.data:
+            # discussion repo data will look like:
+            # [{'student_id', 'student_name', 'text'}]
+            pct_credit = self.credit_per_post if receives_credit( p[ 'text' ] ) else 0
+            self._raw.append( (p[ 'student_id' ], pct_credit) )
+
     def grade( self ):
         """Assigns a provisional grade for the discussion unit
         Will return as a list of tuples
         todo: Add logging of details of how grade assigned
         """
-        credit_per_post = 100 / self.num_posts_required
+        self._calc_scores()
 
-        grades = [
-            # ( sid, percent credit)
-        ]
+        self._prepare_results()
 
-        for p in self.work_repo.data:
-            pct_credit = credit_per_post if receives_credit( p[ 'text' ] ) else 0
-            grades.append( (p['student_id'], pct_credit) )
+        return self.graded
 
-        # sum them up for each student and put in list for upload
-        self.graded = []
-        sids = list(set([s[0] for s in grades]))
+    def _prepare_results( self ):
+        """Takes the raw scores and prepares them for upload
+        """
+        # sum them up for each student
+        sids = list( set( [ s[ 0 ] for s in self._raw ] ) )
         for sid in sids:
-            t = sum([s[1] for s in grades if s[0] == sid])
+            t = sum( [ s[ 1 ] for s in self._raw if s[ 0 ] == sid ] )
+            # todo Should this be rounded to ceiling?
+            t = round(t)
             # Correct for more than required number
             t = 100 if t > 100 else t
-            self.graded.append( ( sid,  t))
-        return self.graded
+            self.graded.append( (sid, t) )
 
 
 #

@@ -19,6 +19,7 @@ class JournalGrader( IGrader ):
         super().__init__( **kwargs )
         self.penalizer = self.activity.penalizer
         self.grade_method = self.activity.grade_method
+        self.graded = [ ]
 
     def grade( self ):
         """Assigns a provisional grade for the discussion unit
@@ -28,7 +29,7 @@ class JournalGrader( IGrader ):
        Determines how much credit potentially late credit/no credit
         assignments should recieve.
         Created in CAN-24"""
-        self.graded = [ ]
+
         for submission in self.work_repo.data:
             if submission.body is not None:
                 score = self.grade_method.grade( submission.body )

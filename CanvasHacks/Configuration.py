@@ -117,6 +117,7 @@ class Configuration( object ):
         Creates a unit object by downloading from canvas using the first defined course id
         todo Make this work with multiple courses
         """
+
         COURSE_ID = cls.course_ids[0]
         # print("Working on course: ", COURSE_ID)
         cls.canvas = Canvas(cls.canvas_url_base, cls.canvas_token)
@@ -256,6 +257,35 @@ class FileBasedConfiguration( Configuration ):
             print("Will ignore work by users: ", cls.excluded_users)
         except:
             pass
+
+
+class TestingConfiguration( Configuration ):
+    def __init__( self ):
+        type(self).is_test = True
+
+        super().__init__()
+
+    @classmethod
+    def handle_token_entry( cls, event ):
+        if event[ 'type' ] == 'change' and event[ 'name' ] == 'value':
+            v = event[ 'new' ]
+            cls.add_canvas_token( v )
+
+    @classmethod
+    def handle_url_entry( cls, event ):
+        if event[ 'type' ] == 'change' and event[ 'name' ] == 'value':
+            v = event[ 'new' ]
+            cls.add_canvas_url_base( v )
+
+    @classmethod
+    def set_test( cls ):
+        cls.is_test = True
+
+    @classmethod
+    def set_live( cls ):
+        cls.is_test = False
+
+
 
 if __name__ == '__main__':
     FileBasedConfiguration.load()

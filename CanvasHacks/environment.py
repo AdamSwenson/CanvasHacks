@@ -15,7 +15,7 @@ if CanvasHacks.testglobals.TEST:
 # testing against server.
 CanvasHacks.testglobals.TEST_WITH_FILE_DB = False
 
-from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration
+from CanvasHacks.Configuration import FileBasedConfiguration, InteractiveConfiguration, TestingConfiguration
 
 ROOT = os.getenv( "HOME" )
 
@@ -43,7 +43,7 @@ if CanvasHacks.testglobals.use_api:
         LOG_FOLDER = None
 else:
     # Testing without api access
-    CONFIG = InteractiveConfiguration
+    CONFIG = TestingConfiguration
     if CanvasHacks.testglobals.TEST:
         CONFIG.is_test = CanvasHacks.testglobals.TEST
     LOG_FOLDER = None

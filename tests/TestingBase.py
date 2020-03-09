@@ -1,7 +1,12 @@
 """
 Created by adam on 2/22/20
 """
-from CanvasHacks.Models.review_association import ReviewAssociation
+
+import CanvasHacks.testglobals
+
+CanvasHacks.testglobals.TEST = True
+CanvasHacks.testglobals.use_api = False
+
 from CanvasHacks.Models.status_record import FeedbackReceivedRecord, InvitationReceivedRecord
 from CanvasHacks.Repositories.reviewer_associations import assign_reviewers
 from CanvasHacks.TimeTools import current_utc_timestamp
@@ -9,10 +14,6 @@ from factories.ModelFactories import make_students
 
 __author__ = 'adam'
 
-import CanvasHacks.testglobals
-
-CanvasHacks.testglobals.TEST = True
-CanvasHacks.testglobals.use_api = False
 
 from CanvasHacks import environment as env
 
@@ -25,7 +26,7 @@ if __name__ == '__main__':
 
 class TestingBase( unittest.TestCase ):
 
-    def config_for_test( self ):
+    def config_for_test( self, use_api=False ):
         print( 'setting test' )
         env.CONFIG.set_test()
         self.fake = Faker()
@@ -61,6 +62,9 @@ class TestingBase( unittest.TestCase ):
         the provided students
         NB, must have the dao session stored on self.session
         """
+        # Here to avoid problems when running tests offline
+        from CanvasHacks.Models.review_association import ReviewAssociation
+
         old_assigns = assign_reviewers( preexisting_students )
 
         session = session if session is not None else self.session
