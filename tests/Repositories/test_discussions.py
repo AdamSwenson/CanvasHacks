@@ -19,28 +19,28 @@ class TestDiscussionRepository( TestingBase ):
         self.activity = self.unit.discussion_forum
 
     def test_course_id( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_download( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test__get_submissions( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test__parse_posts_from_submissions( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_get_student_posts( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_get_formatted_work( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_upload_student_grade( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_display_for_grading( self ):
-        self.fail()
+        self.skipTest('todo')
 
     def test_post_counts( self ):
-        self.fail()
+        self.skipTest('todo')

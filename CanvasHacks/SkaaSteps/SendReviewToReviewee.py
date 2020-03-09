@@ -1,49 +1,58 @@
 """
 Created by adam on 2/23/20
 """
-from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
-from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
-from CanvasHacks.Repositories.status import StatusRepository, SentFeedbackStatusRepository
-from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
-from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
-from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
+from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
+from CanvasHacks.Logging.run_data import RunLogger
+from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
+from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
+from CanvasHacks.Repositories.status import FeedbackStatusRepository, InvitationStatusRepository
+from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
 __author__ = 'adam'
 
 
-class SendReviewToReviewee(IStep):
+class SendReviewToReviewee( IStep ):
     """Handles loading the submitted reviews and routing them to the authors'
     with instructions for completing the metareview
     """
 
-    def __init__(self, course=None, unit=None, is_test=None, send=True, **kwargs):
+    def __init__( self, course=None, unit=None, is_test=None, send=True, **kwargs ):
         """
         :param course:
         :param unit:
         :param is_test:
         :param send: Whether to actually send the messages
         """
-        super().__init__(course, unit, is_test, send, **kwargs)
+        super().__init__( course, unit, is_test, send, **kwargs )
         # The activity whose results we are going to be doing something with
         self.activity = unit.review
 
-        # The activity_inviting_to_complete which we are inviting the receiving student to complete
+        # The activity which we are inviting the receiving student to complete
         self.activity_notifying_about = unit.metareview
 
-        # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
+        # In sending the review results to the author we are
+        # telling the about the feedback on the original assignment
+        self.activity_feedback_on = unit.initial_work
+
+        # The activity whose id is used to store review pairings for the whole SKAA
         self.activity_for_review_pairings = unit.initial_work
 
         self.associations = [ ]
 
         self._initialize()
 
-        #Initialize the relevant status repo
-        self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        # Initialize the relevant status repos
 
-        # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
+        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on)
 
-    def run(self, **kwargs):
+        self.invite_status_repo = InvitationStatusRepository(self.dao, self.activity_notifying_about)
+
+        self.statusRepos = [self.invite_status_repo, self.feedback_status_repo]
+
+        # self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
+
+    def run( self, **kwargs ):
         """
         Retrieves submitted reviews and sends themto the authors
         along with instructions for metareview
@@ -53,7 +62,7 @@ class SendReviewToReviewee(IStep):
         :return:
         """
         try:
-            self._load_step( **kwargs)
+            self._load_step( **kwargs )
 
             self._assign_step()
 
@@ -63,17 +72,18 @@ class SendReviewToReviewee(IStep):
             # Check if new submitters, bail if not
             print( "No new submissions" )
             # todo Log run failure
-            RunLogger.log_no_submissions(self.activity)
+            RunLogger.log_no_submissions( self.activity )
 
         except Exception as e:
-            print(e)
+            print( e )
 
     def _message_step( self ):
         # Handle sending the results of the review to the original author
         # so they can do the metareview
-        self.messenger = MetareviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+        self.messenger = MetareviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.statusRepos )
+
         self.messenger.notify( self.associations, self.send )
-        # messages = self.messenger.notify(self.associationRepo.data, self.send)
+
         # Log the run
         msg = "Sent {} peer review results \n {}".format( len( self.associations ), self.associations )
         # Note we are distributing the material for the metareview, that's
@@ -92,7 +102,7 @@ class SendReviewToReviewee(IStep):
                 records = self.associationRepo.get_by_assessor( self.activity_for_review_pairings, student_id )
 
                 if records is None:
-                    raise NoReviewPairingFound(student_id)
+                    raise NoReviewPairingFound( student_id )
                 else:
                     self.associations.append( records )
             except NoReviewPairingFound:
@@ -104,7 +114,6 @@ class SendReviewToReviewee(IStep):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         self.display_manager.initially_loaded = self.work_repo.data
 
-
     def _filter_notified( self ):
         """
         Filter out students who have already been invited to
@@ -114,14 +123,14 @@ class SendReviewToReviewee(IStep):
 
         :return:
         """
-        records = self.notificationStatusRepo.reviewers_with_notified_authors
+        records = self.feedback_status_repo.reviewers_with_authors_sent_feedback
         self.work_repo.remove_student_records( records )
         self.display_manager.post_filter = self.work_repo.data
 
         # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
         # prelen = len( self.work_repo.data )
         # print( "Loaded work by {} students from {}".format( prelen, self.activity.name ) )
-        # self.work_repo.remove_student_records( self.notificationStatusRepo.previously_invited )
+        # self.work_repo.remove_student_records( self.statusRepos.previously_invited )
 
         # postlen = len( self.work_repo.data )
         # print( "Filtered out {} students who have already been notified".format( prelen - postlen ) )

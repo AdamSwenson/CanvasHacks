@@ -38,7 +38,44 @@ class FrameStorageMixin:
             self.data.set_index('student_id', inplace=True)
 
 
-class StudentWorkMixin:
+class ObjectHandlerMixin:
+    """Tools for dealing with
+    input values which may represent students
+    and other objects in a number of ways
+    """
+    def _handle_id( self, object_or_int ):
+        """
+        Takes either a object or the int value of their id
+        and returns the id
+        :param object_or_int:
+        :return: int
+        """
+        try:
+            return int( object_or_int )
+        except TypeError:
+            try:
+                # in case we have a student object w id stored like this
+                return object_or_int.student_id
+            except AttributeError:
+                return object_or_int.id
+
+    def force_to_ids(self, list_of_students):
+        """We could receive a list of ids, Student
+        objects or canvasapi User objects. This returns
+        a list of ids"""
+        out = []
+
+        for s in list_of_students:
+            if isinstance(s, int):
+                out.append(s)
+            else:
+                # Both Student and User objects will have an id attribute
+                # which contains the canvas id of the student
+                out.append(s.id)
+        return out
+
+
+class StudentWorkMixin(ObjectHandlerMixin):
     """Parent class for any repository which holds
     student data and can provide a formatted version
     for sending via email etc
@@ -58,21 +95,6 @@ class StudentWorkMixin:
         uids.sort()
         return uids
 
-    def _handle_id( self, object_or_int ):
-        """
-        Takes either a object or the int value of their id
-        and returns the id
-        :param object_or_int:
-        :return: int
-        """
-        try:
-            return int( object_or_int )
-        except TypeError:
-            try:
-                # in case we have a student object w id stored like this
-                return object_or_int.student_id
-            except AttributeError:
-                return object_or_int.id
 
     def _check_empty( self, work ):
         """Checks whether the work is empty and

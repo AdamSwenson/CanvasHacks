@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from faker import Faker
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
-from CanvasHacks.Repositories.status import SentInvitationStatusRepository
+from CanvasHacks.Repositories.status import InvitationStatusRepository
 from CanvasHacks.SkaaSteps.SendForumPostsToReviewer import SendForumPostsToReviewer
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     pass
 
 
-class TestSendForumPostsToReviewer( TestingBase ):
+class TestUnitTests( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
@@ -57,10 +57,69 @@ class TestSendForumPostsToReviewer( TestingBase ):
         """The sending of metareview results requires a
         special status repository"""
         obj = SendForumPostsToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
-        self.assertIsInstance( obj.notificationStatusRepo, SentInvitationStatusRepository,
+        self.assertEqual(len(obj.statusRepos), 1, "expected number of status repos")
+        self.assertIsInstance( obj.statusRepos[0], InvitationStatusRepository,
                                "Correct status repo instantiated" )
 
-    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.SentInvitationStatusRepository' )
+    def test__message_step( self ):
+        self.skipTest( "todo" )
+
+    def test__assign_step( self ):
+        self.skipTest( "todo" )
+
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.DisplayManager' )
+    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.WorkRepositoryLoaderFactory' )
+    def test__load_step( self, workLoaderMock, displayManagerMock ):
+        self.workRepo.remove_student_records = MagicMock()
+        workLoaderMock.make = MagicMock( return_value=self.workRepo )
+
+        obj = SendForumPostsToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+
+        # call
+        obj._load_step()
+
+        # check
+        workLoaderMock.make.assert_called()
+        displayManagerMock.assert_called()
+
+        call_args = [ c[ 0 ][ 0 ] for c in workLoaderMock.call_args_list ]
+        # print( call_args )
+        # self.assertEqual()
+
+
+class TestFunctionalTests( TestingBase ):
+
+    def setUp( self ):
+        self.config_for_test()
+        self.unit = unit_factory()
+        self.activity = self.unit.discussion_forum
+        self.course = MagicMock()
+
+        # student recieiving the message
+        self.author = student_factory()
+        self.reviewer = student_factory()
+
+        # This would be the content unit
+        self.work = fake.text()
+        # Set to none so that loader thinks not a quiz
+        self.activity_id = self.unit.discussion_forum.id
+        self.dao = SqliteDAO()
+        self.session = self.dao.session
+        self.create_new_and_preexisting_students()
+        # Prepare fake work repo to give values to calling  objects
+
+        # self.studentRepo = StudentRepository()
+        # self.studentRepo.get_student = MagicMock( return_value=self.reviewer )
+        self.contentRepo = ContentRepositoryMock()
+        self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
+        self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
+        self.statusRepo = MagicMock()
+        # Prepare fake work repo to give values to calling  objects
+        self.workRepo = ContentRepositoryMock()
+        self.workRepo.create_test_content( self.student_ids )
+        self.workRepo.add_students_to_data( self.student_ids, make_dataframe=True )
+
+    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.InvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.WorkRepositoryLoaderFactory' )
@@ -124,11 +183,11 @@ class TestSendForumPostsToReviewer( TestingBase ):
             self.assertEqual( self.unit.discussion_review.email_subject, subj, "Correct subject line" )
 
         # Status repo calls on messenger
-        obj.messenger.status_repository.record.assert_called()
-        call_list = obj.messenger.status_repository.record.call_args_list
+        obj.messenger.status_repositories[0].record.assert_called()
+        call_list = obj.messenger.status_repositories[0].record.call_args_list
 
-        # obj.messenger.status_repository.record_invited.assert_called()
-        # call_list = obj.messenger.status_repository.record_invited.call_args_list
+        # obj.messenger.status_repositories.record_invited.assert_called()
+        # call_list = obj.messenger.status_repositories.record_invited.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
                           "Status repo record_invited called expected number of times" )
@@ -147,31 +206,6 @@ class TestSendForumPostsToReviewer( TestingBase ):
             sent_text = [ t[ 2 ] for t in messenger_args if t[ 0 ] == record.assessor_id ][ 0 ]
             rx = r'{}'.format( author_text )
             self.assertRegex( sent_text, rx, "Author's work in message sent to reviewer" )
-
-    def test__message_step( self ):
-        self.skipTest( "todo" )
-
-    def test__assign_step( self ):
-        self.skipTest( "todo" )
-
-    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.DisplayManager' )
-    @patch( 'CanvasHacks.SkaaSteps.SendForumPostsToReviewer.WorkRepositoryLoaderFactory' )
-    def test__load_step( self, workLoaderMock, displayManagerMock ):
-        self.workRepo.remove_student_records = MagicMock()
-        workLoaderMock.make = MagicMock( return_value=self.workRepo )
-
-        obj = SendForumPostsToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
-
-        # call
-        obj._load_step()
-
-        # check
-        workLoaderMock.make.assert_called()
-        displayManagerMock.assert_called()
-
-        call_args = [ c[ 0 ][ 0 ] for c in workLoaderMock.call_args_list ]
-        # print( call_args )
-        # self.assertEqual()
 
     def test_audit_frame( self ):
         self.skipTest( "todo" )

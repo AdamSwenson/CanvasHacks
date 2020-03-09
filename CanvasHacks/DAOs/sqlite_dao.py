@@ -6,15 +6,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-# from CanvasHacks.Models.review_association import Base
 
 __author__ = 'adam'
 
 if __name__ == '__main__':
     pass
-
-
-# Base = declarative_base()
 
 
 class SqliteDAO( object ):
@@ -32,18 +28,19 @@ class SqliteDAO( object ):
             self._create_memory_engine()
 
         self._connect()
-        # if db_filepath:
-        #     # We'ere going to use a file based database
-        #      self._make_file_engine(db_filepath)
-        # else:
-        #     self._create_memory_engine()
 
     def _connect( self ):
+        """
+        Creates a session on self.session
+        :return:
+        """
         self.session_factory = sessionmaker( bind=self.engine )
         self.session = self.session_factory()
 
     def _create_memory_engine( self ):
-        """Creates an in-memory sqlite db engine"""
+        """
+        Creates an in-memory sqlite db engine
+        """
         connection_string = 'sqlite:///:memory:'
         print( "creating connection: %s " % connection_string )
         self.engine = create_engine( connection_string, echo=False )
@@ -53,6 +50,10 @@ class SqliteDAO( object ):
         # self.engine = create_engine( conn, echo=False )
 
     def initialize_db_file( self ):
+        """
+        Creates tables in the database
+        :return:
+        """
         Base.metadata.create_all( self.engine )
 
 
@@ -60,5 +61,3 @@ class SqliteDAO( object ):
         connection_string = 'sqlite:///{}'.format( filepath )
         print( "creating connection: %s " % connection_string )
         self.engine = create_engine( connection_string, echo=False )
-
-    # self.engine = create_engine( 'sqlite:{}'.format( filepath), echo=False )

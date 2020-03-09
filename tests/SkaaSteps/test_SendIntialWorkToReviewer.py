@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import CanvasHacks.testglobals
 from CanvasHacks.Models.review_association import ReviewAssociation
-from CanvasHacks.Repositories.status import SentInvitationStatusRepository
+from CanvasHacks.Repositories.status import InvitationStatusRepository
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
@@ -38,7 +38,7 @@ class TestCallsAllExpected( TestingBase ):
         self.unit = unit_factory()
         # self.unit.components.append(review)
 
-    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.InvitationStatusRepository' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.PeerReviewInvitationMessenger' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.AssociationRepository' )
@@ -87,6 +87,31 @@ class TestCallsAllExpected( TestingBase ):
         # obj.statusRepo.record_invited.assert_called_with(submitter_ids[1])
 
 
+class TestUnitTests(TestingBase):
+    """Unit tests with all dependencies mocked"""
+    def setUp( self ):
+        self.config_for_test()
+        self.unit = unit_factory()
+        self.course = MagicMock()
+        self.activity_id = self.unit.review.id
+        # self.dao = SqliteDAO()
+        # self.create_new_and_preexisting_students()
+        # # Prepare fake work repo to give values to calling  objects
+        # self.workRepo = ContentRepositoryMock()
+        # self.workRepo.create_test_content( self.student_ids )
+        # self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
+
+    def test_instantiates_correct_status_repos( self ):
+        """The sending of metareview results requires a
+        special status repository"""
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+
+        self.assertIsInstance(obj.statusRepos, list, "status repos is a list")
+        self.assertTrue(len(obj.statusRepos) == 1)
+        self.assertIsInstance(obj.invite_status_repo, InvitationStatusRepository, "Invite repo instantiated")
+
+
+
 class TestFunctionalTestWhenQuizType( TestingBase ):
     """
     Tests the entire process in various use cases using
@@ -110,13 +135,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.workRepo.create_test_content( self.student_ids )
         self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
-    def test_instantiates_correct_status_repo( self ):
-        """The sending of metareview results requires a
-        special status repository"""
-        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
-        self.assertIsInstance( obj.notificationStatusRepo, SentInvitationStatusRepository, "Correct status repo instantiated" )
-
-    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.InvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
@@ -150,7 +169,7 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
 
         # studentRepoMock.get_student = MagicMock(side_effect=se)
         # studentRepoMock.download = MagicMock( return_value=self.students )
-        # statusRepoMock.record_invited = MagicMock()
+        # feedbackStatusRepoMock.record_invited = MagicMock()
         # call
         obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
         # obj.studentRepo = MagicMock()
@@ -196,9 +215,9 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         # print(args)
 
         # Status repo calls on messenger
-        # statusRepoMock.record_invited.assert_called()
-        obj.messenger.status_repository.record.assert_called()
-        call_list = obj.messenger.status_repository.record.call_args_list
+        # feedbackStatusRepoMock.record_invited.assert_called()
+        obj.messenger.status_repositories[0].record.assert_called()
+        call_list = obj.messenger.status_repositories[0].record.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
                           "Status repo record_invited called expected number of times" )
@@ -301,7 +320,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # workRepo = create_autospec( QuizRepository )
         # workRepo.get_formatted_work_by = MagicMock( return_value=testText )
 
-    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.SentInvitationStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.InvitationStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendInitialWorkToReviewer.WorkRepositoryLoaderFactory' )
@@ -376,12 +395,12 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         for sid, subj, body in messenger_args:
             self.assertEqual(self.unit.review.email_subject, subj, "Correct subject line")
 
-        # Status repo calls on messenger
-        obj.messenger.status_repository.record.assert_called()
-        call_list = obj.messenger.status_repository.record.call_args_list
+        # Status repo calls on messenger (only 1 repo)
+        obj.messenger.status_repositories[0].record.assert_called()
+        call_list = obj.messenger.status_repositories[0].record.call_args_list
 
-        # obj.messenger.status_repository.record_invited.assert_called()
-        # call_list = obj.messenger.status_repository.record_invited.call_args_list
+        # obj.messenger.status_repositories.record_invited.assert_called()
+        # call_list = obj.messenger.status_repositories.record_invited.call_args_list
         status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         self.assertEqual( len( self.new_students ), len( call_list ),
                           "Status repo record_invited called expected number of times" )

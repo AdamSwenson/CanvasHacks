@@ -16,23 +16,25 @@ if __name__ == '__main__':
 class SkaaMessenger:
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
+                  status_repositories: list ):
         """
         :param unit:
         :param student_repository:
         :param content_repository:
-        :param status_repository:
+        :param status_repositories: List of status repos to call once sent
         """
         self.unit = unit
         self.student_repository = student_repository
         self.content_repository = content_repository
 
-        # self.activity_inviting_to_complete = activity_inviting_to_complete
-
         # Object responsible for actually sending message
         self.sender = ConversationMessageSender()
-        # Objec in charge of logging statuses
-        self.status_repository = status_repository
+
+        # Objects in charge of storing change in status
+        # after sent. Should be a list of InvitationStatusRepository
+        # or FeedbackStatusRepository objects
+        self.status_repositories = status_repositories
+
         self.logger = MessageLogger()
 
     @property
@@ -113,23 +115,33 @@ class SkaaMessenger:
             # messages.append( message_data )
 
             if send:
-                # m = send_message_to_student( **message_data )
                 m = self.sender.send( **message_data )
                 # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
                 # self.logger.write(m)
 
                 messages.append( m )
-                # Record status change (not to log)
-                if self.status_repository is not None:
-                    self.status_repository.record( message_data[ 'student_id' ] )
-                    # if isinstance(self.content_repository.activity, Metareview):
-                    # For the peer review, the reviewer will be marked as notified
-                    # For the metareview the author will be marked as notified
-                    # self.status_repository.record_invited( message_data[ 'student_id' ] )
-                # print( "Message sent", m )
+                self.update_status( message_data )
+
             else:
                 # For test runs
                 messages.append( message_data )
                 print( message_data )
         # Returns for testing / auditing
         return messages
+
+    def update_status( self, message_data ):
+        """
+        Call the record method on all status repos
+        :param message_data:
+        :return:
+        """
+        if self.status_repositories is not None:
+            # If was passed a single repo, make a list
+            if not isinstance(self.status_repositories, list):
+                self.status_repositories = [ self.status_repositories ]
+
+            for status_repo in self.status_repositories:
+                # Record status change (not to log)
+                # records that the student has been invited or that they
+                # have been sent feedback depending on the class
+                status_repo.record( message_data[ 'student_id' ] )

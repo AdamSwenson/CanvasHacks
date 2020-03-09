@@ -10,8 +10,6 @@ __author__ = 'adam'
 from CanvasHacks.RequestTools import send_multi_page_get_request
 from CanvasHacks.UrlTools import make_url
 
-# import canvasapi.course
-
 
 class StudentRepository( IRepo ):
     """Manages information about students downloaded

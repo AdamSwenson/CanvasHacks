@@ -9,7 +9,7 @@ from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, \
     METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.PeerReviewed.Definitions import Unit
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, IStatusRepository
 from CanvasHacks.TimeTools import getDateForMakingFileName
 
 __author__ = 'adam'
@@ -24,10 +24,11 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
     message_template = REVIEW_NOTICE_TEMPLATE
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
+                  status_repositories: IStatusRepository ):
+
         self.activity_inviting_to_complete = unit.review
 
-        super().__init__( unit, student_repository, content_repository, status_repository )
+        super().__init__( unit, student_repository, content_repository, status_repositories )
         # self.message_template = REVIEW_NOTICE_TEMPLATE
 
     def prepare_message( self, review_assignment, other=None ):
@@ -52,18 +53,18 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
 
 
 class MetareviewInvitationMessenger( SkaaMessenger ):
-    """Handles sending message containg feedback from the peer reviewer
-    to the person who was reviewed
+    """Handles sending message containing feedback from the peer reviewer
+    to the author of the content assignment with invite to do metareview
     """
     message_template = METAREVIEW_NOTICE_TEMPLATE
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
-        # The activity_inviting_to_complete we are notifying about
+                  status_repositories: StatusRepository ):
+
+        # The activity we are notifying about
         self.activity_inviting_to_complete = unit.metareview
 
-        super().__init__( unit, student_repository, content_repository, status_repository )
-        # self.
+        super().__init__( unit, student_repository, content_repository, status_repositories )
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -95,18 +96,19 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     did the initial peer review
     """
     message_template = METAREVIEW_CONTENT_TEMPLATE
-    subject = "Feedback on your peer review"
+    subject = "Unit {}: Feedback on your peer review"
     intro = "Here is the feedback the author gave on your peer review. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
+                  status_repositories: IStatusRepository ):
 
+        # None because sending feedback
         self.activity_inviting_to_complete = None
 
-        super().__init__( unit, student_repository, content_repository, status_repository )
+        super().__init__( unit, student_repository, content_repository, status_repositories )
 
-        # self.subject = "Feedback on your peer review"
-        # self.intro = "Here is the feedback the author gave on your peer review. "
+        self.email_subject = self.subject.format(self.unit.unit_number)
+
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review
@@ -139,7 +141,7 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
             # can't use the usual self.make_message_data because won't have all the expected fields
             return {
                 'student_id': receiving_student.id,
-                'subject': self.subject,
+                'subject': self.email_subject,
                 'body': body
             }
 

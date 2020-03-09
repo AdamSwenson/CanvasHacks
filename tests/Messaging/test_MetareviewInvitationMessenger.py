@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch, create_autospec
 
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, InvitationStatusRepository
 from tests.TestingBase import TestingBase
 
 from faker import Faker
@@ -27,14 +27,14 @@ if __name__ == '__main__':
     pass
 
 
-class TestFeedbackForMetareviewMessenger( TestingBase ):
+class TestMetareviewInvitationMessenger( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
         self.unit = unit_factory()
-        self.activity = self.unit.metareview #InitialWork( **self.activity_data )
+        self.activity = self.unit.metareview
 
-        # student recieiving the message
+        # student receiving the message
         self.author = student_factory()
         self.reviewer = student_factory()
 
@@ -42,10 +42,13 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
         self.work = fake.text()
 
         self.studentRepo = StudentRepository()
-        self.studentRepo.get_student = MagicMock( return_value=self.reviewer )
+        # self.studentRepo.data = {self.author.id : self.author,
+        #                          self.reviewer.id: self.reviewer
+        #                          }
+        self.studentRepo.get_student = MagicMock( return_value=self.author )
         self.contentRepo = ContentRepositoryMock()
         self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
-        self.statusRepo = create_autospec(StatusRepository)
+        self.statusRepo = create_autospec(InvitationStatusRepository)
 
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
 
@@ -57,16 +60,16 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
 
         # check
         self.assertEqual( obj.message_template, METAREVIEW_NOTICE_TEMPLATE, "Working off expected template" )
-        self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Message is going to reviewer" )
+        self.assertEqual( message_data[ 'student_id' ], self.author.id, "Message is going to author of the ca (inviting to review the reviewer)" )
         self.assertEqual( message_data[ 'subject' ], self.activity.email_subject, "Expected subject" )
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
-        expected_content = obj._make_message_content( self.work, None, self.reviewer )
+        expected_content = obj._make_message_content( self.work, None, self.author )
         self.assertEqual( expected_content, message_data[ 'body' ], "Expected message body" )
 
         # Super important: makes sure going to right person
-        # This is for the request to do the metareview, so the receipient should be the AUTHOR
+        # This is for the request to do the metareview, so the recipient should be the AUTHOR
         self.studentRepo.get_student.assert_called_with(self.author.id )
 
     @patch( 'CanvasHacks.Messaging.SendTools.ConversationMessageSender.send' )
@@ -87,22 +90,12 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
         # Check that the sender was given the expected content
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
-        self.assertEqual( kwargs['student_id'], self.reviewer.id, "Sent to reviewer" )
+        self.assertEqual( kwargs['student_id'], self.author.id,  "Message is going to author of the ca (inviting to review the reviewer)"  )
         self.assertEqual(kwargs['subject'], self.unit.metareview.email_subject, "Sent with expected subject line ")
 
         # self.assertEqual(kwargs['subject'], self.FeedbackFromMetareviewMessenger.subject, "Sent with expected subject line -- remember this one is different")
-        d = self.obj._make_template_input( self.work, None, self.reviewer )
-        # d = {
-        #     'intro': TestFeedbackForMetare,
-        #
-        #     'name': get_first_name( self.author.name ),
-        #
-        #     # Formatted work for sending
-        #     'responses': self.work,
-        #
-        #     # Add any materials from me
-        #     'other': "",
-        # }
+        d = self.obj._make_template_input( self.work, None, self.author )
+
         b = METAREVIEW_NOTICE_TEMPLATE.format(**d)
         self.assertEqual(kwargs['body'], b, "Sent with expected body")
 
@@ -110,4 +103,7 @@ class TestFeedbackForMetareviewMessenger( TestingBase ):
         # This is for the request to do the metareview, so the receipient should be the AUTHOR
         self.studentRepo.get_student.assert_called_with(self.author.id )
 
-
+        # Check that status repo called
+        self.statusRepo.record.assert_called()
+        # record invitation to author
+        self.statusRepo.record.assert_called_with( self.author.id )

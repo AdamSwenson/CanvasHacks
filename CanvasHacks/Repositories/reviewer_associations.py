@@ -13,6 +13,8 @@ __author__ = 'adam'
 import numpy as np
 import random
 
+from CanvasHacks.Repositories.mixins import ObjectHandlerMixin
+
 
 def assign_reviewers( student_ids ):
     """
@@ -28,28 +30,28 @@ def assign_reviewers( student_ids ):
     return list( zip( student_ids, np.roll( student_ids, 1 ) ) )
 
 
-def force_to_ids(list_of_students):
-    """We could receive a list of ids, Student
-    objects or canvasapi User objects. This returns
-    a list of ids"""
-    out = []
+# def force_to_ids(list_of_students):
+#     """We could receive a list of ids, Student
+#     objects or canvasapi User objects. This returns
+#     a list of ids"""
+#     out = []
+#
+#     for s in list_of_students:
+#         if isinstance(s, int):
+#             out.append(s)
+#         else:
+#             # Both Student and User objects will have an id attribute
+#             # which contains the canvas id of the student
+#             out.append(s.id)
+#     return out
 
-    for s in list_of_students:
-        if isinstance(s, int):
-            out.append(s)
-        else:
-            # Both Student and User objects will have an id attribute
-            # which contains the canvas id of the student
-            out.append(s.id)
-    return out
 
-
-class AssociationRepository:
+class AssociationRepository(ObjectHandlerMixin):
 
     def __init__( self, dao: SqliteDAO, activity: Activity):
         """
         Create a repository to handle review assignments for a
-        particular activity_inviting_to_complete
+        particular activity
         """
         self.activity = activity
         self.session = dao.session
@@ -90,7 +92,7 @@ class AssociationRepository:
         :raises AllAssigned, NoAvailablePartner,
         """
         # Force list of submitters to be a list of ids
-        submitters = force_to_ids(submitters)
+        submitters = self.force_to_ids(submitters)
 
         # Filter out anyone who has already been assigned to review
         # someone. That will leave anyone who is just now submitting
@@ -123,7 +125,7 @@ class AssociationRepository:
         # make_review_audit_file(self, self.student_repository)
         return self.new_assignments
 
-    def audit_frame( self, student_respository ):
+    def audit_frame( self, student_repository ):
         """
         Returns a data frame with all the current review
         pairings
@@ -132,8 +134,8 @@ class AssociationRepository:
         review_audit = []
         for rev in self.get_associations():
             # print(rev.assessor_id, rev.assessee_id)
-            assessor = student_respository.get_student( rev.assessor_id )
-            assessee = student_respository.get_student( rev.assessee_id )
+            assessor = student_repository.get_student( rev.assessor_id )
+            assessee = student_repository.get_student( rev.assessee_id )
             # print(assessor)
 
             review_audit.append({
@@ -225,6 +227,35 @@ class AssociationRepository:
             .filter( ReviewAssociation.assessee_id == author_id ) \
             .one_or_none()
 
+    def get_by_author( self, author ):
+        """
+        Returns the review object where the student is the author of
+        the original work
+        Introduced in preparation for CAN-52
+        :param author: Student or student id
+        :return: ReviewAssociation or None
+        """
+        author_id = self._handle_id(author)
+        return self.session.query( ReviewAssociation )\
+            .filter( ReviewAssociation.activity_id == self.activity.id )\
+            .filter( ReviewAssociation.assessee_id == author_id )\
+            .one_or_none()
+
+    def get_by_reviewer( self, reviewer ):
+        """
+        Returns the review object where the student is the assessor of the
+        original work
+
+        Introduced in preparation for CAN-52
+
+        :param reviewer: Student or student id
+        :return:
+        """
+        reviewer_id = self._handle_id(reviewer)
+        return self.session.query( ReviewAssociation )\
+            .filter( ReviewAssociation.activity_id == self.activity.id )\
+            .filter( ReviewAssociation.assessor_id == reviewer_id )\
+            .one_or_none()
 
     def get_assessee_object( self, activity, reviewer_id ):
         """Returns the ReviewAssociation object containing the student
@@ -245,10 +276,6 @@ class AssociationRepository:
         so test methods can call on its own
         """
         r = self.get_assessee_object(activity, reviewer_id)
-        # self.session.query( ReviewAssociation ) \
-        #     .filter( ReviewAssociation.activity_id == activity_inviting_to_complete.id ) \
-        #     .filter( ReviewAssociation.assessor_id == reviewer_id ) \
-        #     .one_or_none()
         if r:
             return r.assessee_id
         return r

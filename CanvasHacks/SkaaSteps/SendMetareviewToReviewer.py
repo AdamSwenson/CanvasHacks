@@ -5,7 +5,7 @@ from CanvasHacks.Errors.review_pairings import NoReviewPairingsLoaded
 from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Messaging.skaa import FeedbackFromMetareviewMessenger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
-from CanvasHacks.Repositories.status import SentFeedbackStatusRepository
+from CanvasHacks.Repositories.status import FeedbackStatusRepository, InvitationStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
 __author__ = 'adam'
@@ -25,14 +25,20 @@ class SendMetareviewToReviewer( IStep ):
         self.activity = unit.metareview
 
         # The activity which we are telling the student about
-        self.activity_notifying_about = unit.metareview
+        # self.activity_notifying_about = unit.metareview
+
+        # In sending the metareview results to the reviewer we are
+        # telling the about the feedback on the review
+        self.activity_feedback_on = unit.review
 
         # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
         self.activity_for_review_pairings = unit.initial_work
 
         self._initialize()
 
-        self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on)
+
+        self.statusRepos = [self.feedback_status_repo]
 
         self.associations = [ ]
 
@@ -52,9 +58,10 @@ class SendMetareviewToReviewer( IStep ):
 
     def _message_step( self ):
         # Send
-        self.messenger = FeedbackFromMetareviewMessenger( self.unit, self.studentRepo, self.work_repo,
-                                                          self.notificationStatusRepo )
-
+        self.messenger = FeedbackFromMetareviewMessenger( self.unit,
+                                                          self.studentRepo,
+                                                          self.work_repo,
+                                                          self.statusRepos )
         self.messenger.notify( self.associations, self.send )
         # Log the run
         msg = "Sent {} metareview results \n {}".format( len( self.associations ), self.associations )
@@ -63,6 +70,9 @@ class SendMetareviewToReviewer( IStep ):
         RunLogger.log_metareview_feedback_distributed( self.unit.metareview, msg )
 
     def _assign_step( self ):
+        # Filter out students who have already been notified.
+        # NB, a step like this wasn't necessary in SendInitialWorkToReviewer
+        # since we could filter by who doesn't have a review partner
         self._filter_notified()
 
         # Filter the review pairs to just those in the work repo.
@@ -82,11 +92,7 @@ class SendMetareviewToReviewer( IStep ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         self.display_manager.initially_loaded = self.work_repo.data
 
-        # Filter out students who have already been notified.
-        # (NB, a step like this wasn't necessary in SendInitialWorkToReviewer
-        # since we could filter by who doesn't have a review partner
-        # self.work_repo.remove_student_records( self.notificationStatusRepo.previously_received_feedback )
-        #
+
 
     def _filter_notified( self ):
         """
@@ -97,7 +103,7 @@ class SendMetareviewToReviewer( IStep ):
         That's the job of this method.
         :return:
         """
-        records = self.notificationStatusRepo.reviewers_with_notified_authors
+        records = self.feedback_status_repo.reviewers_with_authors_sent_feedback
         # We can remove those from the repo
         self.work_repo.remove_student_records( records )
         self.display_manager.post_filter = self.work_repo.data

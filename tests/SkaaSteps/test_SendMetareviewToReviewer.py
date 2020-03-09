@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import CanvasHacks.environment as env
 import CanvasHacks.testglobals
 from CanvasHacks.Models.status_record import StatusRecord, InvitationReceivedRecord, FeedbackReceivedRecord
-from CanvasHacks.Repositories.status import SentFeedbackStatusRepository
+from CanvasHacks.Repositories.status import FeedbackStatusRepository, InvitationStatusRepository
 from factories.RepositoryMocks import ContentRepositoryMock
 from tests.factories.ModelFactories import student_factory
 from tests.factories.PeerReviewedFactories import unit_factory
@@ -82,6 +82,33 @@ class TestCallsAllExpected( TestingBase ):
         loggerMock.log_metareview_feedback_distributed.assert_called()
 
 
+class TestUnitTests(TestingBase):
+    """Unit tests with all dependencies mocked"""
+    def setUp( self ):
+        self.config_for_test()
+        env.CONFIG.semester_name = "T30"
+        self.unit = unit_factory()
+        self.course = MagicMock()
+        self.activity_id = self.unit.review.id
+        # self.dao = SqliteDAO()
+        self.create_new_and_preexisting_students()
+        # Prepare fake work repo to give values to calling  objects
+        self.workRepo = ContentRepositoryMock()
+        self.workRepo.create_test_content( self.student_ids )
+        self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
+
+    def test_instantiates_correct_status_repos( self ):
+        """The sending of metareview results requires a
+        special status repository"""
+        obj = SendMetareviewToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+
+        self.assertIsInstance(obj.statusRepos, list, "status repos is a list")
+        self.assertTrue(len(obj.statusRepos) == 1)
+        # self.assertIsInstance(obj.invite_status_repo, InvitationStatusRepository, "Invite repo instantiated")
+        self.assertIsInstance( obj.feedback_status_repo, FeedbackStatusRepository, "Correct status repo instantiated" )
+
+
+
 class TestFunctionalTests( TestingBase ):
     """Test that works using local data"""
 
@@ -98,17 +125,12 @@ class TestFunctionalTests( TestingBase ):
         self.workRepo.create_test_content( self.student_ids )
         self.workRepo.add_students_to_data(self.student_ids, make_dataframe=True)
 
-    def test_instantiates_correct_status_repo( self ):
-        """The sending of metareview results requires a
-        special status repository"""
-        obj = SendMetareviewToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
-        self.assertIsInstance( obj.notificationStatusRepo, SentFeedbackStatusRepository, "Correct status repo instantiated" )
-
-    @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.SentFeedbackStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.InvitationStatusRepository' )
+    @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.FeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
-    def test_run( self, workLoaderMock, studentRepoMock, messengerMock, statusRepoMock ):
+    def test_run( self, workLoaderMock, studentRepoMock, messengerMock, feedbackStatusRepoMock, inviteStatusRepoMock ):
 
         # Prepare fake work repo to give values to calling  objects
         # workRepo = ContentRepositoryMock()
@@ -152,15 +174,16 @@ class TestFunctionalTests( TestingBase ):
         # print(args)
 
         # Status repo calls on messenger
-        obj.messenger.status_repository.record.assert_called()
-        # obj.messenger.status_repository.record_invited.assert_called()
-        call_list = obj.messenger.status_repository.record.call_args_list
-        # call_list = obj.messenger.status_repository.record_invited.call_args_list
-        status_args = [ c[ 0 ][ 0 ] for c in call_list ]
-        self.assertEqual( len( self.students ), len( call_list ),
-                          "Status repo record_invited called expected number of times" )
-        for sid in self.student_ids:
-            self.assertIn( sid, status_args, "StatusRepo.record_invited called on all students" )
+        for repo in obj.messenger.status_repositories:
+            repo.record.assert_called()
+            # obj.messenger.status_repositories.record_invited.assert_called()
+            call_list = repo.record.call_args_list
+            # call_list = obj.messenger.status_repositories.record_invited.call_args_list
+            status_args = [ c[ 0 ][ 0 ] for c in call_list ]
+            self.assertEqual( len( self.students ), len( call_list ),
+                              "Both status repos called expected number of times" )
+            for sid in self.student_ids:
+                self.assertIn( sid, status_args, "Both status repos called on all students" )
 
         # student repo calls on messenger
         for sid in self.student_ids:
@@ -175,8 +198,6 @@ class TestFunctionalTests( TestingBase ):
             rx = r'{}'.format( review_text_by_author )
             self.assertRegex( sent_text, rx, "Author's review of review in message sent to reviewer" )
 
-            # check marked as sent
-            obj.notificationStatusRepo.previously_received_feedback
 
 
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
@@ -207,8 +228,10 @@ class TestFunctionalTests( TestingBase ):
         # Sets up data for the association repo to use
         self.preexisting_pairings = self.create_preexisting_review_pairings( self.unit.initial_work.id, self.students )
 
-        r = self.session.query(FeedbackReceivedRecord).filter(FeedbackReceivedRecord.activity_id == self.unit.metareview.id).all()
-        self.assertTrue(len(r) == 0, "No sent records beforehand")
+        r = self.session.query(FeedbackReceivedRecord).filter(FeedbackReceivedRecord.activity_id == self.unit.review.id).all()
+        self.assertTrue(len(r) == 0, "No sent feedback on review beforehand")
+        r2 = self.session.query(InvitationReceivedRecord).filter(InvitationReceivedRecord.activity_id == self.unit.metareview.id).all()
+        self.assertTrue(len(r) == 0, "No sent invitations to metareview beforehand")
 
         # call
         obj.run()
@@ -217,20 +240,30 @@ class TestFunctionalTests( TestingBase ):
         self.assertEqual( len( obj.associations ), len( self.students ), "Correct number of students notified" )
 
         # check marked as sent
-        self.assertEqual( len(self.students), len( obj.notificationStatusRepo.previously_received ) )
+        for status_repo in obj.statusRepos:
+            self.assertEqual( len(self.students), len( status_repo.previously_received), "all students have updated status" )
 
         # Check the content sent
         for record in obj.associations:
             # we need to check each of the reviewers to see that results has a value
             status_record = self.session\
                 .query( FeedbackReceivedRecord )\
-                .filter( FeedbackReceivedRecord.activity_id == self.unit.metareview.id )\
+                .filter( FeedbackReceivedRecord.activity_id == self.unit.review.id )\
                 .filter(FeedbackReceivedRecord.student_id == record.assessor_id)\
                 .one_or_none()
-            self.assertIsNotNone(status_record, "Record exists")
+            self.assertIsNotNone(status_record, "Feedback Record exists")
             self.assertIsNotNone(status_record.sent_at, "Value set for timestamp")
 
-    # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.SentFeedbackStatusRepository' )
+            # invite_status_record = self.session\
+            #     .query( InvitationReceivedRecord )\
+            #     .filter( InvitationReceivedRecord.activity_id == self.unit.metareview.id )\
+            #     .filter(InvitationReceivedRecord.student_id == record.assessor_id)\
+            #     .one_or_none()
+            # self.assertIsNotNone(invite_status_record, "Invitation Record exists")
+            # self.assertIsNotNone(invite_status_record.sent_at, "Value set for timestamp")
+
+
+    # @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.FeedbackStatusRepository' )
     @patch( 'CanvasHacks.Messaging.base.ConversationMessageSender.send' )
     @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
     @patch( 'CanvasHacks.SkaaSteps.SendMetareviewToReviewer.WorkRepositoryLoaderFactory' )
@@ -241,7 +274,7 @@ class TestFunctionalTests( TestingBase ):
         # previously_sent = fake.random.choices(self.student_ids, k=num_previously_sent)
         to_notify = [ s for s in self.student_ids if s not in previously_sent ]
         num_to_notify = len( to_notify )
-        # statusRepoMock.previously_sent_result = MagicMock( return_value=previously_sent )
+        # feedbackStatusRepoMock.previously_sent_result = MagicMock( return_value=previously_sent )
 
         # Prepare fake work repo to give values to calling  objects
         # workRepo = ContentRepositoryMock()
@@ -266,7 +299,7 @@ class TestFunctionalTests( TestingBase ):
         # Set up previous notifications
 
         for sid in previously_sent:
-            obj.notificationStatusRepo.record(sid)
+            obj.feedback_status_repo.record(sid)
 
         authors_with_notified_reviewers = [ r.assessee_id for r in self.preexisting_pairings if r.assessor_id in previously_sent ]
         authors_without_notified_reviewers = [ s for s in self.student_ids if s not in authors_with_notified_reviewers ]
@@ -299,10 +332,10 @@ class TestFunctionalTests( TestingBase ):
         # print(args)
 
         # # Status repo calls on messenger
-        # obj.messenger.status_repository.record.assert_called()
-        # # obj.messenger.status_repository.record_invited.assert_called()
-        # call_list = obj.messenger.status_repository.record.call_args_list
-        # # call_list = obj.messenger.status_repository.record_invited.call_args_list
+        # obj.messenger.status_repositories.record.assert_called()
+        # # obj.messenger.status_repositories.record_invited.assert_called()
+        # call_list = obj.messenger.status_repositories.record.call_args_list
+        # # call_list = obj.messenger.status_repositories.record_invited.call_args_list
         # status_args = [ c[ 0 ][ 0 ] for c in call_list ]
         # self.assertEqual( num_to_notify, len( call_list ), "Status repo record called expected number of times" )
         # for sid in self.student_ids:
@@ -336,7 +369,7 @@ class TestFunctionalTests( TestingBase ):
         # previously_sent = fake.random.choices(self.student_ids, k=num_previously_sent)
         to_notify = [ s for s in self.student_ids if s in submitted ]
         num_to_notify = len( to_notify )
-        # statusRepoMock.previously_sent_result = MagicMock( return_value=previously_sent )
+        # feedbackStatusRepoMock.previously_sent_result = MagicMock( return_value=previously_sent )
 
         # Prepare fake work repo to give values to calling  objects
         # workRepo = ContentRepositoryMock()

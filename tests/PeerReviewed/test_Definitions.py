@@ -64,12 +64,11 @@ class TestUnit( TestCase ):
         #     a = canvasapi.unit.Assignment()
         #     a.name = v
         #     assigns.append(a)
-        assigns = [ DummyAssignment( name='Unit 1 Content unit', id=5 ),
+        assigns = [ DummyAssignment( name='Unit 1 Content assignment', id=5 ),
                     DummyAssignment( name='Unit 1 metareview', id=4 ),
                     DummyAssignment( name='Unit 1 review', id=3 )
                     ]
         self.obj.find_components( assigns )
-        # print(self.obj.components)
         self.assertEqual( len( self.obj.components ), 3 )
 
     def test__set_access_code_for_next( self ):
@@ -94,7 +93,7 @@ class TestInitialWork( TestCase ):
     def test_is_activity_type( self ):
         # Create the unit
         self.assertFalse( InitialWork.is_activity_type( 'Unit 24 metareview' ) )
-        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 content unit' ) )
+        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 content assignment' ) )
 
 
 class TestReview( TestCase ):

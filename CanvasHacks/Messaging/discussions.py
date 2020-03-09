@@ -19,10 +19,10 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
     message_template = DISCUSSION_REVIEW_NOTICE_TEMPLATE
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
+                  status_repositories: StatusRepository ):
         self.activity_inviting_to_complete = unit.discussion_review
 
-        super().__init__( unit, student_repository, content_repository, status_repository )
+        super().__init__( unit, student_repository, content_repository, status_repositories )
 
         # self.subject = "Discussion forum posts for you to review"
         # self.intro = "Here are some posts by another student for you to review. "
@@ -53,7 +53,7 @@ class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
     intro = "Here is the feedback from another student on your discussion forum posts. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repository: StatusRepository ):
+                  status_repositories: StatusRepository ):
 
         # We will use the subject and intro
         # stored on this class rather than deferring to the activity
@@ -61,7 +61,7 @@ class FeedbackFromDiscussionReviewMessenger( SkaaMessenger ):
 
         self.email_subject = self.email_subject_templ.format(unit.unit_number)
 
-        super().__init__( unit, student_repository, content_repository, status_repository )
+        super().__init__( unit, student_repository, content_repository, status_repositories )
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review

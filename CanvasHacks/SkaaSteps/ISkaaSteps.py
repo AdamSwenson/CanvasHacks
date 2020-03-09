@@ -4,7 +4,7 @@ Created by adam on 2/23/20
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Logging.display import DisplayManager
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
-from CanvasHacks.Repositories.status import StatusRepository, SentFeedbackStatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, FeedbackStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.PeerReviewed.Definitions import MetaReview, DiscussionReview
 
@@ -53,15 +53,15 @@ class IStep:
         #     # step (sending the metareview results to the reviewer). Thus
         #     # we need a special status repository since the notified field
         #     # for the metareview will have already been populated in the previous step
-        #     self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        #     self.statusRepos = FeedbackStatusRepository( self.dao, self.activity_notifying_about )
         # elif isinstance(self.activity, DiscussionReview) and isinstance(self.activity_notifying_about, DiscussionReview):
         #     # If both of these are the discussion review, then we are on the final
         #     # step (sending the review results to the poster). Thus
         #     # we need a special status repository since the notified field
         #     # for the review will have already been populated in the previous step
-        #     self.notificationStatusRepo = SentFeedbackStatusRepository( self.dao, self.activity_notifying_about )
+        #     self.statusRepos = FeedbackStatusRepository( self.dao, self.activity_notifying_about )
         # else:
-        #     self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
+        #     self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
 
     def _initialize_db( self ):
         if env.CONFIG.is_test:

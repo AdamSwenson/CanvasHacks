@@ -4,7 +4,7 @@ Created by adam on 3/2/20
 __author__ = 'adam'
 
 from CanvasHacks.Messaging.discussions import DiscussionReviewInvitationMessenger
-from CanvasHacks.Repositories.status import StatusRepository, SentInvitationStatusRepository
+from CanvasHacks.Repositories.status import InvitationStatusRepository
 
 """
 Created by adam on 2/23/20
@@ -13,11 +13,10 @@ import CanvasHacks.testglobals
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.Errors.review_pairings import AllAssigned, NoAvailablePartner
 from CanvasHacks.Logging.run_data import RunLogger
-from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
 # from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Logging.review_pairings import make_review_audit_file
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
-import pandas as pd
+
 __author__ = 'adam'
 
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
@@ -33,24 +32,29 @@ class SendForumPostsToReviewer( IStep ):
         :param send: Whether to actually send the messages
         """
         super().__init__( course, unit, is_test, send, **kwargs )
-        # The activity_inviting_to_complete whose results we are going to be doing something with
+
+        # The activity whose results we are going to be doing something with
         self.activity = unit.discussion_forum
 
         # The activity which we are inviting the receiving student to complete
         self.activity_notifying_about = unit.discussion_review
 
         # The activity_inviting_to_complete whose id is used to store review pairings for the whole SKAA
+        # We use the discussion review so that the invite status records
+        # and feedback status records will have the same id, which makes it
+        # easier to handle
         self.activity_for_review_pairings = unit.discussion_review
 
         self._initialize()
 
+        # Initialize the relevant status repo
 
-        #Initialize the relevant status repo
-        self.notificationStatusRepo = SentInvitationStatusRepository(self.dao, self.activity_notifying_about)
+        self.invite_status_repo = InvitationStatusRepository( self.dao, self.activity_notifying_about )
+        self.statusRepos = [self.invite_status_repo]
 
-        # self.notificationStatusRepo = StatusRepository( self.dao, self.activity_notifying_about )
+        # self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
 
-    def run( self, **kwargs):
+    def run( self, **kwargs ):
         """
         Loads discussion forum posts, assigns reviewers, and sends formatted
         work to reviewer
@@ -70,7 +74,7 @@ class SendForumPostsToReviewer( IStep ):
             # Check if new submitters, bail if not
             print( "No new submissions" )
             # todo Log run failure
-            RunLogger.log_no_submissions(self.activity)
+            RunLogger.log_no_submissions( self.activity )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise NoNewSubmissions
@@ -79,27 +83,30 @@ class SendForumPostsToReviewer( IStep ):
             # Folks already assigned to review
             # have somehow gotten past the new submissions filter
             # This could be due to them resubmitting late
-            print("New submitters but everyone already assigned")
-            print(e.submitters)
+            print( "New submitters but everyone already assigned" )
+            print( e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
-                raise AllAssigned(e.submitters)
+                raise AllAssigned( e.submitters )
 
         except NoAvailablePartner as e:
             # We will probably want to notify the student that they
             # have had their work noticed, but they are now waiting for
             # a partner
             # todo Notify student that they are waiting
-            print("1 student has submitted and has no partner ", e.submitters)
+            print( "1 student has submitted and has no partner ", e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
-                raise NoAvailablePartner(e.submitters)
+                raise NoAvailablePartner( e.submitters )
 
     def _message_step( self ):
         # Send the work to the reviewers
         # Note that we still do this even if send is false because
         # the messenger will print out the messages rather than sending them
-        self.messenger = DiscussionReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.notificationStatusRepo )
+        self.messenger = DiscussionReviewInvitationMessenger( self.unit,
+                                                              self.studentRepo,
+                                                              self.work_repo,
+                                                              self.statusRepos )
 
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
@@ -107,8 +114,10 @@ class SendForumPostsToReviewer( IStep ):
 
         #  todo Want some way of tracking if messages fail to send so can resend
         # Log the run
-        msg = "New peer review assignments: \t {} \n Notices sent successfully: \t {} \n Send errors: \t {} \n Errors: {}".format( len( self.associations ), self.messenger.sent_count, len( self.messenger.send_errors ), self.messenger.send_errors )  # self.associations )
-        print(msg)
+        msg = "New peer review assignments: \t {} \n Notices sent successfully: \t {} \n Send errors: \t {} \n Errors: {}".format(
+            len( self.associations ), self.messenger.sent_count, len( self.messenger.send_errors ),
+            self.messenger.send_errors )  # self.associations )
+        print( msg )
         RunLogger.log_reviews_assigned( self.activity_notifying_about, msg )
 
     def _assign_step( self ):
@@ -125,15 +134,6 @@ class SendForumPostsToReviewer( IStep ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         self.display_manager.initially_loaded = self.work_repo.data
 
-        # prelen = len(self.work_repo.data)
-        # print("downloaded {} records".format(prelen))
-        # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
-
-        # if isinstance(self.work_repo.data, pd.DataFrame):
-        #     self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
-        #
-        # print("Removed {} empty or non submitted".format(prelen - len(self.work_repo.data)))
-
     @property
     def audit_frame( self ):
         return self.associationRepo.audit_frame( self.studentRepo )
@@ -141,5 +141,3 @@ class SendForumPostsToReviewer( IStep ):
 
 if __name__ == '__main__':
     pass
-
-

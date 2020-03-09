@@ -5,7 +5,7 @@ Created by adam on 2/23/20
 __author__ = 'adam'
 
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository, FeedbackStatusRepository
 
 if __name__ == '__main__':
     pass
@@ -44,8 +44,9 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         # self.activity_data = activity_data_factory()
         self.activity = self.unit.metareview #InitialWork( **self.activity_data )
 
-        # student recieiving the message
         self.author = student_factory()
+        # student receiving the message (we are sending the feedback
+        # created by the author of the content assignment)
         self.reviewer = student_factory()
 
         # This would be metareview feedback on the review
@@ -57,7 +58,7 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
 
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
-        self.statusRepo = create_autospec(StatusRepository)
+        self.statusRepo = create_autospec(FeedbackStatusRepository)
 
     def test_prepare_message( self ):
         obj = FeedbackFromMetareviewMessenger( self.unit, self.studentRepo, self.contentRepo, self.statusRepo )
@@ -67,8 +68,8 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
 
         # check
         self.assertEqual( obj.message_template, METAREVIEW_CONTENT_TEMPLATE, "Working off expected template" )
-        self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Message is going to reviewer" )
-        self.assertEqual( message_data[ 'subject' ], FeedbackFromMetareviewMessenger.subject, "Sent with expected subject line (This is different from the tests of its siblings" )
+        self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Message is going to reviewer (it contains the feedback from the original author)" )
+        self.assertEqual( message_data[ 'subject' ], FeedbackFromMetareviewMessenger.subject.format(self.unit.unit_number), "Sent with expected subject line (This is different from the tests of its siblings" )
 
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
@@ -110,7 +111,7 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.reviewer.id, "Sent to reviewer" )
-        self.assertEqual(kwargs['subject'], FeedbackFromMetareviewMessenger.subject, "Sent with expected subject line (This is different from the tests of its siblings" )
+        self.assertEqual(kwargs['subject'], FeedbackFromMetareviewMessenger.subject.format(self.unit.unit_number), "Sent with expected subject line (This is different from the tests of its siblings" )
         d = {
             'intro': FeedbackFromMetareviewMessenger.intro,
             # the person who did the review is getting feedback from the author
@@ -130,3 +131,6 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         # This is for the metareview, so the receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
+        # Check that status repo called
+        self.statusRepo.record.assert_called()
+        self.statusRepo.record.assert_called_with( self.reviewer.id )
