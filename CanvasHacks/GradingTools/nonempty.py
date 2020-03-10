@@ -39,6 +39,44 @@ class CreditForNonEmpty(IGradingMethod):
             return 100
 
 
+def receives_credit( content: str, min_words=2, count_stopwords=True ):
+    """
+    Given a piece of text written by a student, determines
+    whether to assign credit or no credit
+
+    :param content: The text to analyze
+    :param min_words: The minimum word count to give credit for
+    :param count_stopwords: Whether stopwords should count toward word count
+    :return: Boolean
+    """
+    if not isinstance(content, str):
+        raise NonStringInContentField
+    remove = [ '``', "''", "'s"]
+    remove += string.punctuation
+    if not count_stopwords:
+        remove += stopwords.words('english')
+    remove = set(remove)
+    bag = make_wordbag(content, remove)
+    return len(bag) >= min_words
+
+
+def scored_non_empty(content, max_score, on_empty=None):
+    """
+    Returns a dictionary with key 'score'
+    :param content:
+    :param max_score:
+    :param on_empty: If none, will return no value if empty.
+    :return:
+    """
+    if receives_credit( content ):
+        return { 'score': max_score }
+    else:
+        if on_empty is not None:
+            { 'score': on_empty }
+
+        # questions[ qid ] = { 'score': 4.0 }
+        # total_score += 4
+
 def determine_credit(submissions):
     """
     OLD
@@ -81,44 +119,6 @@ def new_determine_journal_credit(activity, submissionRepo):
             results.append( (submission, int(score) ) )
     return results
 
-
-def receives_credit( content: str, min_words=2, count_stopwords=True ):
-    """
-    Given a piece of text written by a student, determines
-    whether to assign credit or no credit
-
-    :param content: The text to analyze
-    :param min_words: The minimum word count to give credit for
-    :param count_stopwords: Whether stopwords should count toward word count
-    :return: Boolean
-    """
-    if not isinstance(content, str):
-        raise NonStringInContentField
-    remove = [ '``', "''", "'s"]
-    remove += string.punctuation
-    if not count_stopwords:
-        remove += stopwords.words('english')
-    remove = set(remove)
-    bag = make_wordbag(content, remove)
-    return len(bag) >= min_words
-
-
-def scored_non_empty(content, max_score, on_empty=None):
-    """
-    Returns a dictionary with key 'score'
-    :param content:
-    :param max_score:
-    :param on_empty: If none, will return no value if empty.
-    :return:
-    """
-    if receives_credit( content ):
-        return { 'score': max_score }
-    else:
-        if on_empty is not None:
-            { 'score': on_empty }
-
-        # questions[ qid ] = { 'score': 4.0 }
-        # total_score += 4
 
 
 if __name__ == '__main__':

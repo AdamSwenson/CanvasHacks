@@ -181,11 +181,17 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
         super().__init__( **kwargs )
-        self.grace_period = pd.Timedelta( '2 days' )
 
         # Code for accessing the subsequent unit
         self.access_code_for_next_on = Review
         self.access_code_for_next = None
+
+        # Tools which handle the grade
+        self.grace_period = pd.Timedelta( '2 days' )
+        # The object which will be used to penalize late assignments
+        self.penalizer = HalfLate( self.due_at, self.grace_period )
+        # The object which will be used to assign the score
+        self.grade_method = CreditForNonEmpty()
 
 
 class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):

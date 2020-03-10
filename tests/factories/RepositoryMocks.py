@@ -58,7 +58,39 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
         """Populates self.data with records of the expected type"""
         for s in student_ids:
             d = content_repo_data_object_factory( student_id=s, **kwargs )
-            d['body'] = self.testText.get(s)
-            self.data.append(d)
+            d[ 'body' ] = self.testText.get( s )
+            self.data.append( d )
         if make_dataframe:
             self.data = pd.DataFrame( self.data )
+
+    def create_quiz_repo_data( self, student_ids, submitted_date, make_dataframe=False, num_question_columns=5, **kwargs ):
+        """Simulates being a content repo holding quiz data
+        """
+        self.question_columns = [ (fake.random.randint(1, 99999999), fake.word()) for _ in range( 0, num_question_columns ) ]
+        fixed_fields = [ 'course_id', 'quiz_id']
+        variable_fields = ['attempt', 'submission_id']
+
+        course_id = kwargs['course_id'] if 'course_id' in kwargs else fake.random.randint(1, 999999)
+
+        quiz_id = kwargs[ 'quiz_id' ] if 'quiz_id' in kwargs else fake.random.randint( 1, 999999 )
+
+        for sid in student_ids:
+            d = {
+                'student_id': sid,
+                'submitted': submitted_date,
+                'course_id': course_id,
+                'quiz_id': quiz_id
+            }
+            for f in variable_fields:
+                if f in kwargs.keys():
+                    d[f] = kwargs[f]
+                else:
+                    d[f] = fake.random.randint(11111, 9999999)
+
+            for qid, column_name in self.question_columns:
+                d[  column_name ] = fake.paragraph()
+
+            self.data.append( d )
+
+        if make_dataframe:
+            self.data = pd.DataFrame(self.data)

@@ -12,3 +12,14 @@ class NonStringInContentField(Exception):
     appears in a field that we are assessing
     """
     pass
+
+
+class StudentUnableToComplete(Exception):
+    """Raised when a student is unable to 
+    complete the assignment. Usually because 
+    the student they are assigned to review hasn't done their part
+    """
+    
+    def __init__(self, blocked_student, blocking_student):
+        self.blocked_student = blocked_student
+        self.blocking_student = blocking_student
