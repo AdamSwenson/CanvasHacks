@@ -24,19 +24,23 @@ class CreditForNonEmpty(IGradingMethod):
         self.min_words = min_words
         self.count_stopwords = count_stopwords
 
-    def grade( self, content ):
+    def grade( self, content, **kwargs ):
         """Returns the pct credit as an integer"""
         # Aliasing the pct int to leave room for
         # alternative output could go here
 
-        return self.grade_pct_int(content)
+        return self.grade_pct_int(content, **kwargs)
 
-    def grade_pct_int( self, content ):
+    def grade_pct_int( self, content, on_credit=100, on_no_credit=None ):
         """Returns the pct credit as an integer
-        Returns nothing if not getting any credit"""
+        Returns None if not getting any credit, which can be overridden
+        by the value in on_no_credit
+        """
         credit = receives_credit(content, self.min_words, self.count_stopwords)
         if credit:
-            return 100
+            return on_credit
+        elif on_no_credit is not None:
+            return on_no_credit
 
 
 def receives_credit( content: str, min_words=2, count_stopwords=True ):

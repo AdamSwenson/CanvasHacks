@@ -56,4 +56,28 @@ class TestJournalGrader( TestingBase ):
             # Check put in output
             self.assertEqual(self.full_credit_score, g[1], "Correct score added")
 
+    def test_grade_penalty( self ):
+        data = [self.make_journal_submission() for _ in self.students]
+        penalized_score = 21
+        self.penalizer.get_penalized_score = MagicMock(return_value=penalized_score)
+        work_repo = MagicMock( activity=self.activity, data=data )
+        obj = JournalGrader(work_repo)
+
+        # call
+        obj.grade()
+
+        # check
+        self.assertEqual(len(self.students), len(obj.graded), "Expected number in output")
+
+        for d in data:
+            # Check that grade method received expected value
+            self.grade_method.grade.assert_any_call(d.body)
+            # Check that penalizer method received expected value
+            # self.penalizer.get_penalized_score.assert_any_call((d.submitted_at, self.full_credit_score))
+
+        for g in obj.graded:
+            # Check put in output
+            self.assertEqual(penalized_score, g[1], "Correct penalized score added")
+
+
 

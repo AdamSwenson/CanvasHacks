@@ -96,7 +96,7 @@ class TestHalfLate(TestingBase):
 
         # check
         self.assertEqual(result, 0, "zero fudge points returned")
-        self.assertNotIn(row, self.obj.penalized_rows, "Row not added to penalized rows")
+        self.assertNotIn( row, self.obj.penalized_records, "Row not added to penalized rows" )
 
     def test_get_fudge_points_penalty( self ):
         submitted_date = self.due_date + pd.to_timedelta( '{} days'.format( self.fake.random.randint( 1, 200 ) ) )
@@ -109,8 +109,8 @@ class TestHalfLate(TestingBase):
 
         # check
         self.assertEqual(result, -50, "fudge points of 50% original returned" )
-        expected_rec = {'row': row, 'penalty': 0.5, 'fudge_points': -50}
-        self.assertIn( expected_rec, self.obj.penalized_rows, "Row added to penalized rows" )
+        expected_rec = {'record': row, 'penalty': 0.5, 'fudge_points': -50}
+        self.assertIn( expected_rec, self.obj.penalized_records, "Row added to penalized rows" )
 
 
 class TestQuarterLate(TestingBase):
@@ -161,7 +161,8 @@ class TestQuarterLate(TestingBase):
 
         # check
         self.assertEqual( result, 0, "zero fudge points returned" )
-        self.assertNotIn( row, self.obj.penalized_rows, "Row not added to penalized rows" )
+        self.assertEqual(0, len(self.obj.penalized_records), "Row not added to penalized records")
+        # self.assertNotIn( row, self.obj.penalized_records, "Row not added to penalized rows" )
 
     def test_get_fudge_points_quarter_penalty( self ):
         submitted_date = self.last_half_date + pd.to_timedelta( '1 days')
@@ -173,8 +174,8 @@ class TestQuarterLate(TestingBase):
 
         # check
         self.assertEqual( result, -25, "fudge points of 25% original returned" )
-        expected_rec = {'row': row, 'penalty': 0.25, 'fudge_points': -25}
-        self.assertIn( expected_rec, self.obj.penalized_rows, "Record added to penalized rows" )
+        expected_rec = {'record': row, 'penalty': 0.25, 'fudge_points': -25}
+        self.assertIn( expected_rec, self.obj.penalized_records, "Record added to penalized rows" )
 
     def test_get_fudge_points_half_penalty( self ):
         submitted_date = self.due_date + pd.to_timedelta( '1 days' )
@@ -186,8 +187,8 @@ class TestQuarterLate(TestingBase):
 
         # check
         self.assertEqual( result, -50, "fudge points of 50% original returned" )
-        expected_rec = { 'row': row, 'penalty': 0.5, 'fudge_points': -50 }
-        self.assertIn( expected_rec, self.obj.penalized_rows, "Record added to penalized rows" )
+        expected_rec = { 'record': row, 'penalty': 0.5, 'fudge_points': -50 }
+        self.assertIn( expected_rec, self.obj.penalized_records, "Record added to penalized rows" )
 
     # def test_get_penalized_score( self ):
     #     original_score = self.fake.random.randint(1, 2402)

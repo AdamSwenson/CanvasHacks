@@ -5,7 +5,7 @@ Created by adam on 12/24/19
 """
 from CanvasHacks.FileTools import read_text_block
 from CanvasHacks.GradingTools.nonempty import CreditForNonEmpty
-from CanvasHacks.GradingTools.penalities import HalfLate
+from CanvasHacks.GradingTools.penalities import HalfLate, NoLatePenalty
 
 __author__ = 'adam'
 
@@ -170,6 +170,13 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
         super().__init__( **kwargs )
         self.grace_period = pd.Timedelta( '2 days' )
 
+        # The object which will be used to penalize late assignments
+        self.penalizer = HalfLate( self.due_at, self.grace_period )
+
+        # The object which will be used to assign the score
+        self.grade_method = CreditForNonEmpty(min_words=2, count_stopwords=True)
+
+
 
 class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     title_base = "Content assignment"
@@ -188,10 +195,12 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
 
         # Tools which handle the grade
         self.grace_period = pd.Timedelta( '2 days' )
+
         # The object which will be used to penalize late assignments
         self.penalizer = HalfLate( self.due_at, self.grace_period )
+
         # The object which will be used to assign the score
-        self.grade_method = CreditForNonEmpty()
+        self.grade_method = CreditForNonEmpty(min_words=2, count_stopwords=True)
 
 
 class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
@@ -215,6 +224,14 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
         # directly to it
         self.activity_link = None
 
+        # The object which will be used to penalize late assignments
+        self.penalizer = NoLatePenalty(  )
+
+        # The object which will be used to assign the score
+        # NB, min_words is 1 for now so as to not create problems with multiple-choice answers
+        # This could be fixed in CAN-57
+        self.grade_method = CreditForNonEmpty(min_words=1, count_stopwords=True)
+
         super().__init__( **kwargs )
         self.email_intro = "Here is another student's unit for you to review:"
 
@@ -226,8 +243,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
 
 
 class MetaReview( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
-    """The review review"""
-    """Representation of the peer review of 
+    """Representation of the peer review of
     another student's submission"""
     title_base = "Metareview"
     instructions_filename = 'metareview-instructions.txt'
@@ -238,7 +254,17 @@ class MetaReview( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin 
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+
         self.email_intro = "Here is the feedback on your assignment:"
+
+        # The object which will be used to penalize late assignments
+        self.penalizer = NoLatePenalty(  )
+
+        # The object which will be used to assign the score
+        # NB, min_words is 1 for now so as to not create problems with multiple-choice answers
+        # This could be fixed in CAN-57
+        self.grade_method = CreditForNonEmpty(min_words=1, count_stopwords=True)
+
 
     @property
     def email_subject( self ):
@@ -256,6 +282,12 @@ class DiscussionForum(DiscussionGroup, Activity ):
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
+
+        # The object which will be used to penalize late assignments
+        self.penalizer = NoLatePenalty(  )
+
+        # The object which will be used to assign the score
+        self.grade_method = CreditForNonEmpty(min_words=2, count_stopwords=True)
 
     def create_on_canvas( self, course ):
         course.create_quiz()
@@ -279,6 +311,14 @@ class DiscussionReview(DiscussionGroup, Activity, QuizDataMixin, StoredDataFileM
         super().__init__( **kwargs )
         self.email_intro = "Here are the discussion forum posts from another student for you to review:"
 
+        # The object which will be used to penalize late assignments
+        self.penalizer = NoLatePenalty(  )
+
+        # The object which will be used to assign the score
+        # NB, min_words is 1 for now so as to not create problems with multiple-choice answers
+        # This could be fixed in CAN-57
+        self.grade_method = CreditForNonEmpty(min_words=1, count_stopwords=True)
+
     @property
     def email_subject( self ):
         """Since unit number will be set after initialization
@@ -296,6 +336,14 @@ class UnitEndSurvey( Activity ):
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
 
+        # The object which will be used to penalize late assignments
+        self.penalizer = NoLatePenalty(  )
+
+        # The object which will be used to assign the score
+        # NB, min_words is 1 for now so as to not create problems with multiple-choice answers
+        # This could be fixed in CAN-57
+        self.grade_method = CreditForNonEmpty(min_words=1, count_stopwords=True)
+
 
 class Journal( Activity ):
     """Representation of a journal unit.
@@ -309,10 +357,12 @@ class Journal( Activity ):
     def __init__( self, **kwargs ):
         self.grace_period = pd.Timedelta( '2 days' )
         super().__init__( **kwargs )
+
         # The object which will be used to penalize late assignments
         self.penalizer = HalfLate( self.due_at, self.grace_period )
+
         # The object which will be used to assign the score
-        self.grade_method = CreditForNonEmpty()
+        self.grade_method = CreditForNonEmpty(min_words=2, count_stopwords=True)
 
 
 class Unit:

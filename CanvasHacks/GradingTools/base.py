@@ -9,6 +9,8 @@ __author__ = 'adam'
 class IGrader(StoreMixin):
     """Parent which defines common methods for any
     class in charge of grading student work
+
+    todo Calling classes should be keeping a record of details of how grade assigned
     """
     def __init__(self, **kwargs):
         self.graded = [ ]
@@ -19,12 +21,11 @@ class IGrader(StoreMixin):
         from the repos it holds"""
         raise NotImplementedError
 
-    def log( self ):
-        """
-        todo Should be keeping a record of details of how grade assigned
-        :return:
-        """
-        raise NotImplementedError
+    # def log( self ):
+    #     """
+    #     :return:
+    #     """
+    #     raise NotImplementedError
 
     @property
     def activity( self ):

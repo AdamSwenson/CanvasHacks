@@ -3,11 +3,12 @@ Created by adam on 3/9/20
 """
 __author__ = 'adam'
 # first so will set globals
+from CanvasHacks.PeerReviewed.Definitions import DiscussionForum
 from TestingBase import TestingBase
 
 from unittest.mock import MagicMock, create_autospec
 
-from CanvasHacks.GradingTools.discussion import DiscussionGrader
+from CanvasHacks.GradingTools.discussion import DiscussionForumGrader
 from CanvasHacks.Repositories.discussions import DiscussionRepository
 
 # from CanvasHacks.Repositories.discussions import DiscussionRepository
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     pass
 
 
-class TestDiscussionGrader( TestingBase ):
+class TestDiscussionForumGrader( TestingBase ):
 
     def make_student_post( self, student, is_blank=False ):
 
@@ -48,16 +49,17 @@ class TestDiscussionGrader( TestingBase ):
         self.number_required = self.fake.random.randint( 2, 30 )
         self.expected_per_post = 100 / self.number_required
         self.make_post_data()
-
-        self.work_repo = MagicMock( data=self.data )
+        # use real graders
+        self.activity = DiscussionForum()
+        # self.work_repo = MagicMock( data=self.data,  )
         # creates problems when runnning offline
-        self.work_repo = create_autospec( DiscussionRepository, data=self.data )
+        self.work_repo = create_autospec( DiscussionRepository, data=self.data, activity=self.activity )
 
         self.grade_func = MagicMock()
 
     def test_initialize( self ):
 
-        obj = DiscussionGrader( self.work_repo, num_posts_required=self.number_required )
+        obj = DiscussionForumGrader( self.work_repo, num_posts_required=self.number_required )
 
         # check
         self.assertEqual( obj.credit_per_post, self.expected_per_post, "Correct credit per post set" )
@@ -65,7 +67,7 @@ class TestDiscussionGrader( TestingBase ):
     def test__prepare_results( self ):
         self.skipTest('fuck you testing lib')
         num_required = 2
-        obj = DiscussionGrader( self.work_repo, num_posts_required=num_required )
+        obj = DiscussionForumGrader( self.work_repo, num_posts_required=num_required )
 
         # below required
         expected = [ (1, 50), (2, 0) ]
@@ -92,8 +94,8 @@ class TestDiscussionGrader( TestingBase ):
         student = self.students[ 0 ]
         data = self.make_student_post( student, is_blank=True )
 
-        work_repo = create_autospec( DiscussionRepository, data=[ data ] )
-        obj = DiscussionGrader( work_repo, num_posts_required=self.number_required )
+        work_repo = create_autospec( DiscussionRepository, data=[ data ], activity=self.activity  )
+        obj = DiscussionForumGrader( work_repo, num_posts_required=self.number_required )
 
         # call
         obj._calc_scores()
@@ -105,8 +107,8 @@ class TestDiscussionGrader( TestingBase ):
         student = self.students[ 0 ]
         data = self.make_student_post( student )
 
-        work_repo = create_autospec( DiscussionRepository, data=[ data ] )
-        obj = DiscussionGrader( self.work_repo )
+        work_repo = create_autospec( DiscussionRepository, data=[ data ], activity=self.activity  )
+        obj = DiscussionForumGrader( self.work_repo )
 
         # call
         obj._calc_scores()
@@ -120,8 +122,8 @@ class TestDiscussionGrader( TestingBase ):
         student = student_factory()
         student_posts = [ self.make_student_post(student) for _ in range(0, self.number_required)]
 
-        work_repo = create_autospec( DiscussionRepository, data=student_posts  )
-        obj = DiscussionGrader( work_repo, num_posts_required=self.number_required )
+        work_repo = create_autospec( DiscussionRepository, data=student_posts, activity=self.activity   )
+        obj = DiscussionForumGrader( work_repo, num_posts_required=self.number_required )
 
         # call
         obj.grade()
@@ -135,8 +137,8 @@ class TestDiscussionGrader( TestingBase ):
         student = student_factory()
         student_posts = [ self.make_student_post(student) for _ in range(0, self.number_required + 10)]
 
-        work_repo = create_autospec( DiscussionRepository, data=student_posts )
-        obj = DiscussionGrader( work_repo, num_posts_required=self.number_required )
+        work_repo = create_autospec( DiscussionRepository, data=student_posts, activity=self.activity  )
+        obj = DiscussionForumGrader( work_repo, num_posts_required=self.number_required )
 
         # call
         obj.grade()
@@ -152,8 +154,8 @@ class TestDiscussionGrader( TestingBase ):
         student = student_factory()
         student_posts = [ self.make_student_post( student ) for _ in range( 0,  num_posts) ]
 
-        work_repo = create_autospec( DiscussionRepository, data=student_posts )
-        obj = DiscussionGrader( work_repo, num_posts_required=self.number_required )
+        work_repo = create_autospec( DiscussionRepository, data=student_posts, activity=self.activity  )
+        obj = DiscussionForumGrader( work_repo, num_posts_required=self.number_required )
 
         # call
         obj.grade()

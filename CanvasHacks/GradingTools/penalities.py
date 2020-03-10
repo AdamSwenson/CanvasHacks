@@ -18,7 +18,14 @@ class IPenalizer:
 
     def get_penalty( self, submitted_date ):
         """
-        :type submitted_date: object
+
+        Returns the percentage that the assignment
+        should be penalized.
+        Not used on its own. get_fudge_points and
+        get_penalized_score properly apply the output of this
+        method for the particular grading use.
+
+        :type submitted_date: pd.Datetime
         """
         raise NotImplementedError
 
@@ -28,7 +35,7 @@ class IPenalizer:
         grade via fudge points, this calculates the amount for
         canvas to subtract or add to the total score.
 
-        If row is provided, will save record to self.penalized_rows
+        If row is provided, will save record to self.penalized_records
 
         :param submitted_date: The date the student work was submitted
         :param total_score: The score that we will apply penalty to
@@ -45,8 +52,8 @@ class NoLatePenalty( IPenalizer ):
     late submissions
     """
 
-    def __init__( self, *args, **kwargs  ):
-        self.penalized_rows = []
+    def __init__( self, *args, **kwargs ):
+        self.penalized_records = [ ]
 
     def get_penalty( self, submitted_date ):
         return 0
@@ -60,7 +67,7 @@ class NoLatePenalty( IPenalizer ):
         grade via fudge points, this calculates the amount for
         canvas to subtract or add to the total score.
 
-        If row is provided, will save record to self.penalized_rows
+        If row is provided, will save record to self.penalized_records
 
         :param submitted_date: The date the student work was submitted
         :param total_score: The score that we will apply penalty to
@@ -83,10 +90,11 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
             self.due_date += grace_period
 
         # Record of applied penalties
-        self.penalized_rows = [
+        self.penalized_records = [
             # List of dicts with format
-            # 'row': row,
+            # 'record': row,
             # 'penalty': penalty,
+            # optional (for methods which used fudge points)
             # 'fudge_points': fudge_points
         ]
 
@@ -94,6 +102,10 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         """
         Returns the percentage that the assignment
         should be penalized.
+        Not used on its own. get_fudge_points and
+        get_penalized_score properly apply the output of this
+        method for the particular grading use.
+
         Will return 0.0 for an on-time assignment
         :param submitted_date:
         :return:
@@ -105,17 +117,28 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
             return 0
         return 0.50
 
-    def get_penalized_score( self, submitted_date, original_score ):
+    def get_penalized_score( self, submitted_date, original_score, record=None ):
+        """
+        Returns the score reduced by the appropriate penalty.
+        If record is not none, the penalty etc will be saved to
+        penalized_records
+        :param submitted_date:
+        :param original_score:
+        :param record:
+        :return: float
+        """
         penalty = self.get_penalty( submitted_date )
         # penalty was set up for uploading where have to use fudge points.
         # so we need to interpret it a bit here.
         # It will have returned 0 for no penalty and .5 for half credit
         if penalty == 0:
             return original_score
+        elif penalty > 0 and record is not None:
+            self.penalized_records.append(
+                { 'record': record,
+                  'penalty': penalty
+                  } )
         return original_score * penalty
-        # penalty = 100 * penalty
-        # score = original_score - penalty
-        # return score
 
     def get_fudge_points( self, submitted_date, total_score, row=None ):
         """
@@ -123,7 +146,7 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         grade via fudge points, this calculates the amount for
         canvas to subtract or add to the total score.
 
-        If row is provided, will save record to self.penalized_rows
+        If row is provided, will save record to self.penalized_records
 
         :param submitted_date: The date the student work was submitted
         :param total_score: The score that we will apply penalty to
@@ -133,16 +156,13 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         # compute penalty if needed
         penalty = self.get_penalty( submitted_date )
 
-        # penalty = self.penalizer.get_penalty(row['submitted'])
-        # penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
-
         # will be 0 if not docking for lateness
         fudge_points = total_score * -penalty
 
         if penalty > 0 and row is not None:
             # Save record so calling class can handle
-            self.penalized_rows.append( {
-                'row': row,
+            self.penalized_records.append( {
+                'record': row,
                 'penalty': penalty,
                 'fudge_points': fudge_points
             } )
@@ -169,15 +189,24 @@ class QuarterLate( IPenalizer, TimeHandlerMixin ):
             self.last_half_credit_date += grace_period
 
         # Record of applied penalties
-        self.penalized_rows = [
+        self.penalized_records = [
             # List of dicts with format
-            # 'row': row,
+            # 'record': row,
             # 'penalty': penalty,
+            # optional if use fudge points
             # 'fudge_points': fudge_points
         ]
 
-    # @ensure_timestamps
     def get_penalty( self, submitted_date ):
+        """
+        Computes the penalty as a percentage to be combined with
+        the original score by another method.
+        Not used on its own. get_fudge_points and
+        get_penalized_score properly interpret the output of this
+        method for the particular grading use.
+        :param submitted_date:
+        :return: float
+        """
         submitted_date = self._force_timestamp( submitted_date )
         assert (isinstance( submitted_date, pd.Timestamp ))
         # Check if full credit
@@ -196,7 +225,7 @@ class QuarterLate( IPenalizer, TimeHandlerMixin ):
         grade via fudge points, this calculates the amount for
         canvas to subtract or add to the total score.
 
-        If row is provided, will save record to self.penalized_rows
+        If row is provided, will save record to self.penalized_records
 
         :param submitted_date: The date the student work was submitted
         :param total_score: The score that we will apply penalty to
@@ -214,13 +243,16 @@ class QuarterLate( IPenalizer, TimeHandlerMixin ):
 
         if penalty > 0 and row is not None:
             # Save record so calling class can handle
-            self.penalized_rows.append( {
-                'row': row,
+            self.penalized_records.append( {
+                'record': row,
                 'penalty': penalty,
                 'fudge_points': fudge_points
             } )
 
         return fudge_points
+
+
+# ================================= OLD
 
 
 @ensure_timestamps

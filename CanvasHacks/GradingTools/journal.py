@@ -8,12 +8,19 @@ from CanvasHacks.GradingTools.base import IGrader
 
 __author__ = 'adam'
 
+from CanvasHacks.GradingTools.nonempty import IGradingMethod
+from CanvasHacks.GradingTools.penalities import IPenalizer
+
 
 class JournalGrader( IGrader ):
     """Handles grading weekly journals"""
+    grade_method: IGradingMethod
+    penalizer: IPenalizer
 
     def __init__( self, work_repo, **kwargs ):
         """
+        :param work_repo: Content repository with journal data
+        :param kwargs:
         """
         self.work_repo = work_repo
         super().__init__( **kwargs )
@@ -22,43 +29,44 @@ class JournalGrader( IGrader ):
         self.graded = [ ]
 
     def grade( self ):
-        """Assigns a provisional grade for the discussion unit
+        """Assigns a provisional grade for the journal
         Will return as a list of tuples
         todo: Add logging of details of how grade assigned
 
        Determines how much credit potentially late credit/no credit
-        assignments should recieve.
-        Created in CAN-24"""
-
+        assignments should receive.
+        Created in CAN-24
+        """
         for submission in self.work_repo.data:
             if submission.body is not None:
                 score = self.grade_method.grade( submission.body )
                 if score:
-                    score = self.penalizer.get_penalized_score( submission.submitted_at, score )
+                    score = self.penalizer.get_penalized_score( submission.submitted_at, score, record=submission )
                     self.graded.append( (submission, int( score )) )
+
+        self.report_late_penalties()
+
         return self.graded
 
-        # credit = receives_credit( submission.body )
-        # if credit:
-        #     score = 100
-        # todo If things go wierd, it's because I indented all the below from the original method
-        # Now check whether need to penalize for lateness
-        # The method will return the updated score
-        #             score = self.penalizer.get_penalized_score(submission.submitted_at, score)
-        #             self.graded.append( (submission, int( score )) )
-        # return self.graded
+    def report_late_penalties( self ):
+        # Report late penalties
+        if len( self.penalizer.penalized_rows ) > 0:
+            for penalty_dict in self.penalizer.penalized_records:
+                self._penalty_message(penalty_dict['penalty'], penalty_dict['record'])
 
-        # penalty = self.penalizer.get_penalty(submission.submitted_at)
-        #
-        # # penalty = get_penalty( submission.submitted_at, self.activity_inviting_to_complete.due_at, self.activity_inviting_to_complete.lock_at, self.activity_inviting_to_complete.grace_period )
 
-        # penalty was set up for uploading where have to use fudge points.
-        # so we need to interpret it a bit here.
-        # It will have returned 0 for no penalty and .5 for half credit
-        # penalty = 100 * penalty
-        # score = score - penalty
-        # self.graded.append( (submission, int( score )) )
+    def _penalty_message( self, penalty, row ):
+        """
+        Handles printing or logging of penalties applied
 
+        # todo enable logging
+
+        :param penalty:
+        :param row:
+        :return:
+        """
+        stem = 'Student #{}: Submitted on {}; was due {}. Penalized {}'
+        return stem.format( row[ 'student_id' ], row[ 'submitted' ], self.activity.due_at, penalty )
 
 if __name__ == '__main__':
     pass

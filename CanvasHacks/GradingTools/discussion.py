@@ -5,19 +5,32 @@ from CanvasHacks.GradingTools.base import IGrader
 
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.nonempty import receives_credit
+from CanvasHacks.GradingTools.nonempty import receives_credit, IGradingMethod, CreditForNonEmpty
+from CanvasHacks.GradingTools.penalities import IPenalizer, NoLatePenalty
 
 
-class DiscussionGrader(IGrader):
+class DiscussionForumGrader( IGrader ):
+    """
+    Grades discussion forum posts
+    """
 
-    def __init__( self, work_repo, num_posts_required=1, grade_func=None, **kwargs ):
+    grade_method: IGradingMethod
+    penalizer: IPenalizer
+
+    def __init__( self, work_repo, num_posts_required=1,  **kwargs ):
         """
-        :param grade_func: Function or method to use to determine grade
+
+        :param work_repo:
+        :param num_posts_required:
+        :param kwargs:
         """
         self.num_posts_required = num_posts_required
-        self.grade_func = grade_func
         self.work_repo = work_repo
+
         super().__init__(**kwargs)
+
+        self.grade_method = self.activity.grade_method
+        self.penalizer = self.activity.penalizer
 
         self.credit_per_post = 100 / self.num_posts_required
 
@@ -36,7 +49,8 @@ class DiscussionGrader(IGrader):
         for p in self.work_repo.data:
             # discussion repo data will look like:
             # [{'student_id', 'student_name', 'text'}]
-            pct_credit = self.credit_per_post if receives_credit( p[ 'text' ] ) else 0
+            pct_credit = self.grade_method.grade(p['text'], on_credit=self.credit_per_post, on_no_credit=0)
+            # pct_credit = self.credit_per_post if receives_credit( p[ 'text' ] ) else 0
             self._raw.append( (p[ 'student_id' ], pct_credit) )
 
     def grade( self ):

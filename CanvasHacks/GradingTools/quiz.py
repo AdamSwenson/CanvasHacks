@@ -3,8 +3,8 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingTools.base import IGrader
-from CanvasHacks.GradingTools.nonempty import receives_credit
-from CanvasHacks.GradingTools.penalities import get_penalty
+from CanvasHacks.GradingTools.nonempty import receives_credit, IGradingMethod
+from CanvasHacks.GradingTools.penalities import get_penalty, IPenalizer
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository
 
@@ -17,6 +17,9 @@ if __name__ == '__main__':
 
 
 class QuizGrader( IGrader ):
+
+    grade_method: IGradingMethod
+    penalizer: IPenalizer
 
     def __init__( self, work_repo: QuizRepository, submission_repo: ISubmissionRepo, **kwargs ):
         """
@@ -36,9 +39,9 @@ class QuizGrader( IGrader ):
 
     def grade( self, **kwargs):
         """
-
+        Grades all rows in work_repo.data
         todo: Add logging of details of how grade assigned
-        :return:
+        :return: List of objects ready for upload
         """
 
         for i, row in self.work_repo.data.iterrows():
@@ -55,9 +58,9 @@ class QuizGrader( IGrader ):
 
     def report_late_penalties( self ):
         # Report late penalties
-        if len( self.penalizer.penalized_rows ) > 0:
-            for penalty_dict in self.penalizer.penalized_rows:
-                self._penalty_message(penalty_dict['penalty'], penalty_dict['row'])
+        if len( self.penalizer.penalized_records ) > 0:
+            for penalty_dict in self.penalizer.penalized_records:
+                self._penalty_message(penalty_dict['penalty'], penalty_dict['record'])
 
     def _get_score( self, content, on_empty=None ):
         """
@@ -74,24 +77,6 @@ class QuizGrader( IGrader ):
             return self.work_repo.points_per_question
         elif on_empty is not None:
             return on_empty
-        # if receives_credit( content ):
-        #     # if pd.isnull( row[ column_name ] ):
-        #     return self.work_repo.points_per_question
-        # elif on_empty is not None:
-        #     return on_empty
-
-    # def _get_fudge_points( self, row, total_score ):
-    #     """Calculates the amount for canvas to subtract or add to the total score"""
-    #     # compute penalty if needed
-    #     penalty = self.penalizer.get_penalty(row['submitted'])
-    #     # penalty = get_penalty( row[ 'submitted' ], self.activity.due_at, self.activity.last_half_credit_date, self.activity.grace_period )
-    #
-    #     if penalty > 0:
-    #         print( self._penalty_message( penalty, row ) )
-    #
-    #     # will be 0 if not docking for lateness
-    #     fudge_points = total_score * -penalty
-    #     return fudge_points
 
     def _make_graded_row_output( self, row, question_score_dict, fudge_points ):
         out = {
@@ -114,24 +99,17 @@ class QuizGrader( IGrader ):
         return out
 
     def _grade_row( self, row , **kwargs):
-        """
-        Grades a row
+        """Grades a row
+
         NB, requires that the non-graded attempts be
         filtered out before passing in
 
-        :param row:
+        todo test whether the problem with non-graded people getting zeros is caused here
+
+        :param row: pd.DataFrame row
         :param kwargs:
-        :return:
+        :return: Dictionary formatted for uploading
         """
-        # fudge_points = 0
-        # out = {
-        #     'student_id': int( row[ 'student_id' ] ),
-        #     'attempt': int( row[ 'attempt' ] ),
-        #     'submission_id': int( row[ 'submission_id' ] ),
-        #     'course_id': int( row[ 'course_id' ] ),
-        #     'quiz_id': int( row[ 'quiz_id' ] ),
-        #     'data': { }
-        # }
         # used for computing penalty
         total_score = 0
         questions = { }
@@ -140,44 +118,25 @@ class QuizGrader( IGrader ):
         for qid, column_name in self.work_repo.question_columns:
             content = row[ column_name ]
             pts = self._get_score( content, **kwargs )
-            # quiz type things require the scores to be uploaded
+            # Quiz type things require the scores to be uploaded
             # for each question.
             # Thus we grade each question and then penalize the
             # overall score with fudge points if necessary
             questions[ qid ] = { 'score': pts }
             total_score += pts
-            # if receives_credit(content):
-            #     # if pd.isnull( row[ column_name ] ):
-            #     pts = self.work_repo.points_per_question
-            #     questions[ qid ] = { 'score': pts }
-            #     total_score += pts
-            # else:
-            #     # todo test whether I need this and if this causes the problem w people getting 0s
-            #     # questions[ qid ] = { 'score': 0 }
-            #     pass
-            #     # questions[ qid ] = { 'score': 4.0 }
-            #     # total_score += 4
 
-        # compute penalty if needed
-        # will be 0 if not docking for lateness
-        # Records of penalty will be stored on self.penalizer.penalized_rows
+        # Compute penalty if needed
+        # Will be 0 if not docking for lateness
+        # Records of penalty will be stored on self.penalizer.penalized_records
         fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
-        # fudge_points = self._get_fudge_points( row, total_score )
 
         out = self._make_graded_row_output(row, questions, fudge_points)
 
-        # out[ 'data' ][ "quiz_submissions" ] = [
-        #     {
-        #         "attempt": int( row[ 'attempt' ] ),
-        #         "fudge_points": fudge_points,
-        #         "questions": questions
-        #     }
-        # ]
         return out
 
     def _penalty_message( self, penalty, row ):
         """
-        Handles printing or logging of penalities applied
+        Handles printing or logging of penalties applied
 
         # todo enable logging
 
