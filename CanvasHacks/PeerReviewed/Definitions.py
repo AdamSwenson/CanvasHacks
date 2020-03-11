@@ -213,7 +213,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
     instructions_filename = 'peer-review-instructions.txt'
     creation_type = 'survey'
 
-    regex = re.compile( r"\breview\b" )
+    regex = re.compile( r"\bpeer review\b" )
 
     def __init__( self, **kwargs ):
         # Code used to open the review unit
@@ -236,7 +236,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
         self.grade_method = CreditForNonEmpty(min_words=1, count_stopwords=True)
 
         super().__init__( **kwargs )
-        self.email_intro = "Here is another student's unit for you to review:"
+        self.email_intro = "Here is another student's assignment for you to review:"
 
     @property
     def email_subject( self ):
