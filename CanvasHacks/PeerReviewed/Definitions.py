@@ -179,11 +179,14 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
 
 
 class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
-    title_base = "Content assignment"
+    title_base = "Essay"
+
+    # title_base = "Content assignment"
     instructions_filename = 'content-assignment-instructions.txt'
     creation_type = 'assignment'
 
-    regex = re.compile( r"\bcontent assignment\b" )
+    # regex = re.compile( r"\bcontent assignment\b" )
+    regex = re.compile( r"\bessay\b" )
 
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
