@@ -50,23 +50,28 @@ class JournalGrader( IGrader ):
 
     def report_late_penalties( self ):
         # Report late penalties
-        if len( self.penalizer.penalized_rows ) > 0:
+        if len( self.penalizer.penalized_records ) > 0:
             for penalty_dict in self.penalizer.penalized_records:
                 self._penalty_message(penalty_dict['penalty'], penalty_dict['record'])
 
 
-    def _penalty_message( self, penalty, row ):
+    def _penalty_message( self, penalty, record ):
         """
         Handles printing or logging of penalties applied
 
         # todo enable logging
 
         :param penalty:
-        :param row:
+        :param row: A Submission object
         :return:
         """
         stem = 'Student #{}: Submitted on {}; was due {}. Penalized {}'
-        return stem.format( row[ 'student_id' ], row[ 'submitted' ], self.activity.due_at, penalty )
+        try:
+            return stem.format( record.student_id, record.submitted, self.activity.due_at, penalty )
+        except (TypeError, AttributeError):
+            # Will hit this if a Submission object
+            return stem.format( record.user_id, record.submitted_at, self.activity.due_at, penalty )
+
 
 if __name__ == '__main__':
     pass
