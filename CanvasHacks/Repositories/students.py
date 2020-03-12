@@ -60,6 +60,13 @@ class StudentRepository( IRepo ):
             print('No student found for id: {}'.format(canvas_id))
             return ''
 
+    def get_student_first_name( self, canvas_id ):
+        full_name = self.get_student_name(canvas_id)
+
+        if ',' in full_name:
+            return full_name.split(',')[1]
+        else:
+            return full_name.split(' ')[0]
 
 class StudentRepositoryOld( IRepo ):
 

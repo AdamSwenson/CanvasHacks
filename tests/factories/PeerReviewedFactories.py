@@ -5,30 +5,32 @@ __author__ = 'adam'
 
 if __name__ == '__main__':
     pass
-from unittest.mock import MagicMock, patch
-
-from faker import Faker
 import random
+from unittest.mock import MagicMock
+
 import pandas as pd
 import pytz
+from faker import Faker
+
 fake = Faker()
-from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit, DiscussionReview, \
+from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit, DiscussionReview,\
     DiscussionForum
 
 from CanvasHacks.PeerReviewed.Submissions import SubmissionFactory
-from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_comment_result_factory, submission_result_factory
+from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_result_factory
 
 
-def activity_data_factory(name=None):
+def activity_data_factory( name=None ):
     return {
-        'id': random.randint(1, 9999999999),
-        'name' : fake.word() if name is None else name,
-        'access_code' : fake.word(),
+        'id': random.randint( 1, 9999999999 ),
+        'name': fake.word() if name is None else name,
+        'access_code': fake.word(),
         'email_intro': fake.text(),
         'email_subject': fake.text(),
         'html_url': fake.url(),
         'open_at': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=pytz.utc ) ),
         'due_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
+        'lock_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
         'completion_points': random.randint( 0, 1000 ),
         'max_points': random.randint( 0, 1000 ),
     }
@@ -40,14 +42,14 @@ def test_data_factory():
         'review': activity_data_factory(),
         'metareview': activity_data_factory(),
         'discussion_forum': activity_data_factory(),
-        'discussion_review' : activity_data_factory()
+        'discussion_review': activity_data_factory()
     }
 
 
-def unit_factory(course=None, unit_number=None, initial_is_quiz_type=True):
+def unit_factory( course=None, unit_number=None, initial_is_quiz_type=True ):
     """Creates a Unit object with fake data for all assignments"""
     course = course if course is not None else MagicMock()
-    unit_number = unit_number if unit_number is not None else random.randint(1, 22222)
+    unit_number = unit_number if unit_number is not None else random.randint( 1, 22222 )
     test_data = test_data_factory()
     initial = InitialWork( **test_data[ 'initial' ] )
     initial.id = random.randint( 0, 10000 )
@@ -65,16 +67,16 @@ def unit_factory(course=None, unit_number=None, initial_is_quiz_type=True):
     meta.access_code = fake.ean8()
     meta.quiz_id = meta.id
     # discussion forum
-    discussion_forum = DiscussionForum(**test_data['discussion_forum'])
+    discussion_forum = DiscussionForum( **test_data[ 'discussion_forum' ] )
     discussion_forum.id = random.randint( 0, 10000 )
     discussion_forum.access_code = fake.ean8()
     # discussion review
-    discussion_review = DiscussionReview(**test_data['discussion_review'])
+    discussion_review = DiscussionReview( **test_data[ 'discussion_review' ] )
     discussion_review.id = random.randint( 0, 10000 )
     discussion_review.access_code = fake.ean8()
 
     unit = Unit( course, unit_number )
-    unit.components = [initial, review, meta, discussion_forum, discussion_review]
+    unit.components = [ initial, review, meta, discussion_forum, discussion_review ]
     return unit
 
 
@@ -122,33 +124,35 @@ def discussion_entry_factory( **kwargs ):
     'discussion_id': 737847, 'course_id': 85210}
     """
     dummy = { 'id': random.randint( 0, 100000 ),
-             'user_id': random.randint( 0, 10000 ),
-             'parent_id': None,
-             'created_at': pd.to_datetime(fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None )),
-             'updated_at': pd.to_datetime(fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None )),
-             'rating_count': None,
-             'rating_sum': None,
-             'user_name': fake.name(),
-             'message': '<p>{}</p>'.format(fake.paragraph()),
-             'read_state': 'unread', 'forced_read_state': False,
-             'discussion_id': random.randint( 0, 10000 ),
-             'course_id': random.randint( 0, 10000 )
-             }
+              'user_id': random.randint( 0, 10000 ),
+              'parent_id': None,
+              'created_at': pd.to_datetime(
+                  fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None ) ),
+              'updated_at': pd.to_datetime(
+                  fake.date_time_this_century( before_now=False, after_now=True, tzinfo=None ) ),
+              'rating_count': None,
+              'rating_sum': None,
+              'user_name': fake.name(),
+              'message': '<p>{}</p>'.format( fake.paragraph() ),
+              'read_state': 'unread', 'forced_read_state': False,
+              'discussion_id': random.randint( 0, 10000 ),
+              'course_id': random.randint( 0, 10000 )
+              }
 
     # if stuff passed in, replace
     for k in kwargs.keys():
-        dummy[k] = kwargs[k]
+        dummy[ k ] = kwargs[ k ]
     return dummy
 
 
-def content_repo_data_object_factory(**kwargs):
+def content_repo_data_object_factory( **kwargs ):
     """Creates a dictionary with the keys representing columns
     that the dataframe in self.data will be expected to have """
     d = {
-        'student_id': fake.random.randint(11111, 999999999),
+        'student_id': fake.random.randint( 11111, 999999999 ),
         'workflow_state': 'submitted'
     }
 
     for k, v in kwargs.items():
-        d[k] = v
+        d[ k ] = v
     return d

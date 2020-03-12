@@ -113,6 +113,15 @@ class Activity( Model ):
         t = utc_string_to_local_dt( self.due_at )
         return t.date().isoformat()
 
+    @property
+    def string_lock_date( self ):
+        """Returns a human readable date for the last chance to turn in with
+        the format yyyy-mm-dd
+        """
+        if self.due_at is None: return ''
+        t = utc_string_to_local_dt( self.lock_at )
+        return t.date().isoformat()
+
     @staticmethod
     def _check_date( date ):
         """Checks that a value is a pd.Timestamp
