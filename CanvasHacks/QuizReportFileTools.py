@@ -93,7 +93,7 @@ def download_report( download_url, save_file_path=None ):
     return frame
 
 
-def retrieve_quiz_data( quiz, rest_timeout=60, max_id_attempts=20 ):
+def retrieve_quiz_data( quiz, rest_timeout=60, max_id_attempts=20, **kwargs ):
     """Returns a dataframe of the student report
     ACTUALLY WORKING VERSION!
     WILL ONLY WORK IF THE GENERATE REPORT BUTTON HAS BEEN MANUALLY CLICKED FIRST

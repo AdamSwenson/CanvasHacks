@@ -90,6 +90,7 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         # self.data = self.data[self.activity_inviting_to_complete.question_columns]
 
         # Remove html and other artifacts from student answers
+        # DO NOT UNCOMMENT UNTIL CAN-59 HAS BEEN FULLY TESTED
         # for c in self.question_columns:
         #     self.data[c] = self.data.apply(lambda x: self.text_cleaner(x[c]), axis=1)
 
