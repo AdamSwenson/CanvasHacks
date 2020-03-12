@@ -36,7 +36,7 @@ class SendMetareviewToReviewer( IStep ):
 
         self._initialize()
 
-        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on)
+        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on, self.activity_for_review_pairings)
 
         self.statusRepos = [self.feedback_status_repo]
 

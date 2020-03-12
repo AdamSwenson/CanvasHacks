@@ -60,4 +60,3 @@ def skaa_run_button():
 
     b.on_click( callback )
     display( b )
-    return b

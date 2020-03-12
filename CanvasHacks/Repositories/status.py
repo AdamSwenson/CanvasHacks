@@ -168,13 +168,21 @@ class FeedbackStatusRepository( IStatusRepository ):
 
     """
 
-    def __init__( self, dao: SqliteDAO, activity: Activity ):
+    def __init__( self, dao: SqliteDAO, activity: Activity, review_pairings_activity=None ):
         """
-        Create a repository to handle events for a
+         Create a repository to handle events for a
         particular activity
+
+        :param dao:
+        :param activity: The activity feedback is sent on
+        :param review_pairings_activity: Activity which the review associations are based upon
         """
         self.activity = activity
         self.session = dao.session
+
+        # if None, that means there's no difference between the activities
+        # so we can just use the activity
+        self.review_pairings_activity = review_pairings_activity if review_pairings_activity is not None else self.activity
 
     def get( self, student ):
         """
@@ -261,7 +269,7 @@ class FeedbackStatusRepository( IStatusRepository ):
         notified = self.session\
             .query( ReviewAssociation )\
             .outerjoin( FeedbackReceivedRecord, FeedbackReceivedRecord.student_id == ReviewAssociation.assessee_id )\
-            .filter( ReviewAssociation.activity_id == self.activity.id )\
+            .filter( ReviewAssociation.activity_id == self.review_pairings_activity.id )\
             .filter( FeedbackReceivedRecord.activity_id == self.activity.id )\
             .filter( FeedbackReceivedRecord.student_id.isnot( None ) )\
             .all()
