@@ -60,10 +60,14 @@ class TextCleaner( StoreMixin ):
         self.handle_kwargs( **kwargs )
 
     def clean( self, content ):
-        if isinstance(content, str):
-            try:
-                for cleaner in self.cleaners:
-                    content = cleaner.clean( content )
-                return content
-            except Exception as e:
-                print( e )
+        if not isinstance(content, str):
+            # This is a text cleaner. If we haven't received
+            # text, we just send it back
+            return content
+
+        try:
+            for cleaner in self.cleaners:
+                content = cleaner.clean( content )
+            return content
+        except Exception as e:
+            print( 'Text Cleaner Error', e, content )

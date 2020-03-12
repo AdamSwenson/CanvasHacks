@@ -4,6 +4,7 @@ Created by adam on 5/6/19
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin, QuizDataMixin
 from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
+from CanvasHacks.Processors.cleaners import TextCleaner
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
 from CanvasHacks.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
 from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin, FrameStorageMixin
@@ -53,6 +54,11 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         self.activity = activity
         self.question_columns = [ ]
 
+        # The cleaner class that will be called to
+        # remove html and other messy stuff from student
+        # work
+        self.text_cleaner = TextCleaner()
+
     def process( self, work_frame, submissions ):
         self.submissions = submissions
         if not isinstance( submissions, pd.DataFrame ):
@@ -74,16 +80,19 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         self.set_question_columns( self.data )
 
     def _cleanup_data( self ):
-        """This is abstracted out so it can be
-        called independently for use with test data
         """
-        # Store ids so we don't have to reset the index for submitters prop
-        # self.student_ids = list(set(self.data.student_id.tolist()))
+        Runs cleanup operations specific to this kind of data
+        """
         # the name will be set as index from sorting
         # so we set to student id to make look ups easier
         self.data.set_index( 'student_id', inplace=True )
         # Remove unneeded columns
         # self.data = self.data[self.activity_inviting_to_complete.question_columns]
+
+        # Remove html and other artifacts from student answers
+        # for c in self.question_columns:
+        #     self.data[c] = self.data.apply(lambda x: self.text_cleaner(x[c]), axis=1)
+
 
     def get_student_work( self, student_id ):
         try:
