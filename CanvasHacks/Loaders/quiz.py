@@ -3,10 +3,13 @@ Created by adam on 2/24/20
 """
 import pandas as pd
 
+from CanvasHacks.Errors.data_ingestion import NoWorkDownloaded, NoStudentWorkDataLoaded, NoNewSubmissions
 from CanvasHacks.Loaders.interfaces import IAllLoader, INewLoader
 from CanvasHacks.Processors.quiz import process_work
 from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, retrieve_quiz_data, save_downloaded_report, \
     load_new
+
+from CanvasHacks.FileTools import create_folder
 
 __author__ = 'adam'
 
@@ -16,21 +19,33 @@ if __name__ == '__main__':
 
 class AllQuizReportFileLoader( IAllLoader ):
     """Loads all records for quiz"""
+    failure_message = "Could not load data from file"
+
 
     @staticmethod
     def load( activity, course, **kwargs ):
+
         # course = self.course if course is None else course
         # activity_inviting_to_complete = self.activity_inviting_to_complete if activity_inviting_to_complete is None else activity_inviting_to_complete
         # pass
-        return load_activity_data_from_files( activity, course )
+        student_work_frame = load_activity_data_from_files( activity, course )
+        AllQuizReportFileLoader._check_empty( student_work_frame )
+        return student_work_frame
+
 
 
 class AllQuizReportDownloader( INewLoader ):
+    failure_message =  "Could not download data."
 
     @staticmethod
     def load( activity, course, save=True, **kwargs ):
         quiz = AllQuizReportDownloader.get_quiz( course, activity )
+        # This will return none if never able to download from a url
         student_work_frame = retrieve_quiz_data( quiz, **kwargs )
+
+        if student_work_frame is None:
+            print('uhoh')
+            raise NoWorkDownloaded
 
         if save:
             # Want to have all the reports be formatted the same
@@ -85,6 +100,42 @@ class NewQuizReportDownloadLoader( INewLoader ):
         data = load_new( activity )
         NewQuizReportDownloadLoader._check_empty( data )
         return data
+
+
+class QuizComboLoader( IAllLoader ):
+    """
+    Attempts to load first by downloading and then falls
+    back to loading from a file.
+    """
+
+    @staticmethod
+    def load( activity, course, save=True, **kwargs ):
+        loaders = (AllQuizReportDownloader, AllQuizReportFileLoader)
+        for loader in loaders:
+            try:
+                # The loader should raise the error or return the
+                # desired value
+                return loader.load( activity, course, save=save, **kwargs )
+            except NoWorkDownloaded as e:
+                # We ignore so next object will try
+                print(e.message)
+
+                # We attempt to create the folder that the file loader will
+                # look in because, otherwise, we won't have a handy location
+                # to put the downloaded file in the future. (Before, it accidentally happened
+                # when we tried to save None instead of a dataframe. That was fixed
+                # so now we need to do it explicitly).
+                create_folder( activity.folder_path )
+
+            except NoNewSubmissions:
+                # We're done, but this may have special handling
+                # so we re-raise it
+                raise NoNewSubmissions
+
+        # if we made it all the way here, all attempts at loading have failed
+        # so we raise this to tell the program to move on
+        raise NoStudentWorkDataLoaded
+
 
 
 def load_student_work( csv_filepath, submissions ):

@@ -40,7 +40,10 @@ class QuizDataMixin:
         with the form (question id, string column name)
         """
         questions = self._detect_question_columns(results_frame.columns)
-        self.question_columns = [(q.split(':')[0], q) for q in questions ]
+        self.question_columns = [(q.split(':')[0], q) for q in questions]
+        # weird stuff we need to filter
+        bad = ['Unnamed']
+        self.question_columns = [(a[0], a[1] ) for a in self.question_columns if a[0].strip() not in bad ]
 
     def _detect_question_columns(self, columns):
         """Return a list of columns which contain a colon,

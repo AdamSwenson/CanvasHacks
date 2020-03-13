@@ -61,7 +61,17 @@ class INewLoader(ILoader):
 class IAllLoader(ILoader):
     """Interface for any class which loads all existing
     data for the quiz"""
-    pass
+
+    @staticmethod
+    def _check_empty( data ):
+        """
+        Should be called on what's been loaded before returning
+        it.
+        :raises NoNewSubmissions
+        """
+        if len( data ) == 0:
+            raise NoNewSubmissions
+
     # @staticmethod
     # def load( activity_inviting_to_complete, course=None, **kwargs ):
     #     raise NotImplementedError

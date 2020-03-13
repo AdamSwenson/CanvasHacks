@@ -3,11 +3,12 @@ Created by adam on 2/26/20
 """
 __author__ = 'adam'
 
+from CanvasHacks.Errors.data_ingestion import NoWorkDownloaded
 from CanvasHacks.Loaders.assignment import AssignmentDownloadLoader
 from CanvasHacks.Loaders.discussion import DiscussionFileLoader, DiscussionDownloadLoader
 from CanvasHacks.Loaders.interfaces import ILoaderFactory
-from CanvasHacks.Loaders.quiz import AllQuizReportDownloader, AllQuizReportFileLoader, NewQuizReportDownloadLoader, \
-    NewQuizReportFileLoader
+from CanvasHacks.Loaders.quiz import AllQuizReportDownloader, AllQuizReportFileLoader, NewQuizReportDownloadLoader,\
+    NewQuizReportFileLoader, QuizComboLoader
 
 if __name__ == '__main__':
     pass
@@ -60,7 +61,10 @@ class QuizLoaderFactory( ILoaderFactory ):
     """
 
     @staticmethod
-    def make( download=True, only_new=False, **kwargs ):
+    def make( download=True, only_new=False, combo=False, **kwargs ):
+        if combo:
+            return QuizComboLoader
+
         if download and only_new:
             return NewQuizReportDownloadLoader
 

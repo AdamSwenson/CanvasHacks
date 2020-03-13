@@ -3,7 +3,7 @@ Created by adam on 2/26/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded
+from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded, NoNewSubmissions
 from CanvasHacks.Loaders.quiz import NewQuizReportFileLoader, AllQuizReportFileLoader
 from CanvasHacks.PeerReviewed.Definitions import Review, DiscussionForum
 from CanvasHacks.Repositories.assignments import AssignmentRepository
@@ -61,7 +61,7 @@ class WorkRepositoryLoaderFactory:
         """
         # Get the object which handles loading student data
         # The params will determine whether this is from file or download
-        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, is_discussion=activity.is_discussion_type, **kwargs)
+        loader = LoaderFactory.make( is_quiz=activity.is_quiz_type, is_discussion=activity.is_discussion_type, combo=True, **kwargs)
 
         if activity.is_discussion_type:
             return cls._for_discussion_type_activity(activity, course, loader, **kwargs)
@@ -89,9 +89,19 @@ class WorkRepositoryLoaderFactory:
         else:
             repo = QuizRepository( activity, course )
 
-        student_work_frame = loader.load( activity, course, **kwargs )
+        try:
+            student_work_frame = loader.load( activity, course,  **kwargs )
+
+        # Doing each separately so can modify if needed
+        except NoStudentWorkDataLoaded:
+            raise NoStudentWorkDataLoaded
+
+        except NoNewSubmissions:
+            raise NoNewSubmissions
 
         if student_work_frame is None or len(student_work_frame) == 0:
+            # This indicates that all attempts to acquire data
+            # have failed and no further will be attempted
             raise NoStudentWorkDataLoaded
 
         # Download submissions

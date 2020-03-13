@@ -44,7 +44,7 @@ class SendReviewToReviewee( IStep ):
 
         # Initialize the relevant status repos
 
-        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on)
+        self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on, self.activity_for_review_pairings)
 
         self.invite_status_repo = InvitationStatusRepository(self.dao, self.activity_notifying_about)
 
@@ -85,10 +85,13 @@ class SendReviewToReviewee( IStep ):
         self.messenger.notify( self.associations, self.send )
 
         # Log the run
-        msg = "Sent {} peer review results \n {}".format( len( self.associations ), self.associations )
+        msg = "Sent {} peer review results to authors".format( len( self.associations ))
+        print(msg)
+
+        lmsg = "{} \n {}".format(self.associations )
         # Note we are distributing the material for the metareview, that's
         # why we're using that activity_inviting_to_complete.
-        RunLogger.log_review_feedback_distributed( self.unit.metareview, msg )
+        RunLogger.log_review_feedback_distributed( self.unit.metareview, lmsg )
 
     def _assign_step( self ):
         self._filter_notified()

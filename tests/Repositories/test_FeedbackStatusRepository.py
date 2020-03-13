@@ -112,6 +112,49 @@ class TestFeedbackStatusRepository( TestingBase ):
             self.assertEqual(result.student_id, sid, "Correct sid")
             self.assertIsNotNone(result.sent_at, "Timestamp not empty")
 
+    def test_reviewers_with_authors_sent_feedback( self ):
+        num_previous = 2
+        self.make_feedback_received_records( num_previous )
+        self.assertEqual( num_previous, len( self.previously_sent ) )
+
+        reviewers_with_notified_authors = [ r.assessor_id for r in self.pairings if
+                                            r.assessee_id in self.previously_sent ]
+
+        # ra = self.session.query(ReviewAssociation).all()
+        # fb = self.session.query(FeedbackReceivedRecord).all()
+
+        # try with all students to make it easy to check missing
+        result = self.obj.reviewers_with_authors_sent_feedback
+
+        self.assertEqual( num_previous, len( result ), "Correct number of records returned" )
+        for sid in result:
+            self.assertIn( sid, reviewers_with_notified_authors, "Returned for previously notified authors" )
+
+        # self.create_preexisting_review_pairings(self.activity_id, self.students)
+
+    def test_reviewers_with_authors_sent_feedback_different_activities( self ):
+        num_previous = 2
+        self.make_feedback_received_records( num_previous )
+
+        reviewers_with_notified_authors = [ r.assessor_id for r in self.pairings if
+                                            r.assessee_id in self.previously_sent ]
+
+        pairing_activity_id = self.fake.random.randint(1, 9999)
+        self.create_preexisting_review_pairings(pairing_activity_id, self.students, check_db_before_run=False)
+
+        pairing_activity = MagicMock(id=pairing_activity_id)
+
+        self.obj = FeedbackStatusRepository( self.dao, self.activity,  pairing_activity)
+
+        # try with all students to make it easy to check missing
+        result = self.obj.reviewers_with_authors_sent_feedback
+
+        self.assertEqual( num_previous, len( result ), "Correct number of records returned when pairing activity id is different" )
+        for sid in result:
+            self.assertIn( sid, reviewers_with_notified_authors, "Returned for previously notified authors when pairing activity id is different" )
+
+
+
     def test_reviewers_with_notified_authors( self ):
         num_previous = 2
         self.make_feedback_received_records( num_previous )

@@ -57,7 +57,7 @@ class TestingBase( unittest.TestCase ):
         self.preexisting_student_ids = [ s.student_id for s in self.preexisting_students ]
         self.new_students_ids = [ s.student_id for s in self.new_students ]
 
-    def create_preexisting_review_pairings( self, activity_id, preexisting_students, session=None ):
+    def create_preexisting_review_pairings( self, activity_id, preexisting_students, session=None, check_db_before_run=True ):
         """Populates the in-memory database with ReviewAssociations between
         the provided students
         NB, must have the dao session stored on self.session
@@ -77,8 +77,9 @@ class TestingBase( unittest.TestCase ):
 
         self.pairings = session.query( ReviewAssociation ).filter( ReviewAssociation.activity_id == activity_id ).all()
 
-        self.assertEqual( len( preexisting_students ), len( self.pairings ),
-                          "PRE-RUN CHECK: {} students in db".format( len( preexisting_students ) ) )
+        if check_db_before_run is True:
+            self.assertEqual( len( preexisting_students ), len( self.pairings ),
+                              "PRE-RUN CHECK: {} students in db".format( len( preexisting_students ) ) )
 
         return self.pairings
 

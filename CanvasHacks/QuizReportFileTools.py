@@ -47,8 +47,8 @@ def parse_download_url( response ):
     except KeyError:
         # todo Poll the progress url until have download url
         #         progress_url = c['progress_url']
-        print( "Error: No download url provided \n", c )
-
+        # print( "Error: No download url provided ") #, c )
+        pass
 
 def get_report_download_url( report_url ):
     """Uses the report url to get the url from which the csv file can be downloaded"""
@@ -62,7 +62,7 @@ def get_report_download_url( report_url ):
         # We can't use the usual function since we don't want response.json()
         response = requests.get( report_url, headers=make_request_header() )
 
-        print( 'response was ', response.status_code )
+        # print( 'response was ', response.status_code )
         response.raise_for_status()
         # todo or put check the progress url until workflow_state="completed"
         #         if response.progress.workflow_state != 'completed':
@@ -71,10 +71,12 @@ def get_report_download_url( report_url ):
         return parse_download_url( response )
 
     except HTTPError as http_err:
-        print( f'HTTP error occurred: {http_err}' )  # Python 3.6
+        pass
+        # print( f'HTTP error occurred: {http_err}' )  # Python 3.6
 
     except Exception as err:
-        print( f'Other error occurred: {err}' )  # Python 3.6
+        pass
+        # print( f'Other error occurred: {err}' )  # Python 3.6
 
 
 def download_report( download_url, save_file_path=None ):
@@ -119,10 +121,12 @@ def retrieve_quiz_data( quiz, rest_timeout=60, max_id_attempts=20, **kwargs ):
     for _ in range( 0, max_id_attempts ):
         # first value out of generator will be the original url
         url = next( url_gen )
-        print( "trying: ", url )
+        # print( "trying: ", url )
+
         # We request the hidden report object which will have the url for downloading
         # and parse out the url
         download_url = get_report_download_url( url )
+
         # We load the url and parse into a dataframe
         if download_url:
             return download_report( download_url )
