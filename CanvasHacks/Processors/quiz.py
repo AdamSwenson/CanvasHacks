@@ -37,8 +37,8 @@ def make_drop_list( columns ):
         add the common part
     """
 
-    droppable = [ '1.' ]
-    to_drop = [ ]
+    droppable = [ '1.', 'Unnamed' ]
+    to_drop = ['n correct', 'n incorrect' ]
     for c in columns:
         try:
             if float( c ):

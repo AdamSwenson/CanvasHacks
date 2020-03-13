@@ -22,3 +22,10 @@ class MessageSendError(Exception):
     """Wraps an error response from server when an
     attempt to send a message fails"""
     pass
+
+class NoStudentsNeedNotification(Exception):
+    """
+    Raised when no students need to be notified
+    for the current step
+    """
+    pass

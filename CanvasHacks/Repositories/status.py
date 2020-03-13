@@ -266,6 +266,12 @@ class FeedbackStatusRepository( IStatusRepository ):
 
     @property
     def reviewers_with_authors_sent_feedback( self ):
+        """
+        Returns the ids of reviewers who have already had their feedback
+        sent to the authors
+        Used to filter for sending peer review results to authors
+        :return:
+        """
         notified = self.session\
             .query( ReviewAssociation )\
             .outerjoin( FeedbackReceivedRecord, FeedbackReceivedRecord.student_id == ReviewAssociation.assessee_id )\

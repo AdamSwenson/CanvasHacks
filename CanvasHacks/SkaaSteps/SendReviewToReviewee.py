@@ -88,7 +88,7 @@ class SendReviewToReviewee( IStep ):
         msg = "Sent {} peer review results to authors".format( len( self.associations ))
         print(msg)
 
-        lmsg = "{} \n {}".format(self.associations )
+        lmsg = "{} \n {}".format(msg, self.associations )
         # Note we are distributing the material for the metareview, that's
         # why we're using that activity_inviting_to_complete.
         RunLogger.log_review_feedback_distributed( self.unit.metareview, lmsg )

@@ -17,6 +17,8 @@ if __name__ == '__main__':
     pass
 
 
+# =================================== file
+
 class AllQuizReportFileLoader( IAllLoader ):
     """Loads all records for quiz"""
     failure_message = "Could not load data from file"
@@ -32,28 +34,6 @@ class AllQuizReportFileLoader( IAllLoader ):
         AllQuizReportFileLoader._check_empty( student_work_frame )
         return student_work_frame
 
-
-
-class AllQuizReportDownloader( INewLoader ):
-    failure_message =  "Could not download data."
-
-    @staticmethod
-    def load( activity, course, save=True, **kwargs ):
-        quiz = AllQuizReportDownloader.get_quiz( course, activity )
-        # This will return none if never able to download from a url
-        student_work_frame = retrieve_quiz_data( quiz, **kwargs )
-
-        if student_work_frame is None:
-            print('uhoh')
-            raise NoWorkDownloaded
-
-        if save:
-            # Want to have all the reports be formatted the same
-            # regardless of whether we manually or programmatically
-            # downloaded them. Thus we save before doing anything to them.
-            save_downloaded_report( activity, student_work_frame )
-
-        return student_work_frame
 
 
 class NewQuizReportFileLoader( INewLoader ):
@@ -75,6 +55,29 @@ class NewQuizReportFileLoader( INewLoader ):
         data = load_new( activity )
         NewQuizReportFileLoader._check_empty( data )
         return data
+
+
+# ========================= download
+class AllQuizReportDownloader( INewLoader ):
+    failure_message =  "Could not download data."
+
+    @staticmethod
+    def load( activity, course, save=True, **kwargs ):
+        quiz = AllQuizReportDownloader.get_quiz( course, activity )
+        # This will return none if never able to download from a url
+        student_work_frame = retrieve_quiz_data( quiz, **kwargs )
+
+        if student_work_frame is None:
+            print('uhoh')
+            raise NoWorkDownloaded
+
+        if save:
+            # Want to have all the reports be formatted the same
+            # regardless of whether we manually or programmatically
+            # downloaded them. Thus we save before doing anything to them.
+            save_downloaded_report( activity, student_work_frame )
+
+        return student_work_frame
 
 
 class NewQuizReportDownloadLoader( INewLoader ):

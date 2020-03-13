@@ -19,13 +19,16 @@ def run_all_steps( SEND=True, download=True ):
     step1 = SendInitialWorkToReviewer( course=environment.CONFIG.course, unit=environment.CONFIG.unit, send=SEND )
     step1.run( rest_timeout=5 )
 
-    print( "====================== STEP 2 ======================" )
+    print( "\n====================== STEP 2 ======================" )
     step2 = SendReviewToReviewee( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
     step2.run( rest_timeout=5, download=download )
 
-    print( "====================== STEP 3 ======================" )
+    print( "\n====================== STEP 3 ======================" )
     step3 = SendMetareviewToReviewer( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
     step3.run( rest_timeout=5, download=download )
+
+    # Return in case need to check values on them
+    return (step1, step2, step3)
 
 
 
@@ -51,12 +54,13 @@ def skaa_run_button():
         #         time.sleep(3)
         #         print('boop')
 
-        run_all_steps( SEND=True, download=True )
+        steps =run_all_steps( SEND=True, download=True )
 
         RUNNING = False
 
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
+        return steps
 
     b.on_click( callback )
     display( b )
