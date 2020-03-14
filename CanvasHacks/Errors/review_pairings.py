@@ -41,7 +41,10 @@ class NoReviewPairingsLoaded(Exception):
 
 class NoReviewPairingFound(Exception):
     """Raised when no review assignment could be found
-    for the specified student
+    for the specified student.
+
+    This can happen when someone turns in the peer review without
+    turning in the essay
     """
     def __init__(self, student_id):
         self.student_id = student_id

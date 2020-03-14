@@ -31,12 +31,7 @@ class IStep:
         self.is_test = env.CONFIG.is_test if is_test is None else is_test
         self.send = send
 
-        try:
-            t = 'TEST-' if env.CONFIG.is_test else ""
-            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
-        except AttributeError as e:
-            # This is likely to happen during testing
-            print(e)
+
 
     def _initialize( self ):
         """Creates and populates all relevant repositories and db access points"""
@@ -64,6 +59,13 @@ class IStep:
         #     self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
 
     def _initialize_db( self ):
+        try:
+            t = 'TEST-' if env.CONFIG.is_test else ""
+            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
+        except AttributeError as e:
+            # This is likely to happen during testing
+            print(e)
+
         if env.CONFIG.is_test:
             try:
                 if CanvasHacks.testglobals.TEST_WITH_FILE_DB:

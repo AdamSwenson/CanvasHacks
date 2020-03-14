@@ -31,7 +31,6 @@ def run_all_steps( SEND=True, download=True ):
     return (step1, step2, step3)
 
 
-
 def skaa_run_button():
     RUNNING = False
 

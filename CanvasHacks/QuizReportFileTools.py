@@ -13,7 +13,7 @@ import time
 
 import pandas as pd
 
-from CanvasHacks.FileTools import makeDataFileIterator, create_folder
+from CanvasHacks.FileTools import makeDataFileIterator, create_folder, get_newest_file
 from CanvasHacks.RequestTools import *
 
 
@@ -219,6 +219,21 @@ def load_new( activity ):
             raise NoNewSubmissions
 
         return newstuff
+
+
+def load_activity_from_newest_file(activity):
+    """
+    Uses the creation time of the files in the activity's folder
+    to determine which is the newest and loads data from it
+    :param activity:
+    :return:
+    """
+    fpath = get_newest_file(activity.folder_path)
+    frame = pd.read_csv(fpath)
+    frame.submitted = pd.to_datetime( frame.submitted )
+    if 'student_id' not in frame.index:
+        frame.rename( { 'id': 'student_id' }, axis=1, inplace=True )
+    return frame
 
 
 def load_activity_data_from_files( activity, course ):

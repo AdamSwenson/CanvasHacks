@@ -3,13 +3,12 @@ Created by adam on 2/24/20
 """
 import pandas as pd
 
-from CanvasHacks.Errors.data_ingestion import NoWorkDownloaded, NoStudentWorkDataLoaded, NoNewSubmissions
+from CanvasHacks.Errors.data_ingestion import NoNewSubmissions, NoStudentWorkDataLoaded, NoWorkDownloaded
+from CanvasHacks.FileTools import create_folder
 from CanvasHacks.Loaders.interfaces import IAllLoader, INewLoader
 from CanvasHacks.Processors.quiz import process_work
-from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, retrieve_quiz_data, save_downloaded_report, \
-    load_new
-
-from CanvasHacks.FileTools import create_folder
+from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, load_activity_from_newest_file, load_new,\
+    retrieve_quiz_data, save_downloaded_report
 
 __author__ = 'adam'
 
@@ -23,10 +22,8 @@ class AllQuizReportFileLoader( IAllLoader ):
     """Loads all records for quiz"""
     failure_message = "Could not load data from file"
 
-
     @staticmethod
     def load( activity, course, **kwargs ):
-
         # course = self.course if course is None else course
         # activity_inviting_to_complete = self.activity_inviting_to_complete if activity_inviting_to_complete is None else activity_inviting_to_complete
         # pass
@@ -34,6 +31,17 @@ class AllQuizReportFileLoader( IAllLoader ):
         AllQuizReportFileLoader._check_empty( student_work_frame )
         return student_work_frame
 
+
+class QuizReportFileLoader( IAllLoader ):
+    """
+    New standard fileloader
+    """
+
+    @staticmethod
+    def load( activity, course, **kwargs ):
+        student_work_frame = load_activity_from_newest_file( activity )
+        QuizReportFileLoader._check_empty( student_work_frame )
+        return student_work_frame
 
 
 class NewQuizReportFileLoader( INewLoader ):
@@ -59,7 +67,7 @@ class NewQuizReportFileLoader( INewLoader ):
 
 # ========================= download
 class AllQuizReportDownloader( INewLoader ):
-    failure_message =  "Could not download data."
+    failure_message = "Could not download data."
 
     @staticmethod
     def load( activity, course, save=True, **kwargs ):
@@ -68,7 +76,7 @@ class AllQuizReportDownloader( INewLoader ):
         student_work_frame = retrieve_quiz_data( quiz, **kwargs )
 
         if student_work_frame is None:
-            print('uhoh')
+            print( 'uhoh' )
             raise NoWorkDownloaded
 
         if save:
@@ -113,7 +121,7 @@ class QuizComboLoader( IAllLoader ):
 
     @staticmethod
     def load( activity, course, save=True, **kwargs ):
-        loaders = (AllQuizReportDownloader, AllQuizReportFileLoader)
+        loaders = (AllQuizReportDownloader, QuizReportFileLoader) # AllQuizReportFileLoader)
         for loader in loaders:
             try:
                 # The loader should raise the error or return the
@@ -121,7 +129,7 @@ class QuizComboLoader( IAllLoader ):
                 return loader.load( activity, course, save=save, **kwargs )
             except NoWorkDownloaded as e:
                 # We ignore so next object will try
-                print(e.message)
+                print( e.message )
 
                 # We attempt to create the folder that the file loader will
                 # look in because, otherwise, we won't have a handy location
@@ -138,7 +146,6 @@ class QuizComboLoader( IAllLoader ):
         # if we made it all the way here, all attempts at loading have failed
         # so we raise this to tell the program to move on
         raise NoStudentWorkDataLoaded
-
 
 
 def load_student_work( csv_filepath, submissions ):

@@ -4,21 +4,33 @@ Tools for reading and writing csv files
 Created by adam on 6/22/18
 """
 __author__ = 'adam'
+
 import csv
 import os
 
 
-def create_folder(folder_path):
+def create_folder( folder_path ):
     try:
-        os.mkdir(folder_path)
-        print("created: %s" % folder_path)
+        os.mkdir( folder_path )
+        print( "created: %s" % folder_path )
     except Exception as e:
-        print("error creating: %s" % folder_path)
-        print(e)
+        print( "error creating: %s" % folder_path )
+        print( e )
         pass
 
 
-def makeDataFileIterator(folderPath, exclude=[]):
+def get_newest_file( folder_path ):
+    """Returns the file in the folder with the newest
+    creation date
+    """
+    fiter = makeDataFileIterator( folder_path )
+    fpaths = [ (f, os.path.getctime( f )) for f in fiter ]
+    fpaths.sort( key=lambda x: x[ 1 ], reverse=True )
+    newest = fpaths[ 0 ][ 0 ]
+    return newest
+
+
+def makeDataFileIterator( folderPath, exclude=[ ] ):
     """
     Returns an iterator of all files in the source directory
     so that each file has its path appended to it.
@@ -28,12 +40,11 @@ def makeDataFileIterator(folderPath, exclude=[]):
         exclude: file names which should not be included in the output list
 
     """
-    exclude = exclude if any(exclude) else ['.DS_Store']
-    for root, dirs, files in os.walk(folderPath):
+    exclude = exclude if any( exclude ) else [ '.DS_Store' ]
+    for root, dirs, files in os.walk( folderPath ):
         for name in files:
             if name not in exclude:
-                yield os.path.join(root, name)
-
+                yield os.path.join( root, name )
 
 
 def write_csv( csvFile, rowToWrite ):
@@ -102,12 +113,13 @@ def read_list_generator( csvFile ):
     for r in results:
         yield r
 
+
 # Get all subfolder paths
 
-def read_text_block(filename):
-    with open(filename, 'r') as f:
+def read_text_block( filename ):
+    with open( filename, 'r' ) as f:
         j = f.read()
-        j = "\n".join(j.split('\\n'))
+        j = "\n".join( j.split( '\\n' ) )
         # j = "\".join(j.split("\\")
         return j
 
