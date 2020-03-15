@@ -76,7 +76,7 @@ class SendInitialWorkToReviewer( IStep ):
             # have somehow gotten past the new submissions filter
             # This could be due to them resubmitting late
             print( "New submitters but everyone already assigned" )
-            print( e.submitters )
+            # print( e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise AllAssigned( e.submitters )

@@ -365,7 +365,8 @@ class DiscussionOverviewRepository( DaoMixin ):
         # set to none so won't overwrite on next time through
         fb_fieldname = None
 
-        if isinstance( component, DiscussionForum ):
+        # todo this probably should be changed to discussion forum everywhere
+        if isinstance( component, DiscussionReview ):
             fb_fieldname = 'received_discussion_feedback'
 
         if fb_fieldname is not None:
