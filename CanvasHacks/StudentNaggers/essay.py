@@ -8,15 +8,7 @@ if __name__ == '__main__':
 
 
 from CanvasHacks.Messaging.nagging import EssayNonSubmittersMessaging
-#
-# messenger = EssayNonSubmittersMessaging(unit, send=True)
-#
-# non_submitters = [(cid, studentRepo.get_student_first_name(cid)) for cid in  no_ca.canvas_id.tolist()]
-# len(non_submitters)
-#
-# for cid, name in non_submitters:
-#     messenger.send_message_to_student(cid, name)
-#
+
 
 class EssayNagger:
 

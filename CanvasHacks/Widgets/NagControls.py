@@ -31,8 +31,7 @@ def nag_button( label, nag_obj, return_button=False, width='auto', **kwargs ):
     def get_name( is_running=False ):
         return 'RUNNING' if is_running else label
 
-        # Create the button
-
+    # Create the button
     layout = widgets.Layout( width=width )
     b = widgets.Button( description=get_name( RUNNING ),
                         button_style=get_style( RUNNING ),
@@ -43,7 +42,6 @@ def nag_button( label, nag_obj, return_button=False, width='auto', **kwargs ):
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
 
-        # nagger = EssayNagger( control_store[ 'skaa_repo' ] )
         nag_obj.run()
 
         RUNNING = False
@@ -76,13 +74,3 @@ def nag_button_area( control_store, **kwargs ):
     buttons = [ widgets.Label( value="Nag students" ) ]
     buttons += [ nag_button( label, obj, return_button=True, **kwargs ) for label, obj in controls ]
     return VBox( buttons, layout=box_layout )
-
-    # left_box = widgets.VBox( [
-    #     skaa_run_button( control_store, return_button=True ),
-    #     discussion_run_button( control_store, return_button=True )
-    # ], layout=box_layout )
-    # right_box = widgets.VBox( [
-    #     dashboards_load_button( control_store, return_button=True ),
-    #     nag_no_essay( control_store, return_button=True )
-    # ], layout=box_layout )
-    # display( widgets.HBox( [ left_box, right_box ], width='80%' ) )

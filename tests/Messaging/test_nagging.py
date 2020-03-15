@@ -31,7 +31,7 @@ class TestEssayNonSubmittersMessaging( TestingBase ):
         self.obj.messenger = MagicMock()
         self.obj.messenger.send = MagicMock(return_value='taco')
 
-        self.obj.send_message_to_student(self.student)
+        self.obj.send_message_to_student(self.student.student_id, self.student.first_name)
 
         self.obj.messenger.send.assert_called()
 

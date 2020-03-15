@@ -59,8 +59,6 @@ class SkaaOverviewRepository( DaoMixin ):
         :param unit:
         :return:
         """
-        #     feedback_fields = {Review: 'received_ca_feedback', MetaReview: 'received_meta_feedback', DiscussionReview: 'received_discussion_feedback'}
-
         self._initialize( unit )
 
         for sid, obj in self.studentRepo.data.items():
@@ -92,21 +90,6 @@ class SkaaOverviewRepository( DaoMixin ):
             self.data.append( d )
 
         self.data = pd.DataFrame( self.data )
-        # self.data = self.data[ SKAA_ORDER ]
-        # discussion_data = pd.DataFrame( discussion_data )
-        #
-        # # Divide up who has done initial work and been assigned a reviewer
-        # self.ca = self.data[ ~self.data.reviewing.isnull() ]
-        # self.no_ca = self.data[ self.data.reviewing.isnull() ]
-        #
-        # # Students whose reviewer has and has not turned in review
-        # self.reviewed = self.ca[ ~self.ca.received_feedback_on_essay.isnull() ]
-        # self.non_reviewed = self.ca[ self.ca.received_feedback_on_essay.isnull() ].drop( [ 'reviewing' ], axis=1 )
-        #
-        # # Metareviewer turned in
-        # self.metareviewed = self.ca[ ~self.ca.received_feedback_on_review.isnull() ].drop( [ 'reviewed_by' ],
-        #                                                                                    axis=1 )
-        # self.nonmetareviewed = self.ca[ self.ca.received_feedback_on_review.isnull() ].drop( [ 'reviewed_by' ], axis=1 )
 
     def add_invites( self, data_dict, component, student_id ):
         invite_fields = { Review: 'invited_to_review', MetaReview: 'invited_to_metareview',
@@ -188,9 +171,7 @@ class SkaaOverviewRepository( DaoMixin ):
 
         :return: DataFrame
         """
-        # Metareviewer turned in
         return self.essay[ ~self.essay.received_feedback_on_review.isnull() ]
-        # .drop( [ 'reviewed_by' ], axis=1 )
 
     @property
     def non_metareviewed( self ):
@@ -242,10 +223,6 @@ class DiscussionOverviewRepository( DaoMixin ):
     def load( self, unit ):
 
         self._initialize( unit )
-        # invite_fields = { Review: 'invited_to_review', MetaReview: 'invited_to_metareview',
-        #                   DiscussionReview: 'invited_to_discussion_review' }
-        #     feedback_fields = {Review: 'received_ca_feedback', MetaReview: 'received_meta_feedback', DiscussionReview: 'received_discussion_feedback'}
-        # define here so will reset every load
 
         for sid, obj in self.studentRepo.data.items():
             d = {
@@ -276,15 +253,6 @@ class DiscussionOverviewRepository( DaoMixin ):
             self.data.append( d )
 
         self.data = pd.DataFrame( self.data )
-        #
-        # # Divide up who has done posts and been assigned a reviewer
-        # self.posters = self.data[ ~self.data.reviewing.isnull() ]
-        # self.nonposters = self.data[ self.data.reviewing.isnull() ]
-        #
-        # # Students whose reviewer has and has not turned in review
-        # self.reviewed = self.posters[ ~self.posters.received_discussion_feedback.isnull() ]
-        # self.nonreviewed = self.posters[ self.posters.received_discussion_feedback.isnull() ].drop( [ 'reviewing' ],
-        #                                                                                             axis=1 )
 
     def add_invites( self, data_dict, component, student_id ):
         invite_fields = { DiscussionReview: 'invited_to_discussion_review' }
@@ -326,11 +294,6 @@ class DiscussionOverviewRepository( DaoMixin ):
         :return: DataFrame
         """
         return self.data[ self.data.reviewing.isnull() ]
-        # return self.data.non_posters
-
-        # Divide up who has done posts and been assigned a reviewer
-        # self.posters = self.data[ ~self.data.reviewing.isnull() ]
-        # self.non_posters = self.data[ self.data.reviewing.isnull() ]
 
     @property
     def reviewed( self ):

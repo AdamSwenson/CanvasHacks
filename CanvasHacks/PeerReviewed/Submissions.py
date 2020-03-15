@@ -36,7 +36,7 @@ class Submission( StoreMixin ):
         """Returns true if the student submitted the activity_inviting_to_complete
         on time.
         """
-        return self.completion_date <= self.activity.due_date
+        return self.completion_date <= self.activity.due_at
 
     @property
     def submitter_points( self ):
@@ -58,7 +58,7 @@ class InitialSubmission( Submission ):
         object and sets values of submission"""
         self.submitter = Student( student_id=result[ 'user_id' ]) #, **result[ 'user' ] )
         self.completion_date = result['submitted_at']
-        self.handle_kwargs( result )
+        self.handle_kwargs( **result )
 
     @property
     def submitter_points( self ):

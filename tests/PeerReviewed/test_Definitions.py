@@ -64,9 +64,9 @@ class TestUnit( TestCase ):
         #     a = canvasapi.unit.Assignment()
         #     a.name = v
         #     assigns.append(a)
-        assigns = [ DummyAssignment( name='Unit 1 Content assignment', id=5 ),
-                    DummyAssignment( name='Unit 1 metareview', id=4 ),
-                    DummyAssignment( name='Unit 1 review', id=3 )
+        assigns = [ DummyAssignment( name='Unit 1 Essay', id=5, due_at= pd.to_datetime( '2019-01-06' ) ),
+                    DummyAssignment( name='Unit 1 metareview', id=4, due_at= pd.to_datetime( '2019-01-06' ) ),
+                    DummyAssignment( name='Unit 1 peer review', id=3, due_at= pd.to_datetime( '2019-01-06' ) )
                     ]
         self.obj.find_components( assigns )
         self.assertEqual( len( self.obj.components ), 3 )
@@ -93,7 +93,7 @@ class TestInitialWork( TestCase ):
     def test_is_activity_type( self ):
         # Create the unit
         self.assertFalse( InitialWork.is_activity_type( 'Unit 24 metareview' ) )
-        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 content assignment' ) )
+        self.assertTrue( InitialWork.is_activity_type( 'Unit 24 essay' ) )
 
 
 class TestReview( TestCase ):
@@ -108,7 +108,7 @@ class TestReview( TestCase ):
     def test_is_activity_type( self ):
         # Create the unit
         self.assertFalse( Review.is_activity_type( 'Unit 24 metareview' ) )
-        self.assertTrue( Review.is_activity_type( 'Unit 24 review' ) )
+        self.assertTrue( Review.is_activity_type( 'Unit 24 peer review' ) )
 
 
 class TestMetaReview( TestCase ):
@@ -123,7 +123,7 @@ class TestMetaReview( TestCase ):
     def test_is_activity_type( self ):
         # Create the unit
         self.assertTrue( MetaReview.is_activity_type( 'Unit 24 metareview' ) )
-        self.assertFalse( MetaReview.is_activity_type( 'Unit 24 review' ) )
+        self.assertFalse( MetaReview.is_activity_type( 'Unit 24 peer review' ) )
 
 # class TestAssignment( TestCase ):
 #     def setUp( self ):
@@ -156,5 +156,5 @@ class TestJournal( TestCase ):
     def test_is_activity_type( self ):
         # Create the unit
         self.assertTrue( Journal.is_activity_type( 'Journal (week 4)' ) )
-        self.assertFalse( Journal.is_activity_type( 'Unit 24 review' ) )
+        self.assertFalse( Journal.is_activity_type( 'Unit 24 peer review' ) )
 

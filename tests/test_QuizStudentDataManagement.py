@@ -15,4 +15,9 @@ class TestQuizStudentDataManagement( TestCase ):
 
     def test_make_drop_list( self ):
         test = [ 'name', 'id', 'sis_id', '1.0', '1.0.1', '1.0.2' ]
-        self.assertEqual( make_drop_list( test ), [ '1.0', '1.0.1', '1.0.2' ] )
+        result = make_drop_list( test )
+        expected = [ '1.0', '1.0.1', '1.0.2' ]
+        for e in expected:
+            # doing it this way so won't automatically fail if add
+            # additional stems to the list which defines what to drop
+            self.assertIn( e, result)

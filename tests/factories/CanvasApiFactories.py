@@ -50,7 +50,7 @@ def submission_result_factory(activity, student, on_time=True):
         # ('online_text_entry'|'online_url'|'online_upload'|'media_recording')
         "submission_type": "online_text_entry",
         # The timestamp when the unit was submitted
-        "submitted_at": activity.due_date - pd.Timedelta("1 Day") if on_time else activity.due_date + pd.Timedelta("1 Day") ,
+        "submitted_at": activity.due_at - pd.Timedelta("1 Day") if on_time else activity.due_at + pd.Timedelta("1 Day") ,
         # The URL of the submission (for 'online_url' submissions).
         "url": None,
         # The id of the user who created the submission

@@ -99,7 +99,7 @@ def submissions_factory( student1, student2, assignment ):
     submissions.append( sfac2.make( pr2 ) )
 
     # meta reviews
-    sfac3 = SubmissionFactory( assignment.meta_review )
+    sfac3 = SubmissionFactory( assignment.metareview )
     mr1 = peer_review_result_factory( student1, student2 )
     submissions.append( sfac3.make( mr1 ) )
 

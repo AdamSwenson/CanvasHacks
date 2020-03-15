@@ -41,34 +41,58 @@ class UnitDefinitionsLoader( StoreMixin ):
     def make_unit( self, unit_number, start ):
         u = Unit( [ ], unit_number )
         for activity_type in u.component_types:
-            activity = activity_type( unit_number=u.unit_number )
-            #         print(activity.title_base)
-            deets = self.unit_details[ self.unit_details.activity_title == activity.title_base ]
-            #         print(deets)
-            setattr( activity, 'unit_number', unit_number )
-
-            v = { 'title': activity.make_title }
-
+            # Holds the data we'll use to create the activity
+            v = {}
+            # Represents a date which gets incremented for each step
             d = start
 
-            unlock_at = d + pd.Timedelta( '1 minutes' )
-            setattr( activity, 'unlock_at', unlock_at )
-            v[ 'unlock_at' ] = unlock_at
+            # Get the dates sorted out
+            # Have to do this first, since the penalizer for some activities
+            # will require the due date when it initializes
+            deets = self.unit_details[ self.unit_details.activity_title == activity_type.title_base ]
+
+            v[ 'unlock_at' ] = d + pd.Timedelta( '1 minutes' )
+             # = unlock_at
 
             d += pd.Timedelta( '{} days'.format( deets.due_days_from_start.values[ 0 ] ) )
-            due_at = d - pd.Timedelta( '1 minute' )
-            setattr( activity, 'due_at', due_at )
-            v[ 'due_at' ] = due_at
+            v[ 'due_at' ] = d - pd.Timedelta( '1 minute' )
+            # setattr( activity, 'due_at', due_at )
+            # v[ 'due_at' ] = due_at
 
             d += pd.Timedelta( '{} days'.format( deets.lock_after_due.values[ 0 ] ) )
-            lock_at = d - pd.Timedelta( '1 minute' )
-            setattr( activity, 'lock_at', lock_at )
-            v[ 'lock_at' ] = lock_at
+            v[ 'lock_at' ] = d - pd.Timedelta( '1 minute' )
 
+
+            # Instantiate
+            activity = activity_type( unit_number=u.unit_number, due_at=v[ 'due_at' ] )
+            #         print(activity.title_base)
+            # deets = self.unit_details[ self.unit_details.activity_title == activity.title_base ]
+            #         print(deets)
+
+            setattr( activity, 'unit_number', unit_number )
+
+            v['title'] = activity.make_title
+
+            # Set time values
+
+            setattr( activity, 'unlock_at', v[ 'unlock_at' ] )
+            setattr( activity, 'lock_at', v['lock_at'] )
+
+            # unlock_at = d + pd.Timedelta( '1 minutes' )
+            # v[ 'unlock_at' ] = unlock_at
+
+
+            # d += pd.Timedelta( '{} days'.format( deets.lock_after_due.values[ 0 ] ) )
+            # lock_at = d - pd.Timedelta( '1 minute' )
+            # setattr( activity, 'lock_at', lock_at )
+            # v[ 'lock_at' ] = lock_at
+
+            # set point values
             points_possible = deets.points.values[ 0 ]
             setattr( activity, 'points_possible', points_possible )
             v[ 'points_possible' ] = points_possible
 
+            # set text
             # description = activity.description
             # setattr( activity, 'description', description )
             v[ 'description' ] = activity.description

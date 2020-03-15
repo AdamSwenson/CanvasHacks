@@ -50,8 +50,6 @@ class SendReviewToReviewee( IStep ):
 
         self.statusRepos = [self.invite_status_repo, self.feedback_status_repo]
 
-        # self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
-
     def run( self, **kwargs ):
         """
         Retrieves submitted reviews and sends themto the authors
@@ -130,13 +128,6 @@ class SendReviewToReviewee( IStep ):
         self.work_repo.remove_student_records( records )
         self.display_manager.post_filter = self.work_repo.data
 
-        # self.work_repo = make_quiz_repo( self.course, self.unit.initial_work )
-        # prelen = len( self.work_repo.data )
-        # print( "Loaded work by {} students from {}".format( prelen, self.activity.name ) )
-        # self.work_repo.remove_student_records( self.statusRepos.previously_invited )
-
-        # postlen = len( self.work_repo.data )
-        # print( "Filtered out {} students who have already been notified".format( prelen - postlen ) )
 
 
 if __name__ == '__main__':
