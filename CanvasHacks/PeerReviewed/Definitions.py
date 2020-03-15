@@ -413,7 +413,7 @@ class Unit:
         self.find_components( unit_assignments )
         for c in self.components:
             # todo access_code_for_next_on probably not needed; created without looking at what already have
-            self._set_access_code_for_next( c )
+            # self._set_access_code_for_next( c )
             # Set the unit number for the assignment
             setattr( c, 'unit_number', self.unit_number )
 

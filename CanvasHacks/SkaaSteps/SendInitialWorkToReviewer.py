@@ -86,7 +86,7 @@ class SendInitialWorkToReviewer( IStep ):
             # have had their work noticed, but they are now waiting for
             # a partner
             # todo Notify student that they are waiting
-            print( "1 student has submitted and has no partner ", e.submitters )
+            print( "1 student has submitted and has no partner ") #, e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise NoAvailablePartner( e.submitters )

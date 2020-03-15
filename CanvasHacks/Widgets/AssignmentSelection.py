@@ -5,14 +5,14 @@ from CanvasHacks.PeerReviewed.Definitions import Unit
 
 __author__ = 'adam'
 from IPython.display import display
-from ipywidgets import widgets
+from ipywidgets import widgets, VBox
 
 from CanvasHacks import environment
 from CanvasHacks.RequestTools import get_assignments_needing_grading, \
     get_assignments_with_submissions
 
 
-def make_selection_button( item_id, name, get_func, add_func, remove_func, width='50%' ):
+def make_selection_button( item_id, name, get_func, add_func, remove_func, width='50%', **kwargs ):
     """Creates a single selection button
     style is success if the unit has been selected
     style is primary if not selected
@@ -34,19 +34,20 @@ def make_selection_button( item_id, name, get_func, add_func, remove_func, width
         b.button_style = get_style( item_id )
 
     b.on_click( callback )
-    display( b )
+
+
     return b
 
 
 # ------------------------- Discussions
-def make_discussion_selection_button( topic_id, name ):
+def make_discussion_selection_button( topic_id, name, **kwargs ):
     return make_selection_button( topic_id, name,
                                   environment.CONFIG.get_discussion_ids,
                                   environment.CONFIG.add_discussion,
-                                  environment.CONFIG.remove_discussion )
+                                  environment.CONFIG.remove_discussion, **kwargs )
 
 
-def make_discussion_chooser( course ):
+def make_discussion_chooser( course, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -61,7 +62,7 @@ def make_discussion_chooser( course ):
     #     if course_id:
     #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
     for discussion_id, discussion_name in discussions:
-        buttons.append( make_discussion_selection_button( discussion_id, discussion_name ) )
+        buttons.append( make_discussion_selection_button( discussion_id, discussion_name, **kwargs ) )
 
 
 # ---------------------------- Assignments
@@ -88,7 +89,7 @@ def view_ungraded_assignments():
     display( out )
 
 
-def make_assignment_button( assignment_id, name, ):
+def make_assignment_button( assignment_id, name, **kwargs ):
     """Creates a single selection button
     style is success if the unit has been selected
     style is primary if not selected
@@ -96,10 +97,11 @@ def make_assignment_button( assignment_id, name, ):
     return make_selection_button( assignment_id, name,
                                   environment.CONFIG.get_assignment_ids,
                                   environment.CONFIG.add_assignment,
-                                  environment.CONFIG.remove_assignment )
+                                  environment.CONFIG.remove_assignment,
+                                  **kwargs )
 
 
-def make_assignment_chooser(activity=None):
+def make_assignment_chooser(activity=None, **kwargs):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -121,13 +123,13 @@ def make_assignment_chooser(activity=None):
 
     # Make buttons for selecting
     for assignment_id, assignment_name in assignments:
-        buttons.append( make_assignment_button( assignment_id, assignment_name ) )
+        buttons.append( make_assignment_button( assignment_id, assignment_name , **kwargs) )
     # return buttons
 
 
 # ------------------------------ Unit
 
-def make_unit_button( unit_number ):
+def make_unit_button( unit_number , **kwargs):
     """Creates a single selection button
     style is success if the unit has been selected
     style is primary if not selected
@@ -135,7 +137,7 @@ def make_unit_button( unit_number ):
     name = "Unit {}".format( unit_number )
 
     def set_callback(unit_number, name=None):
-        """ This is used so that can also initialize all the
+        """ This is used so that can also _initialize all the
         canvas objects on the configuration
         """
         environment.CONFIG.set_unit_number(unit_number, name)
@@ -148,11 +150,12 @@ def make_unit_button( unit_number ):
                                   environment.CONFIG.get_unit_number,
                                   set_callback,
                                   # environment.CONFIG.set_unit_number,
-                                  environment.CONFIG.reset_unit_number
+                                  environment.CONFIG.reset_unit_number,
+                                  **kwargs
                                   )
 
 
-def make_unit_chooser( num_units=6 ):
+def make_unit_chooser( num_units=6, return_button=False, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -162,7 +165,16 @@ def make_unit_chooser( num_units=6 ):
     #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
     num_units += 1
     for i in range( 1, num_units ):
-        buttons.append( make_unit_button( i ) )
+        buttons.append( make_unit_button( i, **kwargs ) )
+
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return buttons
+    else:
+
+        display( VBox(buttons) )
+
 
 
 if __name__ == '__main__':

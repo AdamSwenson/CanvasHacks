@@ -9,7 +9,12 @@ from CanvasHacks import environment
 __author__ = 'adam'
 
 
-def make_test_selector():
+def make_test_selector(return_button=False):
+    """
+    Displays or returns the button for selecting
+    whether we are running on test or live data
+    :return:
+    """
     def get_description():
         return 'TEST' if environment.CONFIG.is_test else 'LIVE'
 
@@ -31,8 +36,13 @@ def make_test_selector():
         button_style=get_style(),
         tooltip=get_tooltip()
     )
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return b
+    else:
+        display( b )
 
-    display(b)
 
     def callback(j):
         if not j.new:
