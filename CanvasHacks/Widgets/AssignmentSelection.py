@@ -8,7 +8,7 @@ from IPython.display import display
 from ipywidgets import widgets, VBox
 
 from CanvasHacks import environment
-from CanvasHacks.RequestTools import get_assignments_needing_grading, \
+from CanvasHacks.Api.RequestTools import get_assignments_needing_grading, \
     get_assignments_with_submissions
 
 

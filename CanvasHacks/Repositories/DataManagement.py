@@ -1,9 +1,10 @@
 """
 Created by adam on 2/1/19
 """
-from typing import List, Any
+from typing import List
 # from AdamTools.Text.TextProcessingTools import WordFreq
-from CanvasHacks.TextProcessing import WordFreq
+from CanvasHacks.Text.stats import WordFreq
+
 __author__ = 'adam'
 
 

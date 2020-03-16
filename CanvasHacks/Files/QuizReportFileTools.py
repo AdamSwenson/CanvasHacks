@@ -13,8 +13,8 @@ import time
 
 import pandas as pd
 
-from CanvasHacks.FileTools import makeDataFileIterator, create_folder, get_newest_file
-from CanvasHacks.RequestTools import *
+from CanvasHacks.Files.FileTools import makeDataFileIterator, create_folder, get_newest_file
+from CanvasHacks.Api.RequestTools import *
 
 
 # -------------------------- Getting the report file from server

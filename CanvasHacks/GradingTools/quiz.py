@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingTools.base import IGrader
-from CanvasHacks.GradingTools.nonempty import receives_credit, IGradingMethod
+from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingTools.penalities import get_penalty, IPenalizer
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository

@@ -3,12 +3,29 @@ Created by adam on 1/29/20
 """
 from unittest import TestCase
 
-from CanvasHacks.GradingTools.nonempty import receives_credit
+from CanvasHacks.GradingMethods.nonempty import receives_credit, CreditForNonEmpty
 
 __author__ = 'adam'
 
+from TestingBase import TestingBase
+
 if __name__ == '__main__':
     pass
+
+
+class TestCreditForNonEmpty(TestingBase):
+
+    def setUp(self) -> None:
+        self.config_for_test()
+        self.obj = CreditForNonEmpty()
+
+    def test_grade_credit( self ):
+        txt = "The fat wiffle hound wiffled loudly"
+        self.assertEqual( 100, self.obj.grade( txt ), "Defaults -- greater than minimum word count" )
+
+    def test_grade_no_credit( self ):
+        txt = ""
+        self.assertEqual( None, self.obj.grade( txt ), "Defaults -- no credit" )
 
 
 class Test_receives_credit( TestCase ):

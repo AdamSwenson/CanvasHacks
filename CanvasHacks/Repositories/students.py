@@ -7,8 +7,8 @@ from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'
 
-from CanvasHacks.RequestTools import send_multi_page_get_request
-from CanvasHacks.UrlTools import make_url
+from CanvasHacks.Api.RequestTools import send_multi_page_get_request
+from CanvasHacks.Api.UrlTools import make_url
 
 
 class StudentRepository( IRepo ):

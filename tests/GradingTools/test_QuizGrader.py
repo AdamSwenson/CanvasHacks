@@ -5,13 +5,11 @@ __author__ = 'adam'
 
 from unittest.mock import MagicMock, create_autospec
 
-from CanvasHacks.GradingTools.nonempty import IGradingMethod
+from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingTools.penalities import IPenalizer
 from CanvasHacks.GradingTools.quiz import QuizGrader
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from TestingBase import TestingBase
-
-from unittest import TestCase
 
 from factories.RepositoryMocks import ContentRepositoryMock
 

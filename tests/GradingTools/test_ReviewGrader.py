@@ -3,10 +3,9 @@ Created by adam on 3/10/20
 """
 __author__ = 'adam'
 
-from unittest import TestCase
 from unittest.mock import create_autospec, MagicMock
 
-from CanvasHacks.GradingTools.nonempty import IGradingMethod
+from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingTools.penalities import IPenalizer
 from CanvasHacks.GradingTools.review import ReviewGrader
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo

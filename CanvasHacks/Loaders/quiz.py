@@ -4,10 +4,10 @@ Created by adam on 2/24/20
 import pandas as pd
 
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions, NoStudentWorkDataLoaded, NoWorkDownloaded
-from CanvasHacks.FileTools import create_folder
+from CanvasHacks.Files.FileTools import create_folder
 from CanvasHacks.Loaders.interfaces import IAllLoader, INewLoader
 from CanvasHacks.Processors.quiz import process_work
-from CanvasHacks.QuizReportFileTools import load_activity_data_from_files, load_activity_from_newest_file, load_new,\
+from CanvasHacks.Files.QuizReportFileTools import load_activity_data_from_files, load_activity_from_newest_file, load_new,\
     retrieve_quiz_data, save_downloaded_report
 
 __author__ = 'adam'

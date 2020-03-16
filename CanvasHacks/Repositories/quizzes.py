@@ -6,9 +6,10 @@ from CanvasHacks.Models.student import Student
 from CanvasHacks.PeerReviewed.Definitions import Review
 from CanvasHacks.Processors.cleaners import TextCleaner
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
-from CanvasHacks.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
+from CanvasHacks.Files.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
 from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin, FrameStorageMixin
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
+from CanvasHacks.Text.stats import WordCount
 from CanvasHacks.Widgets.AssignmentSelection import make_selection_button
 
 __author__ = 'adam'
@@ -59,6 +60,8 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         # work
         self.text_cleaner = TextCleaner()
 
+        self.analyzer = WordCount()
+
     def process( self, work_frame, submissions ):
         self.submissions = submissions
         if not isinstance( submissions, pd.DataFrame ):
@@ -91,8 +94,8 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
 
         # Remove html and other artifacts from student answers
         # DO NOT UNCOMMENT UNTIL CAN-59 HAS BEEN FULLY TESTED
-        # for c in self.question_columns:
-        #     self.data[c] = self.data.apply(lambda x: self.text_cleaner(x[c]), axis=1)
+        for c in self.question_columns:
+            self.data[c] = self.data.apply(lambda x: self.text_cleaner.clean(x[c]), axis=1)
 
 
     def get_student_work( self, student_id ):
@@ -150,6 +153,21 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         # try:
         return list( set( self.data.reset_index().student_id.tolist() ) )
         # except (ValueError, KeyError):
+
+
+    def word_counts( self ):
+        """
+        Returns a dataframe with columns student_id, and all
+        question columns. Question columns contain word counts
+        :return:
+        """
+        d = []
+        for i, row in self.data.iterrows():
+            s = {'student_id': i }
+            for c in self.question_columns:
+                s[c] = self.analyzer.analyze(row[c])
+            d.append(s)
+        return pd.DataFrame(d)
 
 
 class ReviewRepository( QuizRepository ):

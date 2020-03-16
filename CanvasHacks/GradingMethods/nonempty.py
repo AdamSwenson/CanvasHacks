@@ -4,25 +4,24 @@ Created by adam on 1/29/19
 __author__ = 'adam'
 
 from CanvasHacks.Errors.grading import NonStringInContentField
-from CanvasHacks.TextProcessing import make_wordbag
+from CanvasHacks.GradingMethods.base import IGradingMethod
+from CanvasHacks.Text.process import make_wordbag
 from nltk.corpus import stopwords
 import string
 from CanvasHacks.GradingTools.penalities import get_penalty
+from CanvasHacks.Text.stats import WordCount
 
 
-class IGradingMethod:
-
-    def grade( self, content ):
-        raise NotImplementedError
-
-
-class CreditForNonEmpty(IGradingMethod):
+class CreditForNonEmpty( IGradingMethod ):
     """Returns full credit for a sufficiently non-empty answer"""
 
     def __init__(self,  min_words=2, count_stopwords=True):
         # self.score = 100
         self.min_words = min_words
         self.count_stopwords = count_stopwords
+
+        # The object which will handle the actual processing and computation
+        self.analyzer = WordCount(count_stopwords=count_stopwords)
 
     def grade( self, content, **kwargs ):
         """Returns the pct credit as an integer"""
@@ -36,12 +35,17 @@ class CreditForNonEmpty(IGradingMethod):
         Returns None if not getting any credit, which can be overridden
         by the value in on_no_credit
         """
-        credit = receives_credit(content, self.min_words, self.count_stopwords)
+        word_count = self.analyzer.analyze(content)
+        credit = word_count >= self.min_words
+
+        # credit = receives_credit(content, self.min_words, self.count_stopwords)
         if credit:
             return on_credit
         elif on_no_credit is not None:
             return on_no_credit
 
+
+# --------------------------- old
 
 def receives_credit( content: str, min_words=2, count_stopwords=True ):
     """

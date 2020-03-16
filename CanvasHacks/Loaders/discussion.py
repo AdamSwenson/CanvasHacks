@@ -6,13 +6,10 @@ __author__ = 'adam'
 
 
 from CanvasHacks.Loaders.interfaces import ILoader
-from CanvasHacks.QuizReportFileTools import save_downloaded_report
 
 __author__ = 'adam'
 
 from CanvasHacks.Repositories.discussions import DiscussionRepository
-
-from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository
 
 
 class DiscussionDownloadLoader( ILoader ):

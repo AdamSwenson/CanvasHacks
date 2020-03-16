@@ -1,11 +1,14 @@
 """
 Created by adam on 1/27/20
 """
+from CanvasHacks.Processors.cleaners import TextCleaner
 from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Repositories.mixins import StudentWorkMixin
-from CanvasHacks.UploadGradeTools import upload_credit
+from CanvasHacks.Api.UploadGradeTools import upload_credit
 
 __author__ = 'adam'
+
+from CanvasHacks.Text.stats import WordCount
 
 
 class DiscussionRepository( IContentRepository, StudentWorkMixin ):
@@ -19,6 +22,14 @@ class DiscussionRepository( IContentRepository, StudentWorkMixin ):
         # List of dictionaries from parsed data:
         # [{'student_id', 'student_name', 'text'}]
         self.data = [ ]
+
+        # The cleaner class that will be called to
+        # remove html and other messy stuff from student
+        # work
+        self.text_cleaner = TextCleaner()
+
+        self.analyzer = WordCount()
+
 
     @property
     def course_id( self ):
@@ -53,9 +64,13 @@ class DiscussionRepository( IContentRepository, StudentWorkMixin ):
         posts"""
         for sid, submission in self.submissions.items():
             for entry in submission.discussion_entries:
+                # Remove html and other artifacts from student answers
+                # DO NOT UNCOMMENT UNTIL CAN-59 HAS BEEN FULLY TESTED
+                content = self.text_cleaner.clean(entry[ 'message' ])
+
                 self.data.append( { 'student_id': entry[ 'user_id' ],
                                     'student_name': entry[ 'user_name' ],
-                                    'text': entry[ 'message' ]
+                                    'text': content
                                     } )
             #
             # self.posts.append( (entry.user_id, entry.user_name, entry.message) )

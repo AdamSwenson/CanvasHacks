@@ -1,20 +1,41 @@
 """
-Created by adam on 9/21/18
+Created by adam on 3/15/20
 """
 __author__ = 'adam'
+
 import nltk
-from nltk.corpus import stopwords
-import string
 
-remove = [ '``', "''", "'s"]
-remove += string.punctuation
-remove += stopwords.words('english')
-remove = set(remove)
+from CanvasHacks.Models.model import StoreMixin
+from CanvasHacks.Text.process import WordbagMaker
+
+if __name__ == '__main__':
+    pass
 
 
-def make_wordbag(text, to_remove=remove):
-    return [word.lower() for sent in nltk.tokenize.sent_tokenize(text) for word in nltk.tokenize.word_tokenize(sent) if word.lower() not in to_remove]
+class ITextStat:
 
+    def analyze( self, content ):
+        raise NotImplementedError
+
+
+class WordCount(ITextStat):
+
+    def __init__(self, **kwargs):
+        """
+        kwargs will often contain
+            count_stopwords
+        :param kwargs:
+        """
+        self.bagmaker = WordbagMaker(**kwargs)
+
+    def analyze( self, content ):
+        """
+        Returns the total number of words in the content
+        :param content:
+        :return:
+        """
+        bag = self.bagmaker.process(content)
+        return len( bag )
 
 
 class WordFreq(object):
@@ -67,7 +88,3 @@ class WordFreq(object):
         return [{'word': w[0], 'count' : w[1]} for w in self.freqDist.items()]
         #     results.append()
         # return results
-
-
-if __name__ == '__main__':
-    pass

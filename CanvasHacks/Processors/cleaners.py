@@ -32,13 +32,16 @@ class UtfCleaner( ICleaner ):
         multi_char_to_remove = [
             "\xa0"
         ]
+        chars = single_char_to_remove + multi_char_to_remove
+        rx = r'{}'.format("|".join(chars))
+        content = re.sub( rx, '', content )
 
         # Dealing with single first to reduce time for next step
-        content = "".join( [ c for c in content if c not in single_char_to_remove ] )
+        # content = "".join( [ c for c in content if c not in single_char_to_remove ] )
         # return str( content )  # .encode('utf-8').decode()
-
-        for c in multi_char_to_remove:
-            content = re.sub(c, '', content)
+        #
+        # for c in multi_char_to_remove:
+        #     content = re.sub(c, '', content)
         return content
 
 
@@ -46,7 +49,7 @@ class HtmlCleaner( ICleaner ):
 
     @staticmethod
     def clean( content ):
-        soup = BeautifulSoup( content )
+        soup = BeautifulSoup( content, features="lxml" )
         return soup.text
 
 

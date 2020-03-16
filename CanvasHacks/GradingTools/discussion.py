@@ -5,8 +5,8 @@ from CanvasHacks.GradingTools.base import IGrader
 
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.nonempty import receives_credit, IGradingMethod, CreditForNonEmpty
-from CanvasHacks.GradingTools.penalities import IPenalizer, NoLatePenalty
+from CanvasHacks.GradingMethods.base import IGradingMethod
+from CanvasHacks.GradingTools.penalities import IPenalizer
 
 
 class DiscussionForumGrader( IGrader ):

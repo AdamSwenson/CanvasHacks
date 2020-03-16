@@ -3,8 +3,8 @@ Objects which define the parameters/ values for the entire unit
 
 Created by adam on 12/24/19
 """
-from CanvasHacks.FileTools import read_text_block
-from CanvasHacks.GradingTools.nonempty import CreditForNonEmpty
+from CanvasHacks.Files.FileTools import read_text_block
+from CanvasHacks.GradingMethods.nonempty import CreditForNonEmpty
 from CanvasHacks.GradingTools.penalities import HalfLate, NoLatePenalty
 
 __author__ = 'adam'

@@ -8,7 +8,7 @@ from CanvasHacks.GradingTools.base import IGrader
 
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.nonempty import IGradingMethod
+from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingTools.penalities import IPenalizer
 
 

@@ -9,7 +9,6 @@ import json
 import os
 
 from CanvasHacks import environment
-from CanvasHacks.FileTools import create_folder
 
 DATA_FOLDER = '%s/data' % environment.CONFIG.proj_base
 IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER

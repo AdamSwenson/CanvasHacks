@@ -14,6 +14,8 @@ if __name__ == '__main__':
 TEST_DATA =[ {'input': '¬†¬†¬†¬†¬†¬†¬†¬†¬†¬†¬†',
              'expect': ''
              },
+             {'input': 'Good text that ïuh oh.',
+              'expect': 'Good text that uh oh.'},
              {'input': "Dog breath is taco-like. Hmmm",
               'expect': "Dog breath is taco-like. Hmmm"
               }

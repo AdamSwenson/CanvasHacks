@@ -8,8 +8,8 @@ import docx
 import requests
 from requests.exceptions import HTTPError
 
-from CanvasHacks.RequestTools import make_request_header
-from CanvasHacks.UrlTools import make_url
+from CanvasHacks.Api.RequestTools import make_request_header
+from CanvasHacks.Api.UrlTools import make_url
 
 __author__ = 'adam'
 

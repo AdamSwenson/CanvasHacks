@@ -2,7 +2,7 @@
 Created by adam on 2/1/19
 """
 from unittest import TestCase
-from CanvasHacks.DownloadProcessingTools import *
+from CanvasHacks.Api.DownloadProcessingTools import *
 
 __author__ = 'adam'
 

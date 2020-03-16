@@ -4,7 +4,7 @@ Created by adam on 2/9/20
 from CanvasHacks.Errors.messaging import MessageSendError
 from CanvasHacks.Logging.decorators import log_message
 from CanvasHacks.Messaging.interfaces import ISender
-from CanvasHacks.RequestTools import send_post_request
+from CanvasHacks.Api.RequestTools import send_post_request
 
 __author__ = 'adam'
 

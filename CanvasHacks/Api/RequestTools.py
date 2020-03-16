@@ -7,7 +7,7 @@ import requests
 from requests.exceptions import HTTPError
 
 from CanvasHacks import environment
-from CanvasHacks.UrlTools import make_url
+from CanvasHacks.Api.UrlTools import make_url
 
 
 def make_request_header():

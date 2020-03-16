@@ -5,7 +5,7 @@ import canvasapi
 import pandas as pd
 
 import CanvasHacks.environment as env
-from CanvasHacks.DownloadProcessingTools import extract_body
+from CanvasHacks.Api.DownloadProcessingTools import extract_body
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 
 __author__ = 'adam'

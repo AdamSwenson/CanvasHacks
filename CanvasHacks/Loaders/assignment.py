@@ -4,7 +4,7 @@ use quiz reports
 Created by adam on 2/26/20
 """
 from CanvasHacks.Loaders.interfaces import ILoader
-from CanvasHacks.QuizReportFileTools import save_downloaded_report
+from CanvasHacks.Files.QuizReportFileTools import save_downloaded_report
 
 __author__ = 'adam'
 

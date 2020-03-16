@@ -10,8 +10,8 @@ from IPython.display import display
 from ipywidgets import widgets
 
 from CanvasHacks.Repositories.DataManagement import DataStore, DataStoreNew
-from CanvasHacks.RequestTools import make_request_header
-from CanvasHacks.UrlTools import make_url
+from CanvasHacks.Api.RequestTools import make_request_header
+from CanvasHacks.Api.UrlTools import make_url
 
 
 def upload_students_receiving_credit( store: DataStore ):
