@@ -547,7 +547,7 @@ class ComplexStatusRepository:
 
         # also store reviewor here?
 
-        # todo commit here or wait for successful notification?
+        # todo commit here or rest_timeout for successful notification?
         self.session.commit()
 
     def record_peer_review_results_sent( self, list_of_students ):

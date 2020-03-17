@@ -48,7 +48,7 @@ class SendMetareviewToReviewer( IStep ):
         Send feedback from the metareview to the person
         who completed the peer review
         :param only_new: Probably won't be used
-        :param rest_timeout: Number of seconds to wait for canvas to generate report
+        :param rest_timeout: Number of seconds to rest_timeout for canvas to generate report
         :return:
         """
         try:

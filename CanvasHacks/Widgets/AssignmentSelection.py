@@ -101,7 +101,7 @@ def make_assignment_button( assignment_id, name, **kwargs ):
                                   **kwargs )
 
 
-def make_assignment_chooser(activity=None, **kwargs):
+def make_assignment_chooser(activity=None,  return_button=False, **kwargs):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -125,6 +125,14 @@ def make_assignment_chooser(activity=None, **kwargs):
     for assignment_id, assignment_name in assignments:
         buttons.append( make_assignment_button( assignment_id, assignment_name , **kwargs) )
     # return buttons
+
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return buttons
+    else:
+
+        display( VBox(buttons) )
 
 
 # ------------------------------ Unit

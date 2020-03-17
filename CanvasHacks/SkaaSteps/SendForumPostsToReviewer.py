@@ -59,7 +59,7 @@ class SendForumPostsToReviewer( IStep ):
         Loads discussion forum posts, assigns reviewers, and sends formatted
         work to reviewer
          only_new=False, rest_timeout=5
-        :param rest_timeout: Number of seconds to wait for canvas to generate report
+        :param rest_timeout: Number of seconds to rest_timeout for canvas to generate report
         :param only_new: Probably will not be used
         :return:
         """

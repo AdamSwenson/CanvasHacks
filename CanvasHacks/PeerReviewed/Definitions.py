@@ -173,7 +173,9 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
     instructions_filename = 'topical-assignment-instructions.txt'
     creation_type = 'quiz'
 
-    regex = re.compile( r"\btopical assignment\b" )
+    regex = re.compile( r"\bwarm up\b" )
+
+    # regex = re.compile( r"\btopical assignment\b" )
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
