@@ -3,6 +3,7 @@ Created by adam on 2/22/20
 """
 
 import CanvasHacks.testglobals
+from CanvasHacks.Models.submission_record import SubmissionRecord
 
 CanvasHacks.testglobals.TEST = True
 CanvasHacks.testglobals.use_api = False
@@ -13,7 +14,6 @@ from CanvasHacks.TimeTools import current_utc_timestamp
 from factories.ModelFactories import make_students
 
 __author__ = 'adam'
-
 
 from CanvasHacks import environment as env
 
@@ -57,7 +57,8 @@ class TestingBase( unittest.TestCase ):
         self.preexisting_student_ids = [ s.student_id for s in self.preexisting_students ]
         self.new_students_ids = [ s.student_id for s in self.new_students ]
 
-    def create_preexisting_review_pairings( self, activity_id, preexisting_students, session=None, check_db_before_run=True ):
+    def create_preexisting_review_pairings( self, activity_id, preexisting_students, session=None,
+                                            check_db_before_run=True ):
         """Populates the in-memory database with ReviewAssociations between
         the provided students
         NB, must have the dao session stored on self.session
@@ -112,3 +113,18 @@ class TestingBase( unittest.TestCase ):
             self.previously_sent.append( student_id )
 
         self.assertEqual( number, len( self.previously_sent ), "dummy check" )
+
+    def make_submitted_records( self, number, session=None ):
+        session = session if session is not None else self.session
+        self.previously_submitted = [ ]
+
+        for i in range( 0, number ):
+            student_id = self.student_ids[ i ]
+            rec = SubmissionRecord( student_id=student_id,
+                                    activity_id=self.activity.id,
+                                    submitted_at=current_utc_timestamp() )
+            session.add( rec )
+            session.commit()
+            self.previously_submitted.append( student_id )
+
+        self.assertEqual( number, len( self.previously_submitted ), "dummy check" )

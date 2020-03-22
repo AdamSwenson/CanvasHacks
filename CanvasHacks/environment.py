@@ -54,6 +54,7 @@ STATUS_TABLE_NAME = 'status'
 COMPLEX_STATUS_TABLE_NAME = 'complexstatus'
 FEEDBACK_RECEIVED_STATUS_TABLE_NAME = 'feedback_received'
 INVITATION_RECEIVED_STATUS_TABLE_NAME = 'invitation_received'
+SUBMISSION_TABLE_NAME = 'submissions'
 
 STUDENT_TABLE_NAME = 'students'
 
