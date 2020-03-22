@@ -4,6 +4,8 @@ Created by adam on 2/26/20
 __author__ = 'adam'
 
 import pandas as pd
+from canvasapi.quiz import QuizSubmission
+from canvasapi.submission import Submission
 
 if __name__ == '__main__':
     pass
@@ -161,3 +163,4 @@ class SelectableMixin:
 
     def reset_selections( self ):
         self.selected = [ ]
+
