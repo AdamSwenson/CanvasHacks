@@ -12,9 +12,11 @@ from CanvasHacks.DAOs.sqlite_dao import Base
 from CanvasHacks.Models.model import Model
 from CanvasHacks.TimeTools import current_utc_timestamp
 
-
+# Deprecated
 class StatusRecord( Base, Model ):
     """
+    :deprecated
+
     Keeps track of when an activity_inviting_to_complete was made available to a
     student and when they submitted it.
 
