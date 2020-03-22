@@ -13,8 +13,9 @@ import pytz
 from faker import Faker
 
 fake = Faker()
-from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit, DiscussionReview,\
-    DiscussionForum
+from CanvasHacks.Definitions.skaa import InitialWork, Review, MetaReview
+from CanvasHacks.Definitions.discussion import DiscussionForum, DiscussionReview
+from CanvasHacks.Definitions.unit import Unit
 
 from CanvasHacks.PeerReviewed.Submissions import SubmissionFactory
 from tests.factories.CanvasApiFactories import peer_review_result_factory, submission_result_factory

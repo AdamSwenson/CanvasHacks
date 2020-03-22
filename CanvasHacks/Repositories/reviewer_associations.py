@@ -6,7 +6,7 @@ Created by adam on 12/28/19
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Errors.review_pairings import NoAvailablePartner, AllAssigned
 from CanvasHacks.Models.review_association import ReviewAssociation
-from CanvasHacks.PeerReviewed.Definitions import Activity
+from CanvasHacks.Definitions.activity import Activity
 import pandas as pd
 
 __author__ = 'adam'

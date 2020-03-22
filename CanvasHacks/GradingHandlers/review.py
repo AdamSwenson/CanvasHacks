@@ -3,8 +3,8 @@ Created by adam on 3/10/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.base import IGrader
-from CanvasHacks.GradingTools.quiz import QuizGrader
+from CanvasHacks.GradingHandlers.base import IGrader
+from CanvasHacks.GradingHandlers.quiz import QuizGrader
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository
 

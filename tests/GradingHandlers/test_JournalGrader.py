@@ -3,7 +3,7 @@ Created by adam on 3/9/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.journal import JournalGrader
+from CanvasHacks.GradingHandlers.journal import JournalGrader
 from TestingBase import TestingBase
 
 from unittest.mock import MagicMock

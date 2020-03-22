@@ -2,17 +2,15 @@
 Created by adam on 2/24/20
 """
 import unittest
-from unittest.mock import MagicMock
 from tests.TestingBase import TestingBase
 
 from faker import Faker
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.status_record import StatusRecord
-from CanvasHacks.PeerReviewed.Definitions import Unit
-from CanvasHacks.Repositories.status import ComplexStatusRepository, StatusRepository
+from CanvasHacks.Repositories.status import StatusRepository
 from tests.factories.ModelFactories import student_factory
-from tests.factories.PeerReviewedFactories import activity_data_factory, unit_factory
+from tests.factories.PeerReviewedFactories import unit_factory
 fake = Faker()
 
 

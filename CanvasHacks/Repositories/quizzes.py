@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin, QuizDataMixin
 from CanvasHacks.Models.student import Student
-from CanvasHacks.PeerReviewed.Definitions import Review
+from CanvasHacks.Definitions.skaa import Review
 from CanvasHacks.Processors.cleaners import TextCleaner
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
 from CanvasHacks.Files.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report

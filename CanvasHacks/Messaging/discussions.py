@@ -7,7 +7,7 @@ from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Messaging.base import SkaaMessenger
 from CanvasHacks.Messaging.templates import DISCUSSION_REVIEW_NOTICE_TEMPLATE, DISCUSSION_REVIEW_FEEDBACK_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.status import StatusRepository
 
 if __name__ == '__main__':

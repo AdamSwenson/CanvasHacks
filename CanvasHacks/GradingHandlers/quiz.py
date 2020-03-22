@@ -2,9 +2,9 @@
 Created by adam on 5/6/19
 """
 from CanvasHacks.Errors.grading import NonStringInContentField
-from CanvasHacks.GradingTools.base import IGrader
+from CanvasHacks.GradingHandlers.base import IGrader
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.GradingTools.penalities import get_penalty, IPenalizer
+from CanvasHacks.GradingCorrections.penalities import get_penalty, IPenalizer
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository
 
@@ -125,10 +125,10 @@ class QuizGrader( IGrader ):
             questions[ qid ] = { 'score': pts }
             total_score += pts
 
-        # Compute penalty if needed
-        # Will be 0 if not docking for lateness
-        # Records of penalty will be stored on self.penalizer.penalized_records
-        fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
+            # Compute penalty if needed
+            # Will be 0 if not docking for lateness
+            # Records of penalty will be stored on self.penalizer.penalized_records
+            fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
 
         out = self._make_graded_row_output(row, questions, fudge_points)
 
@@ -146,6 +146,9 @@ class QuizGrader( IGrader ):
         """
         stem = 'Student #{}: Submitted on {}; was due {}. Penalized {}'
         return stem.format( row[ 'student_id' ], row[ 'submitted' ], self.activity.due_at, penalty )
+
+
+
 
 
 # ============================= OLD

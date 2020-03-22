@@ -1,8 +1,8 @@
 """
 Created by adam on 12/20/19
 """
-from CanvasHacks.PeerReviewed.Definitions import InitialWork, Review, MetaReview, Unit
-from CanvasHacks.PeerReviewed.Submissions import Submission
+from CanvasHacks.Definitions.skaa import InitialWork, Review, MetaReview
+from CanvasHacks.Definitions.unit import Unit
 
 __author__ = 'adam'
 

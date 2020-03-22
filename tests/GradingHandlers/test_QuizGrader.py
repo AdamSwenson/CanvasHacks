@@ -6,8 +6,8 @@ __author__ = 'adam'
 from unittest.mock import MagicMock, create_autospec
 
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.GradingTools.penalities import IPenalizer
-from CanvasHacks.GradingTools.quiz import QuizGrader
+from CanvasHacks.GradingCorrections.penalities import IPenalizer
+from CanvasHacks.GradingHandlers.quiz import QuizGrader
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from TestingBase import TestingBase
 

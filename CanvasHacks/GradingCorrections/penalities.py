@@ -1,6 +1,7 @@
 """
 Created by adam on 2/17/20
 """
+from abc import ABC
 
 import pandas as pd
 
@@ -14,7 +15,21 @@ if __name__ == '__main__':
     pass
 
 
-class IPenalizer:
+class IPenalizer(ABC):
+
+
+    def analyze( self, *args, **kwargs ):
+        """
+        THIS IS THE LATEST VERSION CAN-60
+        Returns a signed float of the percentage
+        the contribution the evaluated item makes to the
+        overall score should be lowered.
+
+        :param work:
+        :return: signed float
+        """
+        raise NotImplementedError
+
 
     def get_penalty( self, submitted_date ):
         """
@@ -43,6 +58,40 @@ class IPenalizer:
         :return: float
         """
         raise NotImplementedError
+
+    @property
+    def penalty_messages( self ):
+        """
+        Returns a list of penalty messages
+        :return: list
+        """
+        out = []
+
+        if len( self.penalized_records ) > 0:
+            for penalty_dict in self.penalized_records:
+                due_at = None
+                try:
+                    due_at = self.due_date
+                except AttributeError:
+                    # Some penalizers may not have a due date
+                    pass
+                msg = self._make_penalty_message( penalty_dict[ 'penalty' ], penalty_dict[ 'record' ], due_at=None )
+                out.append(msg)
+        return out
+
+
+    def _make_penalty_message( self, penalty, row, due_at=None ):
+            """
+            Handles printing or logging of penalties applied
+
+            # todo enable logging
+
+            :param penalty:
+            :param row:
+            :return:
+            """
+            stem = 'Student #{}: Submitted on {}; was due {}. Penalized {}'
+            return stem.format( row[ 'student_id' ], row[ 'submitted' ], due_at, penalty )
 
 
 class NoLatePenalty( IPenalizer ):
@@ -98,7 +147,7 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
             # 'fudge_points': fudge_points
         ]
 
-    def get_penalty( self, submitted_date ):
+    def get_penalty( self, submitted_at ):
         """
         Returns the percentage that the assignment
         should be penalized.
@@ -107,13 +156,13 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         method for the particular grading use.
 
         Will return 0.0 for an on-time assignment
-        :param submitted_date:
+        :param submitted_at:
         :return:
         """
-        submitted_date = check_is_date( submitted_date )
-        assert (isinstance( submitted_date, pd.Timestamp ))
+        submitted_date = check_is_date( submitted_at )
+        assert (isinstance( submitted_at, pd.Timestamp ))
         # Check if full credit
-        if submitted_date <= self.due_date:
+        if submitted_at <= self.due_date:
             return 0
         return 0.50
 
@@ -139,6 +188,10 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
                   'penalty': penalty
                   } )
         return original_score * penalty
+
+
+    def get_point_reduction_pct( self, submitted_date ):
+        return 1 - self.get_penalty(submitted_date)
 
     def get_fudge_points( self, submitted_date, total_score, row=None ):
         """
@@ -196,6 +249,10 @@ class QuarterLate( IPenalizer, TimeHandlerMixin ):
             # optional if use fudge points
             # 'fudge_points': fudge_points
         ]
+
+
+    def get_point_reduction_pct( self, submitted_date ):
+        return 1 - self.get_penalty(submitted_date)
 
     def get_penalty( self, submitted_date ):
         """

@@ -6,8 +6,7 @@ __author__ = 'adam'
 from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import ConversationMessageSender
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.PeerReviewed.Definitions import Unit
-from CanvasHacks.Repositories.status import StatusRepository
+from CanvasHacks.Definitions.unit import Unit
 
 if __name__ == '__main__':
     pass

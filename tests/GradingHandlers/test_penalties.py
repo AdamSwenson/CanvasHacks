@@ -3,7 +3,7 @@ Created by adam on 5/6/19
 """
 from unittest import TestCase
 
-from CanvasHacks.GradingTools.penalities import get_penalty, HalfLate, QuarterLate, NoLatePenalty
+from CanvasHacks.GradingCorrections.penalities import get_penalty, HalfLate, QuarterLate, NoLatePenalty
 import pandas as pd
 
 __author__ = 'adam'

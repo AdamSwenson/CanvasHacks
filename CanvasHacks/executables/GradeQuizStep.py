@@ -3,9 +3,12 @@ Created by adam on 3/16/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.quiz import QuizGrader
+from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.Definitions.base import BlockableActivity
+from CanvasHacks.GradingHandlers.quiz import QuizGrader
 from CanvasHacks.Models.model import StoreMixin
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
+from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
 from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
 
 
@@ -63,13 +66,22 @@ class GradeQuiz(StoreMixin):
 
         self.workRepo.data.reset_index( inplace=True )
 
+        # We will need the association repo if the activity can be
+        # blocked or graded by another student
+        self.association_repo = None
+        if isinstance( self.activity, BlockableActivity ):
+            dao = SqliteDAO()
+            self.association_repo = AssociationRepository(dao, self.activity)
+
 
     def run( self, **kwargs ):
         self.handle_kwargs(**kwargs)
         # Load data
         self._initialize()
         # Let the grader do its job
-        grader = QuizGrader( self.workRepo, self.subRepo )
+        grader = QuizGrader( work_repo=self.workRepo,
+                             submission_repo=self.subRepo,
+                             association_repo=self.association_repo )
         g = grader.grade( on_empty=0 )
         self.graded += g
         print( "Graded: ", len( self.graded ) )

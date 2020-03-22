@@ -1,7 +1,7 @@
 """
 Created by adam on 2/14/19
 """
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 
 __author__ = 'adam'
 from IPython.display import display

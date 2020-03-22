@@ -8,7 +8,7 @@ from CanvasHacks.Messaging.base import SkaaMessenger
 from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, \
     METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.status import StatusRepository, IStatusRepository
 from CanvasHacks.TimeTools import getDateForMakingFileName
 

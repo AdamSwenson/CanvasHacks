@@ -10,8 +10,13 @@ from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 
 __author__ = 'adam'
 
+from CanvasHacks.Repositories.mixins import ObjectHandlerMixin
 
-class SubmissionRepository( ISubmissionRepo ):
+class CannotDetermineState(Exception):
+    """Raised when can't tell the submission status of a record"""
+    pass
+
+class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
     """Downloads and stores canvasapi.Submission objects
     NB, for many operations on quiz assignments, will need
     to use QuizSubmission objects. That's not this repo
@@ -24,6 +29,24 @@ class SubmissionRepository( ISubmissionRepo ):
         """
         self.assignment = assignment
         self.download()
+
+    def has_completed( self, student ):
+        """
+        Determines whether the student has submitted the assignment
+        :param student:
+        :return: Boolean
+        """
+        student_id = self._handle_id(student)
+        rec = self.get_by_student_id(student_id)
+        # state = self.frame.loc['student_id', student_id].workflow_state
+
+        if rec.workflow_state == 'submitted':
+            return True
+
+        if rec.workflow_state == 'unsubmitted':
+            return False
+
+        raise CannotDetermineState
 
     def download( self ):
         """Downloads and stores submission objects as a list in self.data"""

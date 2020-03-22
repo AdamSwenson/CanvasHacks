@@ -4,9 +4,7 @@ Created by adam on 2/23/20
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Logging.display import DisplayManager
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
-from CanvasHacks.Repositories.status import StatusRepository, FeedbackStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
-from CanvasHacks.PeerReviewed.Definitions import MetaReview, DiscussionReview
 
 __author__ = 'adam'
 

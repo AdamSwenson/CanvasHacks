@@ -5,7 +5,8 @@ from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.review_association import ReviewAssociation
 from CanvasHacks.Models.status_record import ComplexStatusRecord, FeedbackReceivedRecord, InvitationReceivedRecord,\
     StatusRecord
-from CanvasHacks.PeerReviewed.Definitions import Activity, Unit
+from CanvasHacks.Definitions.activity import Activity
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'

@@ -3,10 +3,10 @@ Created by adam on 3/1/20
 """
 __author__ = 'adam'
 
-from unittest import TestCase
 import pandas as pd
 from unittest.mock import patch, MagicMock
-from CanvasHacks.PeerReviewed.Definitions import Unit, Activity
+from CanvasHacks.Definitions.activity import Activity
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.PeerReviewed.SkaaMaker import UnitDefinitionsLoader
 from tests.TestingBase import TestingBase
 import CanvasHacks.environment as env

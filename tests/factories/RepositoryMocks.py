@@ -63,7 +63,7 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
         if make_dataframe:
             self.data = pd.DataFrame( self.data )
 
-    def create_quiz_repo_data( self, student_ids, submitted_date, make_dataframe=False, num_question_columns=5, **kwargs ):
+    def create_quiz_repo_data( self, student_ids, submitted_at, make_dataframe=False, num_question_columns=5, **kwargs ):
         """Simulates being a content repo holding quiz data
         """
         self.question_columns = [ (fake.random.randint(1, 99999999), fake.word()) for _ in range( 0, num_question_columns ) ]
@@ -77,7 +77,7 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
         for sid in student_ids:
             d = {
                 'student_id': sid,
-                'submitted': submitted_date,
+                'submitted_at': submitted_at,
                 'course_id': course_id,
                 'quiz_id': quiz_id
             }
