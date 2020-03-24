@@ -29,8 +29,15 @@ class DiscussionForumGrader( IGrader ):
 
         super().__init__(**kwargs)
 
-        self.grade_method = self.activity.grade_method
-        self.penalizer = self.activity.penalizer
+        self.corrections = self.activity.corrections
+
+        self.penalizers = self.activity.penalizers
+
+        self.grade_methods = self.activity.grade_methods
+        # Todo Check that output of grading methods sums to 1?
+
+        # self.grade_method = self.activity.grade_method
+        # self.penalizer = self.activity.penalizer
 
         self.credit_per_post = 100 / self.num_posts_required
 
@@ -49,7 +56,15 @@ class DiscussionForumGrader( IGrader ):
         for p in self.work_repo.data:
             # discussion repo data will look like:
             # [{'student_id', 'student_name', 'text'}]
-            pct_credit = self.grade_method.grade(p['text'], on_credit=self.credit_per_post, on_no_credit=0)
+            pct_credit = 0
+            for method in self.grade_methods:
+                # each method should return a float pct
+                # all of which sum to 1
+                pct_credit += method.grade( p['text'],
+                                            on_credit=self.credit_per_post,
+                                            on_no_credit=0)
+
+            # pct_credit = self.grade_method.grade(p['text'], on_credit=self.credit_per_post, on_no_credit=0)
             # pct_credit = self.credit_per_post if receives_credit( p[ 'text' ] ) else 0
             self._raw.append( (p[ 'student_id' ], pct_credit) )
 

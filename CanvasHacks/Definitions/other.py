@@ -32,7 +32,7 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [  HalfLate( self.due_at, self.grace_period ) ]
+        self.penalizers = [  HalfLate( self.due_at, self.grace_period ) ]
         # The object which will be used to penalize late assignments
         # todo deprecated
         self.penalizer = self.penalizers[ 0 ]

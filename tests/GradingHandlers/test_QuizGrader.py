@@ -28,10 +28,15 @@ class TestQuizGrader( TestingBase ):
         self.penalizer = create_autospec(IPenalizer)
         self.grade_method = create_autospec(IGradingMethod)
 
-        self.activity = MagicMock(grade_method=self.grade_method, penalizer=self.penalizer)
+        self.activity = MagicMock(grade_method=self.grade_method,
+                                  penalizer=self.penalizer)
 
-        self.work_repo = ContentRepositoryMock( activity=self.activity, points_per_question=self.points_per_question )
-        self.work_repo.create_quiz_repo_data(self.student_ids, submitted_date=self.fake.date_time_this_century(), make_dataframe=True)
+        self.work_repo = ContentRepositoryMock( activity=self.activity,
+                                                points_per_question=self.points_per_question )
+
+        self.work_repo.create_quiz_repo_data(self.student_ids,
+                                             submitted_at=self.fake.date_time_this_century(),
+                                             make_dataframe=True)
 
         self.submission_repo = create_autospec(ISubmissionRepo)
 

@@ -29,7 +29,7 @@ class TestReviewBased( TestingBase ):
         # self.reviewRepo = ContentRepositoryMock()
 
     def test__initialize( self ):
-        self.fail()
+        self.skipTest('todo')
 
     @patch('CanvasHacks.GradingMethods.review.WorkRepositoryLoaderFactory')
     def test_grade( self, workRepoMock ):
@@ -65,4 +65,4 @@ class TestReviewBased( TestingBase ):
         self.skipTest('todo')
 
     def test_grade_reviewing_student_not_turned_in( self ):
-        self.fail()
+        self.skipTest('todo')

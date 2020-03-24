@@ -130,7 +130,7 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
     """Late assignments receive half credit"""
 
     def __init__( self, due_date, grace_period=None ):
-        due_date = check_is_date( due_date )
+        due_date = self._force_timestamp( due_date )
         assert (isinstance( due_date, pd.Timestamp ))
         self.due_date = due_date
 
@@ -159,7 +159,7 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         :param submitted_at:
         :return:
         """
-        submitted_date = check_is_date( submitted_at )
+        submitted_at = self._force_timestamp( submitted_at )
         assert (isinstance( submitted_at, pd.Timestamp ))
         # Check if full credit
         if submitted_at <= self.due_date:
