@@ -29,6 +29,7 @@ if CanvasHacks.testglobals.use_api:
         JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
         LOG_FOLDER = FileBasedConfiguration.log_folder
         DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
+        DOWNLOAD_FOLDER = "{}/Downloads"
         # Testing
         TEST_DATA_PATH = "{}/tests/testdata".format( FileBasedConfiguration.proj_base )
 

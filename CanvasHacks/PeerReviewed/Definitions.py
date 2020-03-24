@@ -173,7 +173,8 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
     instructions_filename = 'topical-assignment-instructions.txt'
     creation_type = 'quiz'
 
-    regex = re.compile( r"\btopical assignment\b" )
+    regex = re.compile( r"\bwarm up\b" )
+    # regex = re.compile( r"\btopical assignment\b" )
 
     def __init__( self, **kwargs ):
         super().__init__( **kwargs )
@@ -380,16 +381,24 @@ class Journal( Activity ):
 class Unit:
     """The main SKAA. This holds the definitions of all the consituent parts"""
     __name__ = 'Unit'
+    component_types = [ TopicalAssignment,
+                        InitialWork,
+                        Review,
+                        MetaReview,
+                        DiscussionForum,
+                        DiscussionReview,
+                        UnitEndSurvey
+                        ]
 
     def __init__( self, course, unit_number ):
-        self.component_types = [ TopicalAssignment,
-                                 InitialWork,
-                                 Review,
-                                 MetaReview,
-                                 DiscussionForum,
-                                 DiscussionReview,
-                                 UnitEndSurvey
-                                 ]
+        # self.component_types = [ TopicalAssignment,
+        #                          InitialWork,
+        #                          Review,
+        #                          MetaReview,
+        #                          DiscussionForum,
+        #                          DiscussionReview,
+        #                          UnitEndSurvey
+        #                          ]
         self.components = [ ]
 
         self.course = course

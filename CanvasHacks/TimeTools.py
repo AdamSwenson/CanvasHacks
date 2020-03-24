@@ -41,3 +41,12 @@ def to_canvas_time(timestamp):
 
 def to_csun_time(timestamp):
     return timestamp.tz_convert('US/Pacific')
+
+
+def timestamp_for_unique_filenames():
+    """
+    Returns a safe string that can be added to filenames
+    to keep them unique, yet still someone human readable
+    :return:
+    """
+    return datetime.datetime.now().strftime( "%Y-%m-%d_%H%M" )
