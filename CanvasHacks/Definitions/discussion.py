@@ -6,7 +6,7 @@ __author__ = 'adam'
 import re
 
 from CanvasHacks.Definitions.activity import Activity
-from CanvasHacks.Definitions.groups import DiscussionGroup
+from CanvasHacks.Definitions.groups import DiscussionGroup, ReviewType
 from CanvasHacks.GradingCorrections.penalities import NoLatePenalty
 from CanvasHacks.GradingMethods.nonempty import CreditForNonEmptyOLD
 from CanvasHacks.Models.QuizModels import QuizDataMixin, StoredDataFileMixin
@@ -41,7 +41,7 @@ class DiscussionForum( DiscussionGroup, Activity ):
         try:
             # todo deprecated
             self.penalizer = self.penalizers[ 0 ]
-            self.grade_method = self.grade_method[ 0 ]
+            self.grade_method = self.grade_methods[ 0 ]
         except AttributeError as e:
             print(e)
 
@@ -56,7 +56,7 @@ class DiscussionForum( DiscussionGroup, Activity ):
             print( "No topic id set on discussion " )
 
 
-class DiscussionReview( DiscussionGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
+class DiscussionReview( DiscussionGroup, Activity, QuizDataMixin, StoredDataFileMixin, ReviewType ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
     instructions_filename = 'discussion-review-instructions.txt'
@@ -81,7 +81,7 @@ class DiscussionReview( DiscussionGroup, Activity, QuizDataMixin, StoredDataFile
         try:
             # todo deprecated
             self.penalizer = self.penalizers[ 0 ]
-            self.grade_method = self.grade_method[ 0 ]
+            self.grade_method = self.grade_methods[ 0 ]
         except AttributeError as e:
             print(e)
 

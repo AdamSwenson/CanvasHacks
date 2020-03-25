@@ -47,7 +47,7 @@ def make_discussion_selection_button( topic_id, name, **kwargs ):
                                   environment.CONFIG.remove_discussion, **kwargs )
 
 
-def make_discussion_chooser( course, **kwargs ):
+def make_discussion_chooser( course, return_button=False, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -63,6 +63,15 @@ def make_discussion_chooser( course, **kwargs ):
     #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
     for discussion_id, discussion_name in discussions:
         buttons.append( make_discussion_selection_button( discussion_id, discussion_name, **kwargs ) )
+
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return buttons
+    else:
+
+        display( VBox(buttons) )
+
 
 
 # ---------------------------- Assignments

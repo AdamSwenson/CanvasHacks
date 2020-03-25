@@ -120,6 +120,26 @@ class Unit:
             if isinstance( c, component_class ):
                 return c
 
+    def get_activity_by_id( self, activity_id ):
+        for c in self.components:
+            if c.id == activity_id:
+                return c
+
+    def get_discussion_by_topic_id( self, topic_id ):
+        """
+        Discussions are usually identified via the topic id
+        thus this is a shortcut to getting the right one, if there
+        is more than one associated with the unit
+        :param topic_id:
+        :return:
+        """
+        for c in self.components:
+            try:
+                if c.topic_id == topic_id:
+                    return c
+            except AttributeError:
+                pass
+
     @property
     def topical_assignment( self ):
         for c in self.components:

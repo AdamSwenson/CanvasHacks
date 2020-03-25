@@ -1,26 +1,28 @@
 """
-Created by adam on 3/16/20
+Created by adam on 3/24/20
 """
 __author__ = 'adam'
+
 
 from CanvasHacks import environment
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Definitions.base import BlockableActivity
-# todo Switch to quiz_new when ready
+# todo Switch to assignment_new when ready
 from CanvasHacks.GradingHandlers.factories import GradingHandlerFactory
-from CanvasHacks.GradingHandlers.quiz import QuizGrader
 from CanvasHacks.Models.model import StoreMixin
+from CanvasHacks.Repositories.DataManagement import DataStoreNew
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
-from CanvasHacks.Repositories.submissions import QuizSubmissionRepository
+
+from CanvasHacks.Repositories.submissions import SubmissionRepository, AssignmentSubmissionRepository
 
 
-class GradeQuiz( StoreMixin ):
+class GradeAssignment( StoreMixin ):
     """
     Executable which grades and uploads scores for all selected
     assignments
 
-    Taken from the code in the Quiz tools notebook which was created
+    Taken from the code in the assignment tools notebook which was created
     in CAN-44
 
     Created: CAN-44 / CAN-60
@@ -36,9 +38,7 @@ class GradeQuiz( StoreMixin ):
             # todo update to allow multiple selected activities
             activity_id = selected_activities[0]
             activity = environment.CONFIG.unit.get_activity_by_id(activity_id)
-            # \
-            # [ c for c in environment.CONFIG.unit.components if c.id == environment.CONFIG.get_assignment_ids.assignments[ 0 ][ 0 ] ][
-            #     0 ]
+
         self.activity = activity
 
         if self.no_late_penalty:
@@ -57,17 +57,14 @@ class GradeQuiz( StoreMixin ):
                                                           activity=self.activity,
                                                           rest_timeout=self.wait )
 
-        try:
-            self.quiz = environment.CONFIG.course.get_quiz( self.activity.quiz_id )
-        except AttributeError:
-            # todo dev hope this doesn't cause problems!
-            self.quiz = environment.CONFIG.course.get_quiz( self.activity.id )
 
-        self.subRepo = QuizSubmissionRepository( self.quiz )
+        self.assignment = environment.CONFIG.course.get_assignment( self.activity.id )
 
-        # If this is a quiz type assignment, we need to get the quiz submission objects
-        # not the regular submission object so we can use them for uploading
-        self.qsubs = [ s for s in self.quiz.get_submissions() ]
+        self.subRepo = AssignmentSubmissionRepository( self.assignment )
+        # shove the activity onto a sub repo so it will resemble
+        # a quizrepo for the grader
+        self.subRepo.activity = self.activity
+
 
         # Filter previously graded
         self.subRepo.data = [ s for s in self.subRepo.data if s.workflow_state != 'complete' ]
@@ -92,7 +89,11 @@ class GradeQuiz( StoreMixin ):
                                              submission_repo=self.subRepo,
                                              association_repo=self.association_repo )
 
-        # grader = QuizGrader( work_repo=self.workRepo,
+        #     store.results = GT.new_determine_journal_credit(journal, subRepo)
+        #     if GRADING_LATE:
+        #         store.results = [j for j in store.results if j[0].grade != 'complete']
+
+        # grader = assignmentGrader( work_repo=self.workRepo,
         #                      submission_repo=self.subRepo,
         #                      association_repo=self.association_repo )
         g = grader.grade( on_empty=0 )
@@ -103,16 +104,23 @@ class GradeQuiz( StoreMixin ):
             self._upload_step()
 
     def get_submission_object( self, student_id, attempt ):
-        return [ d for d in self.qsubs if d.user_id == student_id and d.attempt == attempt ]
+        """
+        todo This really should be calling a method on the submission repo
+        :param student_id:
+        :param attempt:
+        :return:
+        """
+        return [ d for d in self.subRepo.data if d.user_id == student_id and d.attempt == attempt ][0]
 
     def _upload_step( self ):
         self.uploaded = 0
         # Upload grades
-        for g in self.graded:
-            sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )[ 0 ]
-            sub.update_score_and_comments( quiz_submissions=g[ 'data' ][ 'quiz_submissions' ] )
+        for g, pct_credit in self.graded:
+            # call the put method on the returned canvas api submission
+            score = "{}%".format(pct_credit)
+            sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )
+            sub.edit(submission={'posted_grade': score})
             self.uploaded += 1
-
 
         self._log_uploaded()
 
@@ -124,10 +132,8 @@ class GradeQuiz( StoreMixin ):
         stem = "Grades uploaded for {} students "
         print(stem.format(self.uploaded))
 
-
-
 if __name__ == '__main__':
     # todo parse command line args into environment
 
-    step = GradeQuiz()
+    step = GradeAssignment()
     # step.run()

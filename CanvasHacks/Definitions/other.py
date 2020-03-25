@@ -42,7 +42,7 @@ class TopicalAssignment( Activity, QuizDataMixin, StoredDataFileMixin ):
         # This could be fixed in CAN-57
         # The object which will be used to assign the score
         self.grade_methods = [ CreditForNonEmptyOLD( min_words=2, count_stopwords=True ) ]
-        self.grade_method = self.grade_method[ 0 ]
+        self.grade_method = self.grade_methods[ 0 ]
 
 
 class UnitEndSurvey( Activity ):
@@ -59,7 +59,7 @@ class UnitEndSurvey( Activity ):
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [ NoLatePenalty(  ) ]
+        self.penalizers = [ NoLatePenalty(  ) ]
         # The object which will be used to penalize late assignments
         # todo deprecated
         self.penalizer = self.penalizers[ 0 ]
@@ -69,4 +69,4 @@ class UnitEndSurvey( Activity ):
         # This could be fixed in CAN-57
         # The object which will be used to assign the score
         self.grade_methods = [ CreditForNonEmptyOLD( min_words=2, count_stopwords=True ) ]
-        self.grade_method = self.grade_method[ 0 ]
+        self.grade_method = self.grade_methods[ 0 ]

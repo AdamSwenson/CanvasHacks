@@ -5,7 +5,7 @@ Created by adam on 12/24/19
 """
 from CanvasHacks.Definitions.activity import Activity
 from CanvasHacks.Definitions.base import BlockableActivity
-from CanvasHacks.Definitions.groups import SkaaReviewGroup
+from CanvasHacks.Definitions.groups import SkaaReviewGroup, ReviewType
 from CanvasHacks.GradingCorrections.penalities import HalfLate, NoLatePenalty
 from CanvasHacks.GradingMethods.nonempty import CreditForNonEmptyOLD
 
@@ -28,7 +28,7 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
     creation_type = 'assignment'
 
     # regex = re.compile( r"\bcontent assignment\b" )
-    regex = re.compile( r"\bessay\b" )
+    regex = re.compile( r"\bessay\b|\bcontent assignment\b" )
 
     def __init__( self, **kwargs ):
         self.question_columns = [ ]
@@ -44,7 +44,7 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [ HalfLate( self.due_at, self.grace_period ) ]
+        self.penalizers = [ HalfLate( self.due_at, self.grace_period ) ]
         # The object which will be used to penalize late assignments
 
         # The object which will be used to assign the score
@@ -56,7 +56,7 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
         try:
             # todo deprecated
             self.penalizer = self.penalizers[ 0 ]
-            self.grade_method = self.grade_method[ 0 ]
+            self.grade_method = self.grade_methods[ 0 ]
         except AttributeError as e:
             print(e)
         #
@@ -68,7 +68,7 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
         # ]
 
 
-class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
+class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin, ReviewType ):
     """Representation of the peer review component of the
      unit """
     title_base = "Peer review"
@@ -92,7 +92,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [ NoLatePenalty() ]
+        self.penalizers = [ NoLatePenalty() ]
         # The object which will be used to penalize late assignments
         # todo deprecated
         # self.penalizer = self.penalizers[ 0 ]
@@ -102,12 +102,12 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
         # This could be fixed in CAN-57
         # The object which will be used to assign the score
         self.grade_methods = [ CreditForNonEmptyOLD( min_words=2, count_stopwords=True ) ]
-        # self.grade_method = self.grade_method[ 0 ]
+        # self.grade_method = self.grade_methods[ 0 ]
 
         try:
             # todo deprecated
             self.penalizer = self.penalizers[ 0 ]
-            self.grade_method = self.grade_method[ 0 ]
+            self.grade_method = self.grade_methods[ 0 ]
         except AttributeError as e:
             print(e)
 
@@ -121,7 +121,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin ):
         return "Unit {} peer-review of content unit".format( self.unit_number )
 
 
-class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, StoredDataFileMixin ):
+class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, StoredDataFileMixin, ReviewType ):
     """Representation of the peer review of
     another student's submission"""
     title_base = "Metareview"
@@ -139,7 +139,7 @@ class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, S
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [ NoLatePenalty() ]
+        self.penalizers = [ NoLatePenalty() ]
         # The object which will be used to penalize late assignments
         # todo deprecated
         # self.penalizer = self.penalizers[ 0 ]
@@ -149,12 +149,12 @@ class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, S
         # This could be fixed in CAN-57
         # The object which will be used to assign the score
         self.grade_methods = [ CreditForNonEmptyOLD( min_words=2, count_stopwords=True ) ]
-        # self.grade_method = self.grade_method[ 0 ]
+        # self.grade_method = self.grade_methods[ 0 ]
 
         try:
             # todo deprecated
             self.penalizer = self.penalizers[ 0 ]
-            self.grade_method = self.grade_method[ 0 ]
+            self.grade_method = self.grade_methods[ 0 ]
         except AttributeError as e:
             print(e)
 

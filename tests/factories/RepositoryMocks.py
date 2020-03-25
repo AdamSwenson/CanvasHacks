@@ -78,6 +78,8 @@ class ContentRepositoryMock( IContentRepository, StoreMixin ):
             d = {
                 'student_id': sid,
                 'submitted_at': submitted_at,
+                # some things look for this still
+                'submitted': submitted_at,
                 'course_id': course_id,
                 'quiz_id': quiz_id
             }

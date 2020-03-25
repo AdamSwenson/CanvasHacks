@@ -31,7 +31,7 @@ class Journal( Activity ):
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizer = [HalfLate( self.due_at, self.grace_period )]
+        self.penalizers = [HalfLate( self.due_at, self.grace_period )]
         # The object which will be used to penalize late assignments
         # todo deprecated
         self.penalizer = self.penalizers[ 0 ]
@@ -41,5 +41,5 @@ class Journal( Activity ):
         # This could be fixed in CAN-57
         # The object which will be used to assign the score
         self.grade_methods = [ CreditForNonEmptyOLD( min_words=2, count_stopwords=True ) ]
-        self.grade_method = self.grade_method[ 0 ]
+        self.grade_method = self.grade_methods[ 0 ]
 
