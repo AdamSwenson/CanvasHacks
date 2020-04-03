@@ -15,7 +15,7 @@ if __name__ == '__main__':
     pass
 
 
-class DiscussionForum( DiscussionGroup, Activity ):
+class DiscussionForum( DiscussionGroup, Activity, StoredDataFileMixin ):
     """Representation of the main discussion forum"""
     title_base = "Main discussion"
     instructions_filename = 'discussion-forum-instructions.txt'
