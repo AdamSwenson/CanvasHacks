@@ -3,8 +3,8 @@ Created by adam on 3/15/20
 """
 __author__ = 'adam'
 
+
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.GradingMethods.errors import InvalidGradingValuesError
 from CanvasHacks.Processors.cleaners import TextCleaner
 from CanvasHacks.Text.stats import WordCount
 
@@ -14,12 +14,13 @@ if __name__ == '__main__':
 
 def make_pct_required_count_thresholds( required_count, step=10 ):
     return [
-        { 'min_count': round( required_count * pct * 0.01 ), 'pct_credit': round(pct * 0.01) } for pct in range( 0, 100, step ) ]
+        { 'min_count': round( required_count * pct * 0.01 ), 'pct_credit': round( pct * 0.01 ) } for pct in
+        range( 0, 100, step ) ]
 
 
-class GradeByWordCount( IGradingMethod ):
+class GradeByWordCount( IGradingMethod):
 
-    def __init__( self, threshold_dicts, count_stopwords=True ):
+    def __init__( self, threshold_dicts=[ ], required_count=None, pct_of_score=1, count_stopwords=True ):
         """
         Count dict defines the thresholds via wordcounts
         and percentage of total. Should be a list like:
@@ -35,6 +36,7 @@ class GradeByWordCount( IGradingMethod ):
         :param count_stopwords: Whether stopwords should be included in the wordcount
         """
 
+        self.required_count = required_count
         self.threshold_dicts = threshold_dicts
         self.count_stopwords = count_stopwords
 
@@ -46,13 +48,24 @@ class GradeByWordCount( IGradingMethod ):
         # The object which will handle the actual processing and computation
         self.analyzer = WordCount( count_stopwords=count_stopwords )
 
+        if self.required_count is not None and len( self.threshold_dicts ) > 0:
+            self.make_pct_required_count_thresholds( self.required_count )
+
         self.prepare_dicts()
+
+    def make_pct_required_count_thresholds( self, required_count, step=10 ):
+        self.threshold_dicts = make_pct_required_count_thresholds(required_count, step)
+        # [
+        #     { 'min_count': round( required_count * pct * 0.01 ), 'pct_credit': round( pct * 0.01 ) } for pct in
+        #     range( 0, 100, step ) ]
+        self.prepare_dicts()
+        return self.threshold_dicts
 
     def prepare_dicts( self ):
         # Validate and put the dicts we've received into the
         # correct order
-        if len( self.threshold_dicts ) == 0:
-            raise InvalidGradingValuesError
+        # if len( self.threshold_dicts ) == 0:
+        #     raise InvalidGradingValuesError
         self.threshold_dicts.sort( key=lambda x: x[ 'min_count' ], reverse=True )
 
     def grade( self, content, **kwargs ):

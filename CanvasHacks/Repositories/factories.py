@@ -4,8 +4,7 @@ Created by adam on 2/26/20
 __author__ = 'adam'
 
 from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded, NoNewSubmissions
-from CanvasHacks.Loaders.quiz import NewQuizReportFileLoader, AllQuizReportFileLoader
-from CanvasHacks.PeerReviewed.Definitions import Review, DiscussionForum
+from CanvasHacks.Definitions.skaa import Review
 from CanvasHacks.Repositories.assignments import AssignmentRepository
 from CanvasHacks.Repositories.discussions import DiscussionRepository
 from CanvasHacks.Repositories.quizzes import ReviewRepository, QuizRepository

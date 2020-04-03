@@ -5,7 +5,7 @@ __author__ = 'adam'
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.submission_record import SubmissionRecord
-from CanvasHacks.PeerReviewed.Definitions import Activity
+from CanvasHacks.Definitions.activity import Activity
 from CanvasHacks.Repositories.interfaces import IRepo
 from CanvasHacks.Repositories.mixins import StudentWorkMixin
 from CanvasHacks.TimeTools import current_utc_timestamp

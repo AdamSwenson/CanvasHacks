@@ -1,7 +1,7 @@
 """
 Created by adam on 2/14/19
 """
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 
 __author__ = 'adam'
 from IPython.display import display
@@ -47,7 +47,7 @@ def make_discussion_selection_button( topic_id, name, **kwargs ):
                                   environment.CONFIG.remove_discussion, **kwargs )
 
 
-def make_discussion_chooser( course, **kwargs ):
+def make_discussion_chooser( course, return_button=False, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -63,6 +63,15 @@ def make_discussion_chooser( course, **kwargs ):
     #         display( widgets.HTML( value="<h4>Course {}</h4>".format( course_id ) ) )
     for discussion_id, discussion_name in discussions:
         buttons.append( make_discussion_selection_button( discussion_id, discussion_name, **kwargs ) )
+
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return buttons
+    else:
+
+        display( VBox(buttons) )
+
 
 
 # ---------------------------- Assignments
@@ -101,7 +110,7 @@ def make_assignment_button( assignment_id, name, **kwargs ):
                                   **kwargs )
 
 
-def make_assignment_chooser(activity=None, **kwargs):
+def make_assignment_chooser(activity=None,  return_button=False, **kwargs):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG
@@ -125,6 +134,14 @@ def make_assignment_chooser(activity=None, **kwargs):
     for assignment_id, assignment_name in assignments:
         buttons.append( make_assignment_button( assignment_id, assignment_name , **kwargs) )
     # return buttons
+
+    if return_button is True:
+        # If putting inside a box or something else which will
+        # call display
+        return buttons
+    else:
+
+        display( VBox(buttons) )
 
 
 # ------------------------------ Unit

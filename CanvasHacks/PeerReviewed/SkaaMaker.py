@@ -8,7 +8,7 @@ import pandas as pd
 
 import CanvasHacks.environment as env
 from CanvasHacks.Models.model import StoreMixin
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 
 LOC = '{}/Box Sync/TEACHING/Phil 305 Business ethics/Phil305 S20'.format(
     env.ROOT )  # placeholder for where the access codes are stored

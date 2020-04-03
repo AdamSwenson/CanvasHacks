@@ -6,8 +6,10 @@ __author__ = 'adam'
 
 from CanvasHacks import environment
 from CanvasHacks.DAOs.mixins import DaoMixin
-from CanvasHacks.PeerReviewed.Definitions import DiscussionForum, DiscussionGroup, DiscussionReview, InitialWork,\
-    MetaReview, Review, SkaaReviewGroup
+from CanvasHacks.Definitions.skaa import InitialWork,\
+    MetaReview, Review
+from CanvasHacks.Definitions.discussion import DiscussionForum, DiscussionReview
+from CanvasHacks.Definitions.groups import SkaaReviewGroup, DiscussionGroup
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
 from CanvasHacks.Repositories.status import FeedbackStatusRepository, InvitationStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository

@@ -20,7 +20,7 @@ class StatusRecord( Base, Model ):
     Keeps track of when an activity_inviting_to_complete was made available to a
     student and when they submitted it.
 
-    NB, No need for recording when a wait notification is sent.
+    NB, No need for recording when a rest_timeout notification is sent.
     That can go in the logs for auditing
     """
     __tablename__ = env.STATUS_TABLE_NAME
@@ -167,7 +167,7 @@ class ComplexStatusRecord( Base, Model ):
     # reviewer_of student's content unit to review
     reviewer_assigned_on = Column( DATETIME, nullable=True )
 
-    # If the student was sent a message that they must wait
+    # If the student was sent a message that they must rest_timeout
     # until someone else submits the unit before they can review
     # this is when that notificaion was sent
     wait_notification_on = Column( DATETIME, nullable=True )
@@ -248,7 +248,7 @@ class ComplexStatusRecord( Base, Model ):
 
     def record_wait_notification( self, sent_time=None ):
         """Call to record that the student has been sent a notification that
-        they will have to wait to receive student work for them to review"""
+        they will have to rest_timeout to receive student work for them to review"""
         if sent_time is None:
             sent_time = current_utc_timestamp()
         self.wait_notification_on = sent_time

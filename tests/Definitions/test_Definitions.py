@@ -3,11 +3,13 @@ Created by adam on 12/24/19
 """
 import pandas as pd
 from unittest import TestCase
-from tests.TestingBase import TestingBase
-from tests.factories.PeerReviewedFactories import activity_data_factory, test_data_factory, unit_factory
+from tests.factories.PeerReviewedFactories import test_data_factory, unit_factory
 from CanvasHacks.Models.model import Model
-from CanvasHacks.PeerReviewed.Definitions import Unit, Activity, UnitEndSurvey, Journal, InitialWork, Review, MetaReview, TopicalAssignment, DiscussionReview, DiscussionForum
-import re
+from CanvasHacks.Definitions.skaa import InitialWork, Review, MetaReview
+from CanvasHacks.Definitions.journal import Journal
+from CanvasHacks.Definitions.activity import Activity
+from CanvasHacks.Definitions.unit import Unit
+
 __author__ = 'adam'
 
 if __name__ == '__main__':

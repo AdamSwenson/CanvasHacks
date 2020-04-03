@@ -3,19 +3,16 @@ Created by adam on 2/22/20
 """
 __author__ = 'adam'
 
-from unittest import TestCase
-from unittest.mock import MagicMock, patch, create_autospec
+from unittest.mock import MagicMock, patch
 
 from faker import Faker
 
 from CanvasHacks.Messaging.templates import REVIEW_NOTICE_TEMPLATE
-from CanvasHacks.PeerReviewed.Definitions import *
 from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
-from CanvasHacks.Repositories.status import StatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
 from tests.TestingBase import TestingBase
 from tests.factories.ModelFactories import student_factory
-from tests.factories.PeerReviewedFactories import activity_data_factory, unit_factory
+from tests.factories.PeerReviewedFactories import unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
 fake = Faker()

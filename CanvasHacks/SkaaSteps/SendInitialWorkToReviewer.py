@@ -52,7 +52,7 @@ class SendInitialWorkToReviewer( IStep ):
         work to reviewer
         Possible kwargs:
             only_new=False, Probably not used
-            rest_timeout=5 Number of seconds to wait for canvas to generate report
+            rest_timeout=5 Number of seconds to rest_timeout for canvas to generate report
         :return:
         """
         try:

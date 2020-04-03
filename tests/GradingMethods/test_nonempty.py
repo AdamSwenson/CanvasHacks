@@ -3,7 +3,7 @@ Created by adam on 1/29/20
 """
 from unittest import TestCase
 
-from CanvasHacks.GradingMethods.nonempty import receives_credit, CreditForNonEmpty
+from CanvasHacks.GradingMethods.nonempty import receives_credit, CreditForNonEmptyOLD
 
 __author__ = 'adam'
 
@@ -17,7 +17,7 @@ class TestCreditForNonEmpty(TestingBase):
 
     def setUp(self) -> None:
         self.config_for_test()
-        self.obj = CreditForNonEmpty()
+        self.obj = CreditForNonEmptyOLD()
 
     def test_grade_credit( self ):
         txt = "The fat wiffle hound wiffled loudly"

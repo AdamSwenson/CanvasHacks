@@ -18,8 +18,13 @@ class DaoMixin:
 
     def _initialize_db( self ):
         try:
+            unit_number = self.unit.unit_number
+        except AttributeError:
+            unit_number = self.activity.unit_number
+
+        try:
             t = 'TEST-' if env.CONFIG.is_test else ""
-            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
+            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, unit_number )
         except AttributeError as e:
             # This is likely to happen during testing
             print(e)

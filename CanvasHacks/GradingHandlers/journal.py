@@ -4,12 +4,12 @@ Created by adam on 2/18/20
 
 __author__ = 'adam'
 
-from CanvasHacks.GradingTools.base import IGrader
+from CanvasHacks.GradingHandlers.base import IGrader
 
 __author__ = 'adam'
 
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.GradingTools.penalities import IPenalizer
+from CanvasHacks.GradingCorrections.penalities import IPenalizer
 
 
 class JournalGrader( IGrader ):

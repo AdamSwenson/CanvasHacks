@@ -6,8 +6,8 @@ __author__ = 'adam'
 from unittest.mock import create_autospec, MagicMock
 
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.GradingTools.penalities import IPenalizer
-from CanvasHacks.GradingTools.review import ReviewGrader
+from CanvasHacks.GradingCorrections.penalities import IPenalizer
+from CanvasHacks.GradingHandlers.review import ReviewGrader
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from TestingBase import TestingBase
 from factories.RepositoryMocks import ContentRepositoryMock
@@ -29,7 +29,8 @@ class TestReviewGrader( TestingBase ):
         self.activity = MagicMock( grade_method=self.grade_method, penalizer=self.penalizer )
 
         self.work_repo = ContentRepositoryMock( activity=self.activity, points_per_question=self.points_per_question )
-        self.work_repo.create_quiz_repo_data( self.student_ids, submitted_date=self.fake.date_time_this_century(),
+        self.work_repo.create_quiz_repo_data( self.student_ids,
+                                            submitted_at=self.fake.date_time_this_century(),
                                               make_dataframe=True )
 
         self.submission_repo = create_autospec( ISubmissionRepo )

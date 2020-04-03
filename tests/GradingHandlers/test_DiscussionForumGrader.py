@@ -3,12 +3,12 @@ Created by adam on 3/9/20
 """
 __author__ = 'adam'
 # first so will set globals
-from CanvasHacks.PeerReviewed.Definitions import DiscussionForum
+from CanvasHacks.Definitions.discussion import DiscussionForum
 from TestingBase import TestingBase
 
 from unittest.mock import MagicMock, create_autospec
 
-from CanvasHacks.GradingTools.discussion import DiscussionForumGrader
+from CanvasHacks.GradingHandlers.discussion import DiscussionForumGrader
 from CanvasHacks.Repositories.discussions import DiscussionRepository
 
 # from CanvasHacks.Repositories.discussions import DiscussionRepository

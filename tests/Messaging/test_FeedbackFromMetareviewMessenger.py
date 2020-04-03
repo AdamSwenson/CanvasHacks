@@ -5,7 +5,7 @@ Created by adam on 2/23/20
 __author__ = 'adam'
 
 from CanvasHacks.Models.student import get_first_name
-from CanvasHacks.Repositories.status import StatusRepository, FeedbackStatusRepository
+from CanvasHacks.Repositories.status import FeedbackStatusRepository
 
 if __name__ == '__main__':
     pass
@@ -19,11 +19,10 @@ from unittest.mock import MagicMock, patch, create_autospec
 from faker import Faker
 
 from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE
-from CanvasHacks.PeerReviewed.Definitions import *
 from CanvasHacks.Repositories.students import StudentRepository
 
 from tests.factories.ModelFactories import student_factory
-from tests.factories.PeerReviewedFactories import activity_data_factory, unit_factory
+from tests.factories.PeerReviewedFactories import unit_factory
 from tests.factories.RepositoryMocks import ContentRepositoryMock
 
 from CanvasHacks.Messaging.skaa import FeedbackFromMetareviewMessenger

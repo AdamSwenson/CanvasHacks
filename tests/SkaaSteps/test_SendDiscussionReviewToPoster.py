@@ -9,9 +9,7 @@ from faker import Faker
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Messaging.discussions import FeedbackFromDiscussionReviewMessenger
-from CanvasHacks.Models.review_association import ReviewAssociation
-from CanvasHacks.Models.status_record import FeedbackReceivedRecord
-from CanvasHacks.PeerReviewed.Definitions import DiscussionReview, DiscussionForum
+from CanvasHacks.Definitions.discussion import DiscussionReview
 from CanvasHacks.Repositories.status import FeedbackStatusRepository
 from CanvasHacks.SkaaSteps.SendDiscussionReviewToPoster import SendDiscussionReviewToPoster
 from tests.TestingBase import TestingBase

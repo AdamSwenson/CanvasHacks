@@ -10,6 +10,7 @@ from canvasapi.submission import Submission
 if __name__ == '__main__':
     pass
 
+
 class UncheckableDataProvidedError(Exception):
     """A filtration class has been provided with something
     it can't check"""
