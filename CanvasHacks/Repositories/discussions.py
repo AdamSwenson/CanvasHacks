@@ -130,6 +130,16 @@ class DiscussionRepository( IContentRepository, StudentWorkMixin ):
             counts.append( (sid, len( [ s for s in self.data if s[ 'student_id' ] == sid ] )) )
         return counts
 
+    def filter_by_count( self, min_post_count ):
+        """
+        Returns a copy of data without students who have not reached
+        the minimum count
+        :param min_post_count:
+        :return:
+        """
+        students_to_keep = [ sid for sid, cnt in self.post_counts if cnt >= min_post_count ]
+        return [ s for s in filter( lambda x: x[ 'student_id' ] in students_to_keep, self.data ) ]
+
     # def _get_discussion_entries(self, topic_id):
     #     """
     #     THIS WON'T WORK BECAUSE ONLY RETURNS TOP LEVEL ENTRIES

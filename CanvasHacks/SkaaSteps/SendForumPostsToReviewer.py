@@ -23,8 +23,9 @@ from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 
 
 class SendForumPostsToReviewer( IStep ):
+    # post_threshold: int
 
-    def __init__( self, course=None, unit=None, is_test=None, send=True, **kwargs ):
+    def __init__( self, course=None, unit=None, is_test=None, send=True, post_threshold=None, **kwargs ):
         """
         :param course:
         :param unit:
@@ -34,6 +35,7 @@ class SendForumPostsToReviewer( IStep ):
         super().__init__( course, unit, is_test, send, **kwargs )
 
         # The activity whose results we are going to be doing something with
+        self.post_threshold = post_threshold
         self.activity = unit.discussion_forum
 
         # The activity which we are inviting the receiving student to complete
@@ -132,11 +134,17 @@ class SendForumPostsToReviewer( IStep ):
 
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
+        if self.post_threshold is not None:
+            # If a minimum post count has been set, we toss out students
+            # who have not reached that count
+            self.work_repo.data = self.work_repo.filter_by_count(self.post_threshold)
+
         self.display_manager.initially_loaded = self.work_repo.data
 
     @property
     def audit_frame( self ):
         return self.associationRepo.audit_frame( self.studentRepo )
+
 
 
 if __name__ == '__main__':

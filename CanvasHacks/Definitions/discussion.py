@@ -6,6 +6,7 @@ __author__ = 'adam'
 import re
 
 from CanvasHacks.Definitions.activity import Activity
+from CanvasHacks.Definitions.base import DiscussionType
 from CanvasHacks.Definitions.groups import DiscussionGroup, ReviewType
 from CanvasHacks.GradingCorrections.penalities import NoLatePenalty
 from CanvasHacks.GradingMethods.nonempty import CreditForNonEmptyOLD
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     pass
 
 
-class DiscussionForum( DiscussionGroup, Activity, StoredDataFileMixin ):
+class DiscussionForum(Activity, DiscussionType,  DiscussionGroup,  StoredDataFileMixin ):
     """Representation of the main discussion forum"""
     title_base = "Main discussion"
     instructions_filename = 'discussion-forum-instructions.txt'
@@ -56,7 +57,7 @@ class DiscussionForum( DiscussionGroup, Activity, StoredDataFileMixin ):
             print( "No topic id set on discussion " )
 
 
-class DiscussionReview( DiscussionGroup, Activity, QuizDataMixin, StoredDataFileMixin, ReviewType ):
+class DiscussionReview( Activity, DiscussionType,  ReviewType, DiscussionGroup, QuizDataMixin, StoredDataFileMixin ):
     """Representation of the peer review of the main discussion forum"""
     title_base = "Discussion review"
     instructions_filename = 'discussion-review-instructions.txt'

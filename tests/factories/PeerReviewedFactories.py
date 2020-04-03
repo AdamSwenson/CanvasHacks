@@ -70,6 +70,7 @@ def unit_factory( course=None, unit_number=None, initial_is_quiz_type=True ):
     # discussion forum
     discussion_forum = DiscussionForum( **test_data[ 'discussion_forum' ] )
     discussion_forum.id = random.randint( 0, 10000 )
+    discussion_forum.discussion_topic = {'id' : discussion_forum.id}
     discussion_forum.access_code = fake.ean8()
     # discussion review
     discussion_review = DiscussionReview( **test_data[ 'discussion_review' ] )

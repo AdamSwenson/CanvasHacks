@@ -122,15 +122,6 @@ class GradeAssignment( StoreMixin ):
             sub.edit(submission={'posted_grade': score})
             self.uploaded += 1
 
-        self._log_uploaded()
-
-    def _log_uploaded( self ):
-        """
-        Prints or writes to file what happened during upload
-        :return:
-        """
-        stem = "Grades uploaded for {} students "
-        print(stem.format(self.uploaded))
 
 if __name__ == '__main__':
     # todo parse command line args into environment

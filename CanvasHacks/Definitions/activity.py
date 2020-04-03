@@ -22,7 +22,7 @@ class Activity( Model ):
 
     @classmethod
     def is_activity_type( cls, assignment_name ):
-        """Given the name of an unit, determines
+        """Given the name of an activity, determines
         whether it is an instance of this unit type"""
         return cls.regex.search( assignment_name.strip().lower() )
 
