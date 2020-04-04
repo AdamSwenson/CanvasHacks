@@ -100,7 +100,9 @@ class Unit:
         """
         try:
             # first we try to set from self
-            return obj.access_code
+            if obj.access_code is not None:
+                return obj.access_code
+            raise AttributeError
         except AttributeError:
             # check to see if we ahve a quiz id
             try:
