@@ -101,7 +101,7 @@ def populate_discussion( tokens: list, topic_id: int, deep: int, course_id: int 
 
 # ---------------------- Assignment answer tools
 
-def populate_assignment( tokens: list, assignment_id: int, course_id: int ):
+def populate_assignment( tokens: list, assignment_id: int, course_id: int, num_paragraphs=1 ):
     """Uploads a paragraph of response text for each token provided
     in tokens.
     :param assignment_id: The identifier of the canvas unit to populate
@@ -112,7 +112,7 @@ def populate_assignment( tokens: list, assignment_id: int, course_id: int ):
     submissions = [ ]
 
     for t in tokens:
-        msg = fake.paragraph()
+        msg = '\n '.join([fake.paragraph() for _ in range(0,num_paragraphs)])
         sub = {
             'submission_type': 'online_text_entry',
             'body': msg,
