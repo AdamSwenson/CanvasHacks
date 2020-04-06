@@ -18,10 +18,10 @@ URL = 'https://github.com/AdamSwenson/CanvasHacks'
 EMAIL = 'adam.swenson@csun.edu'
 AUTHOR = 'adam swenson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.18'
+VERSION = '0.0.19'
 
 # What packages are required for this module to be executed?
-# REQUIRED = [
+REQUIRED = []
 #     'PyPDF2', 'python-docx', 'requests', 'AdamTools'  # 'requests', 'maya', 'records',
 # ]
 
@@ -36,8 +36,8 @@ EXTRAS = {
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open('{}/requirements.txt'.format(here), 'r') as f:
-    REQUIRED = f.readlines()
+# with open('{}/requirements.txt'.format(here), 'r') as f:
+#     REQUIRED = f.readlines()
 
 
 
