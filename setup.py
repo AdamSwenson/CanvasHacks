@@ -18,12 +18,12 @@ URL = 'https://github.com/AdamSwenson/CanvasHacks'
 EMAIL = 'adam.swenson@csun.edu'
 AUTHOR = 'adam swenson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.0.17'
+VERSION = '0.0.18'
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    'PyPDF2', 'python-docx', 'requests', 'AdamTools'  # 'requests', 'maya', 'records',
-]
+# REQUIRED = [
+#     'PyPDF2', 'python-docx', 'requests', 'AdamTools'  # 'requests', 'maya', 'records',
+# ]
 
 # What packages are optional?
 EXTRAS = {
@@ -35,6 +35,11 @@ EXTRAS = {
 # If you do change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+with open('{}/requirements.txt'.format(here), 'r') as f:
+    REQUIRED = f.readlines()
+
+
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
