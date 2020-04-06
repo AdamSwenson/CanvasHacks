@@ -183,8 +183,6 @@ class InteractiveConfiguration( Configuration ):
     def handle_url_entry( cls, event ):
         if event[ 'type' ] == 'change' and event[ 'name' ] == 'value':
             v = event[ 'new' ]
-            print('j', v)
-
             cls.add_canvas_url_base( v )
 
     @classmethod
