@@ -37,6 +37,11 @@ def make_canvas_url_input(**kwargs):
                          'layout' : widgets.Layout( width='100%' )
     }
     v = { **canvas_url_input, **kwargs}
+    try:
+        # If we received the url as a default parameter, set it on the config now
+        v['handler']({'type' : 'change', 'name': 'value', 'value': v['value']})
+    except KeyError:
+        pass
     text = widgets.Text( **v )
     display( text )
     text.observe( v[ 'handler' ] )
