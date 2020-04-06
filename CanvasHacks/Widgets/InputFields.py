@@ -38,9 +38,11 @@ def make_canvas_url_input(**kwargs):
     }
     v = { **canvas_url_input, **kwargs}
     try:
+        print(v)
         # If we received the url as a default parameter, set it on the config now
-        v['handler']({'type' : 'change', 'name': 'value', 'value': v['value']})
-    except KeyError:
+        v['handler']({'type' : 'change', 'name': 'value', 'new': v['value']})
+    except KeyError as e:
+        print(e)
         pass
     text = widgets.Text( **v )
     display( text )
