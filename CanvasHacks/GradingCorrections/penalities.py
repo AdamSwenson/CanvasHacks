@@ -104,13 +104,13 @@ class NoLatePenalty( IPenalizer ):
     def __init__( self, *args, **kwargs ):
         self.penalized_records = [ ]
 
-    def get_penalty( self, submitted_date ):
+    def get_penalty( self, submitted_date, **kwargs ):
         return 0
 
-    def get_penalized_score( self, submitted_date, original_score ):
+    def get_penalized_score( self, submitted_date, original_score, **kwargs ):
         return original_score
 
-    def get_fudge_points( self, submitted_date, total_score, row=None ):
+    def get_fudge_points( self, submitted_date, total_score, row=None, **kwargs ):
         """
         For assignment types where we have to submit the
         grade via fudge points, this calculates the amount for
@@ -190,7 +190,7 @@ class HalfLate( IPenalizer, TimeHandlerMixin ):
         return original_score * penalty
 
 
-    def get_point_reduction_pct( self, submitted_date ):
+    def get_point_reduction_pct( self, submitted_date, **kwargs ):
         return 1 - self.get_penalty(submitted_date)
 
     def get_fudge_points( self, submitted_date, total_score, row=None ):
