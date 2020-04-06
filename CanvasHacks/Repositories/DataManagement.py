@@ -27,7 +27,7 @@ class DataStoreNew(object):
     @property
     def credit( self ):
         """Alias so can use interfaces for old version"""
-        return self.results
+        return [r.user_id for r in self.results]
 
     @property
     def submissions( self ):

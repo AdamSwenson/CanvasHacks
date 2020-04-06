@@ -1,37 +1,30 @@
 """
-Created by adam on 3/16/20
+Created by adam on 4/6/20
 """
 __author__ = 'adam'
 
-import re
-
-import pandas as pd
-
 from CanvasHacks.Definitions.activity import Activity
-from CanvasHacks.GradingCorrections.penalities import HalfLate
+from CanvasHacks.GradingCorrections.penalities import NoLatePenalty
 from CanvasHacks.GradingMethods.nonempty import CreditForNonEmptyOLD
 
 if __name__ == '__main__':
     pass
 
 
-class Journal( Activity ):
-    """Representation of a journal activity.
+class GenericCreditNoCredit( Activity ):
+    """Representation of a generic assignment which is graded credit / no credit
+    with no late penalties
     Not related to assignments within a Unit
     """
-    title_base = "Journal"
-
-    regex = re.compile( r"\bjournal\b" )
     creation_type = 'assignment'
 
     def __init__( self, **kwargs ):
-        self.grace_period = pd.Timedelta( '2 days' )
         super().__init__( **kwargs )
 
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizers = [HalfLate( self.due_at, self.grace_period )]
+        self.penalizers = [NoLatePenalty(  )]
         # The object which will be used to penalize late assignments
         # todo deprecated
         self.penalizer = self.penalizers[ 0 ]

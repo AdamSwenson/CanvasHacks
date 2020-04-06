@@ -12,7 +12,9 @@ from CanvasHacks.Configuration import InteractiveConfiguration
 # -------- General
 def make_text_input( input_dict ):
     """Creates a text input field. The given dictionary should have keys 'label' and 'handler'"""
-    text = widgets.Text( description=input_dict[ 'label' ] )
+    text = widgets.Text( **input_dict )
+
+    # text = widgets.Text( description=input_dict[ 'label' ] )
     display( text )
     text.observe( input_dict[ 'handler' ] )
     return text
@@ -21,14 +23,23 @@ def make_text_input( input_dict ):
 # -------- Canvas specific
 def make_canvas_token_input():
     """Creates the input field for the canvas api token"""
-    canvas_token_input = { 'label': 'Canvas token', 'handler': InteractiveConfiguration.handle_token_entry }
+    canvas_token_input = { 'description': 'Canvas token',
+                           'handler': InteractiveConfiguration.handle_token_entry,
+                           'layout' : widgets.Layout( width='100%' )
+                           }
     return make_text_input( canvas_token_input )
 
 
-def make_canvas_url_input():
+def make_canvas_url_input(**kwargs):
     """Creates the input field for the canvas api token"""
-    canvas_url_input = { 'label': 'Canvas url', 'handler': InteractiveConfiguration.handle_url_entry }
-    make_text_input( canvas_url_input )
+    canvas_url_input = { 'description': 'Canvas url',
+                         'handler': InteractiveConfiguration.handle_url_entry,
+                         'layout' : widgets.Layout( width='100%' )
+    }
+    v = { **canvas_url_input, **kwargs}
+    text = widgets.Text( **v )
+    display( text )
+    text.observe( v[ 'handler' ] )
 
 
 def make_course_ids_input():
