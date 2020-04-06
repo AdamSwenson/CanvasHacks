@@ -67,7 +67,6 @@ Send2Trash==1.5.0
 six==1.12.0
 soupsieve==2.0
 SQLAlchemy==1.3.12
-terminado==0.8.2
 testpath==0.4.2
 text-unidecode==1.3
 tornado==6.0.3
