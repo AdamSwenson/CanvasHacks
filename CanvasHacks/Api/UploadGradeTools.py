@@ -40,18 +40,19 @@ def upload_credit( course_id, assignment_id, student_id, pct_credit ):
     :param student_id:
     :return:
     """
-    pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
+    if pct_credit is not None:
+        pct = "{}%".format(pct_credit) if isinstance(pct_credit, int) or pct_credit[-1:] != '%' else pct_credit
 
-    data = { 'submission': { 'posted_grade': pct } }
+        data = { 'submission': { 'posted_grade': pct } }
 
-    url_temp = "{url_base}/{assignment_id}/submissions/{student_id}"
+        url_temp = "{url_base}/{assignment_id}/submissions/{student_id}"
 
-    url = url_temp.format( url_base=make_url( course_id, 'assignments' ),
-                           assignment_id=assignment_id,
-                           student_id=student_id )
+        url = url_temp.format( url_base=make_url( course_id, 'assignments' ),
+                               assignment_id=assignment_id,
+                               student_id=student_id )
 
-    print( 'Uploading {} credit'.format(pct), url )
-    requests.put( url, headers=make_request_header(), json=data )
+        print( 'Uploading {} credit'.format(pct), url )
+        requests.put( url, headers=make_request_header(), json=data )
 
 
 def assign_no_credit( course_id, assignment_id, students ):

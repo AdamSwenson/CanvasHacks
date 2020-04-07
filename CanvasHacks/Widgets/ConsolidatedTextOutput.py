@@ -41,11 +41,11 @@ def make_text_display( student_id, text, student_name='' ):
     return widgets.HTML( e )
 
 
-def make_submission_output( text, student_id, credit_list, studentRepository=None ):
+def make_submission_output( text, student_id, store,  studentRepository=None ):
     """Creates the display of the submitted text with a toggle button to
     update whether the student receives credit
     """
-    bval = 'Credit' if student_id in credit_list else 'No credit'
+    bval = 'Credit' if student_id in store.credit else 'No credit'
     credit_button = widgets.ToggleButtons(
         options=[ 'Credit', 'No credit' ],
         value=bval,
@@ -66,9 +66,9 @@ def make_submission_output( text, student_id, credit_list, studentRepository=Non
         print( v, student_id )
         try:
             if v == 'Credit':
-                credit_list.append( student_id )
+                store.assign_student_credit( student_id )
             elif v == 'No credit':
-                credit_list.remove( student_id )
+                store.assign_student_no_credit( student_id )
         except ValueError:
             pass
 
@@ -80,7 +80,7 @@ def make_consolidated_text_fields( store, studentRepository=None ):
     """Displays each entry with a toggle to adjust whether the
     student receives credit"""
     for r in store.submissions:
-        make_submission_output( r[ 'body' ], r[ 'student_id' ], store.credit, studentRepository )
+        make_submission_output( r[ 'body' ], r[ 'student_id' ], store, studentRepository )
 
 
 def make_consolidated_text_file( journal_folder, filename='compiled-text.txt', studentRepository=None ):

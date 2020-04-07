@@ -24,10 +24,33 @@ class DataStoreNew(object):
         # should contain tuples (submission, pct credit)
         self.results = []
 
+    def assign_student_no_credit( self, student_id ):
+        """
+        Update a record to give the student no credit
+        :param student_id:
+        :return:
+        """
+        idx = [ idx for idx, v in enumerate( self.results ) if v[ 0 ].user_id == student_id ][ 0 ]
+        old = self.results.pop( idx )
+        new = (old[ 0 ], None)
+        self.results.append(new)
+
+
+    def assign_student_credit( self, student_id ):
+        """
+        Updates student to receive 100 credit. NB, will lose any penalty
+        :param student_id:
+        :return:
+        """
+        idx = [ idx for idx, v in enumerate( self.results ) if v[ 0 ].user_id == student_id ][ 0 ]
+        old = self.results.pop( idx )
+        new = (old[ 0 ], 100)
+        self.results.append( new )
+
     @property
     def credit( self ):
         """Alias so can use interfaces for old version"""
-        return [r.user_id for r, s in self.results]
+        return [r.user_id for r, score in self.results if score is not None and score > 0]
 
     @property
     def submissions( self ):
