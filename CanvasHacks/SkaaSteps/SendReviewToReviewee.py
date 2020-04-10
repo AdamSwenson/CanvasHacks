@@ -4,7 +4,7 @@ Created by adam on 2/23/20
 from CanvasHacks.Errors.data_ingestion import NoNewSubmissions
 from CanvasHacks.Errors.review_pairings import NoReviewPairingFound
 from CanvasHacks.Logging.run_data import RunLogger
-from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
+from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger, FeedbackFromReviewMessenger
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.status import FeedbackStatusRepository, InvitationStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
@@ -43,12 +43,15 @@ class SendReviewToReviewee( IStep ):
         self._initialize()
 
         # Initialize the relevant status repos
-
         self.feedback_status_repo = FeedbackStatusRepository(self.dao, self.activity_feedback_on, self.activity_for_review_pairings)
 
-        self.invite_status_repo = InvitationStatusRepository(self.dao, self.activity_notifying_about)
+        self.statusRepos = [self.feedback_status_repo]
 
-        self.statusRepos = [self.invite_status_repo, self.feedback_status_repo]
+        if self.activity_notifying_about is not None:
+            # Will hit this if there is a metareview
+            self.invite_status_repo = InvitationStatusRepository(self.dao, self.activity_notifying_about)
+            self.statusRepos.append(self.invite_status_repo)
+
 
     def run( self, **kwargs ):
         """
@@ -76,9 +79,20 @@ class SendReviewToReviewee( IStep ):
             print( e )
 
     def _message_step( self ):
-        # Handle sending the results of the review to the original author
-        # so they can do the metareview
-        self.messenger = MetareviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.statusRepos )
+        if self.unit.metareview is None:
+            print("No metareview to invite; just sending feedback")
+            self.messenger = FeedbackFromReviewMessenger( self.unit,
+                                                          self.studentRepo,
+                                                          self.work_repo,
+                                                          self.statusRepos )
+        else:
+            print("Sending feedback and inviting to metareview")
+            # Handle sending the results of the review to the original author
+            # so they can do the metareview
+            self.messenger = MetareviewInvitationMessenger( self.unit,
+                                                            self.studentRepo,
+                                                            self.work_repo,
+                                                            self.statusRepos )
 
         self.messenger.notify( self.associations, self.send )
 

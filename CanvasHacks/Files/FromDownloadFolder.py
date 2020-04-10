@@ -11,7 +11,7 @@ import re
 import shutil
 from functools import wraps
 from CanvasHacks import environment as env
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.TimeTools import current_utc_timestamp, timestamp_for_unique_filenames
 
 

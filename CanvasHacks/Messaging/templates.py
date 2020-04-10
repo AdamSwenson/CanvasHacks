@@ -35,6 +35,28 @@ REVIEW_NOTICE_TEMPLATE = """
    
     """
 
+# Used to send feedback without invite to metareview
+REVIEW_FEEDBACK_ONLY_TEMPLATE = """
+    Hi {name},
+
+    The peer-review responses from the student who read your work are below. Please read them carefully and re-read your original assignment :
+    =======================
+
+    {responses}
+
+    =======================
+    {other}
+
+    Personally, whenever I get critical feedback on something I've written, my first impression is always wrong ---I either think the problems mentioned are more trivial than they are or go in the opposite direction and overinflate every minor thing into something huge. Please take the opportunity to really get your head around your reviewers' feedback.
+    
+    Please note that there is no metareview assignment (the review of the review) for this unit.
+
+    Enjoy,
+    /a
+
+    """
+
+
 # Used to notify the author that it is time to do the metareview
 METAREVIEW_NOTICE_TEMPLATE = """
     Hi {name},
@@ -65,7 +87,6 @@ METAREVIEW_NOTICE_TEMPLATE = """
     Enjoy,
     /a
     
-    PS, Please let me know if anything seems strange about the review I've sent you. I've tested my software as best I can, but....
    
     """
 

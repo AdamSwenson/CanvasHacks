@@ -5,8 +5,8 @@ from CanvasHacks import environment as env
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Messaging.SendTools import send_message_to_student
 from CanvasHacks.Messaging.base import SkaaMessenger
-from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, \
-    METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE
+from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE,\
+    METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE, REVIEW_FEEDBACK_ONLY_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.status import StatusRepository, IStatusRepository
@@ -52,6 +52,8 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
             raise MessageDataCreationError( review_assignment )
 
 
+
+
 class MetareviewInvitationMessenger( SkaaMessenger ):
     """Handles sending message containing feedback from the peer reviewer
     to the author of the content assignment with invite to do metareview
@@ -89,6 +91,75 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
             # todo exception handling
             print( e )
             raise MessageDataCreationError( review_assignment )
+
+
+class FeedbackFromReviewMessenger(MetareviewInvitationMessenger):
+    """
+    FOR USE ONLY WHEN THERE IS NO METAREVIEW IN THE UNIT!!!!!!
+
+    We inherit from metareview invitation so can use the same prepare_messages
+    method while overwriting the methods on its parent which will require
+    a value in activity_inviting_to_complete
+
+    Sends the feedback to the original author with no request to complete
+    the metareview
+    """
+    message_template = REVIEW_FEEDBACK_ONLY_TEMPLATE
+
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repositories: StatusRepository ):
+
+        super().__init__( unit, student_repository, content_repository, status_repositories )
+
+        # The activity we are notifying about
+        # Setting to None after the parent initializes so that can overwrite this value
+        self.activity_inviting_to_complete = None
+
+
+    def _make_message_data( self, receiving_student, content, other=None ):
+        """
+        Creates a dictionary with data to be passed to the
+        method which actually sends the info to the receiving student
+        """
+        message = self._make_message_content( content, other, receiving_student )
+
+        return {
+            'student_id': receiving_student.id,
+            'subject': "Feedback on your Unit {} Essay".format(self.unit.unit_number),
+            'body': message
+        }
+
+    def _make_template_input( self, content, other, receiving_student ):
+        """
+        There will be no next assignment with many of the values the
+        regular method uses
+
+        Creates the dictionary that will be used to format the message template
+        and create the message content
+        This is abstracted out to make testing easier
+        """
+
+        d = {
+
+            'intro': "Here is the feedback on your essay:",
+
+            'name': get_first_name( receiving_student ),
+
+            # Formatted work for sending
+            'responses': content,
+
+            # Add any materials from me
+            'other': other if other is not None else "",
+
+            # Add code and link to do reviewing unit
+        }
+        return d
+
+    def _make_access_code_message( self ):
+        """There will be no next assignment with an access code, so returns an empty string
+        """
+        return ""
+
 
 
 class FeedbackFromMetareviewMessenger( SkaaMessenger ):

@@ -36,6 +36,7 @@ class SkaaMessenger:
 
         self.logger = MessageLogger()
 
+
     @property
     def sent_count( self ):
         return self.sender.sent_count
