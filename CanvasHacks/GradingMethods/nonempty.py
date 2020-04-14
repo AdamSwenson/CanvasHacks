@@ -24,7 +24,7 @@ class CreditForNonEmptyOLD( IGradingMethod ):
 
         # The object which will handle the actual processing and computation
         self.analyzer = NonEmpty
-        # self.analyzer = WordCount(count_stopwords=count_stopwords)
+        # self.analyzer = WordCount(keep_stopwords=keep_stopwords)
 
     def grade( self, content, **kwargs ):
         """Returns the pct credit as an integer"""
@@ -53,7 +53,7 @@ class CreditForNonEmptyOLD( IGradingMethod ):
         # word_count = self.analyzer.analyze(content)
         # credit = word_count >= self.min_words
         #
-        # # credit = receives_credit(content, self.min_words, self.count_stopwords)
+        # # credit = receives_credit(content, self.min_words, self.keep_stopwords)
         # if credit:
         #     return on_credit
         # elif on_no_credit is not None:
@@ -72,7 +72,7 @@ class CreditForNonEmpty( IGradingMethod ):
 
         # The object which will handle the actual processing and computation
         self.analyzer = NonEmpty
-        # self.analyzer = WordCount(count_stopwords=count_stopwords)
+        # self.analyzer = WordCount(keep_stopwords=keep_stopwords)
 
     def grade( self, content, **kwargs ):
         """Returns the pct creditr"""

@@ -5,7 +5,7 @@ __author__ = 'adam'
 
 
 from CanvasHacks.GradingMethods.base import IGradingMethod
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Text.cleaners import TextCleaner
 from CanvasHacks.Text.stats import WordCount
 
 if __name__ == '__main__':

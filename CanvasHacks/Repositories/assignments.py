@@ -6,7 +6,7 @@ __author__ = 'adam'
 from CanvasHacks.Messaging.skaa import make_prompt_and_response
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin
 from CanvasHacks.Models.student import Student
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Text.cleaners import TextCleaner
 from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Repositories.mixins import SelectableMixin, StudentWorkMixin, FrameStorageMixin
 from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository

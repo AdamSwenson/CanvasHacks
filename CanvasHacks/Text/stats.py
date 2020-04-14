@@ -23,7 +23,7 @@ class WordCount(ITextStat):
     def __init__(self, **kwargs):
         """
         kwargs will often contain
-            count_stopwords
+            keep_stopwords
         :param kwargs:
         """
         self.bagmaker = WordbagMaker(**kwargs)

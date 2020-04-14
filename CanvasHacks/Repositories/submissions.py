@@ -3,6 +3,7 @@ Created by adam on 1/18/20
 """
 import canvasapi
 import pandas as pd
+from PyPDF2.utils import PdfReadError
 
 import CanvasHacks.environment as env
 from CanvasHacks.Api.DownloadProcessingTools import extract_body
@@ -52,7 +53,11 @@ class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
         """Downloads and stores submission objects as a list in self.data"""
         self.data = [ s for s in self.assignment.get_submissions() ]
         for d in self.data:
-            d.body = extract_body( d )
+            try:
+                d.body = extract_body( d )
+            except PdfReadError as e:
+                print(e)
+
         print( "Downloaded {} submissions for unit id {}".format( len( self.data ), self.assignment.id ) )
 
     @property
