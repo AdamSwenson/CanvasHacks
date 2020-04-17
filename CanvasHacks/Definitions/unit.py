@@ -19,15 +19,24 @@ class Unit:
     """The main SKAA. This holds the definitions of all the consituent parts"""
     __name__ = 'Unit'
 
+    component_types = [ TopicalAssignment,
+                        InitialWork,
+                        Review,
+                        MetaReview,
+                        DiscussionForum,
+                        DiscussionReview,
+                        UnitEndSurvey
+                        ]
+
     def __init__( self, course, unit_number ):
-        self.component_types = [ TopicalAssignment,
-                                 InitialWork,
-                                 Review,
-                                 MetaReview,
-                                 DiscussionForum,
-                                 DiscussionReview,
-                                 UnitEndSurvey
-                                 ]
+        # self.component_types = [ TopicalAssignment,
+        #                          InitialWork,
+        #                          Review,
+        #                          MetaReview,
+        #                          DiscussionForum,
+        #                          DiscussionReview,
+        #                          UnitEndSurvey
+        #                          ]
         self.components = [ ]
 
         self.course = course

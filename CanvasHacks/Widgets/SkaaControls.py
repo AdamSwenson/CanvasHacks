@@ -94,11 +94,13 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
     unit_nums = widgets.HBox([start_unit_box, stop_unit_box])
     task_box = widgets.HBox([tasks])
 
+    out = widgets.Output( layout={ 'border': '1px solid black' } )
 
     button_box = widgets.HBox([b])
-    container = widgets.VBox([unit_nums, task_box, button_box])
+    container = widgets.VBox([unit_nums, task_box, button_box, out])
 
 
+    @out.capture(clear_output=True)
     def callback( change ):
         RUNNING = True
         b.description = get_name( RUNNING )
