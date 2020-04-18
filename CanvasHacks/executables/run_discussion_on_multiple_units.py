@@ -5,6 +5,7 @@ __author__ = 'adam'
 
 from CanvasHacks import environment
 from CanvasHacks.Definitions.unit import Unit
+from CanvasHacks.Errors.data_ingestion import NoStudentWorkDataLoaded
 from CanvasHacks.executables.run_discussion_on_single_unit import run_discussion_steps
 
 
@@ -33,8 +34,11 @@ class RunDiscussionMultipleUnits:
             environment.CONFIG.set_unit_number( unit_number)
             environment.CONFIG.initialize_canvas_objs()
             environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
+            try:
+                results[unit_number] = run_discussion_steps( **kwargs )
+            except NoStudentWorkDataLoaded as e:
+                print("Error: No student work data loaded")
 
-            results[unit_number] = run_discussion_steps( **kwargs )
 
         return results
 

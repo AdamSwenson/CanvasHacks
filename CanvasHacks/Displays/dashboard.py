@@ -3,7 +3,12 @@ Created by adam on 3/13/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Repositories.overview import SkaaOverviewRepository
+from IPython.display import HTML, Latex
+from IPython.display import display
+
+import CanvasHacks.environment as env
+from CanvasHacks.Definitions.unit import Unit
+from CanvasHacks.Repositories.overview import DiscussionOverviewRepository, SkaaOverviewRepository
 
 if __name__ == '__main__':
     pass
@@ -14,6 +19,200 @@ SKAA_ORDER = [ 'student', 'reviewing', 'reviewed_by', 'invited_to_review',
 
 DISCUSSION_ORDER = [ 'student', 'reviewing', 'reviewed_by', 'invited_to_discussion_review',
                      'received_discussion_feedback', 'canvas_id', 'csun_id', 'reviewing_id', 'reviewed_by_id' ]
+
+
+class ControlStore:
+
+    def __init__( self ):
+
+        # self.skaa_overview_repo = SkaaOverviewRepository()
+        # self.disc_overview_repo = DiscussionOverviewRepository()
+        #
+        # self.skaa_dash = SkaaDashboard( self.skaa_overview_repo )
+        # self.discussion_dash = DiscussionDashboard( self.disc_overview_repo )
+
+        self.skaa_dashboards = { }
+        self.discussion_dashboards = { }
+
+        self.skaa_repos = { }
+        self.discussion_repos = { }
+
+        # Stores all steps which have been run
+        self._completed_steps = [ ]
+
+        self.units = { }
+        # return {
+        #     'skaa_repo': sr,
+        #     'diss_repo': dr,
+        #     'skaa_dash': SkaaDashboard( sr ),
+        #     'diss_dash': DiscussionDashboard( dr ),
+        #     # holds results from multiple_unit_control
+        #     'all_steps': [ ]
+        # }
+
+    @property
+    def completed_steps( self ):
+        return self._completed_steps
+
+    @completed_steps.setter
+    def completed_steps( self, steps ):
+        if isinstance( steps, list ):
+            self._completed_steps.extend( steps )
+        self._completed_steps.append( steps )
+
+    @property
+    def skaa_repo( self ):
+        """For backwards compatibility"""
+        return self.skaa_overview_repo
+
+    def _initialize_unit_obj( self, unit_number, course=env.CONFIG.course ):
+        """Retrieves all assignments etc and creates a Unit
+        object. Replaces existing unit object if there was one"""
+        unit = Unit( course, unit_number )
+        self.units[ unit_number ] = unit
+        return unit
+
+    def load_unit( self, unit ):
+        if isinstance( unit, int ):
+            # Load the unit definition if was given a number
+            unit = self._initialize_unit_obj( unit )
+
+        # initialize and store overview repos
+        skaa_overview_repo = SkaaOverviewRepository()
+        skaa_overview_repo.load( unit )
+        self.skaa_repos[ unit.unit_number ] = skaa_overview_repo
+
+        disc_overview_repo = DiscussionOverviewRepository()
+        disc_overview_repo.load( unit )
+        self.discussion_repos[ unit.unit_number ] = disc_overview_repo
+
+        # initialize and store dashboards
+        self.skaa_dashboards[ unit.unit_number ] = SkaaDashboard( skaa_overview_repo )
+        self.discussion_dashboards[ unit.unit_number ] = DiscussionDashboard( disc_overview_repo )
+
+    @property
+    def unit_numbers( self ):
+        k = [ uk for uk in self.units.keys() ]
+        k.sort()
+        return k
+
+    # def non_poster_tables( self, display_tables=False, latex=False ):
+    #     """Displays students who have not posted to the forum"""
+    #     # Not ready for this
+    #     assert (latex is False)
+    #
+    #     tables = [ ]
+    #     for u in self.unit_numbers:
+    #         label = "Unit {}".format( u )
+    #         if latex:
+    #             raise NotImplementedError
+    #         #     out = Latex( out )
+    #         #     t = self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label )
+    #
+    #         else:
+    #             # default html table
+    #             t = self.discussion_dashboards[ u ].non_posters.to_html()
+    #             h = "<h3>{}</h3>".format( label )
+    #             t = h + t
+    #
+    #         tables.append( t )
+    #
+    #     out = ' '.join( tables )
+    #     if display_tables:
+    #         self._display( out, latex=latex )
+    #
+    #     else:
+    #         return out
+
+    def _display( self, out, latex=False ):
+        # Display all of them
+        if latex:
+            out = Latex( out )
+        else:
+            out = HTML( out )
+
+        display( out )
+
+    def display_stats( self, latex=False ):
+        assert(latex is False)
+
+        out = []
+
+        for u in self.unit_numbers:
+            if latex:
+                pass
+                # tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
+
+            else:
+                out_temp = """
+                <div class='all-units'>
+                    <h2>Unit {unit_number}</h2>
+                    <h3>SKAA</h3>
+                        <p><strong>Did not submit essay</strong>:{no_essay}</p>
+                        <p><strong>Reviewer has not submitted</strong>: {skaa_no_review}</p>
+
+                    <h3>Discussion</h3>
+                        <p><strong>Has not reached post trigger amount:</strong> {no_posts}</p>
+                        <p><strong>Reviewer has not submitted</strong>: {discussion_no_review} </p>
+                </div>
+                """
+                # default html table
+                d = {
+                    'unit_number': u,
+                    'no_essay': len(self.skaa_dashboards[ u ].no_essay),
+                    'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
+                    'no_posts': len(self.discussion_dashboards[ u ].non_posters),
+                    'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
+                }
+                out.append(out_temp.format(**d))
+        out = ' '.join(out)
+        self._display(out)
+
+
+    def display_tables( self, latex=False ):
+        """
+        Displays students whose reviewers has not turned in the review
+
+        :param latex:
+        :return:
+        """
+        tables = [ ]
+        for u in self.unit_numbers:
+            label = "Unit {}".format( u )
+            if latex:
+                tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
+
+            else:
+                out_temp = """
+                <div class='all-units'>
+                    <h2>Unit {unit_number}</h2>
+                    <h3>SKAA</h3>
+                        <h4>Did not submit essay</h4>
+                            {no_essay}
+                        <h4>Reviewer has not submitted</h4>
+                            {skaa_no_review}
+                
+                    <h3>Discussion</h3>
+                        <h4>Has not reached post trigger amount</h4>
+                            {no_posts}
+                        <h4>Reviewer has not submitted </h4>
+                            {discussion_no_review}
+                </div>
+                """
+                # default html table
+                d = {
+                    'unit_number': u,
+                    'no_essay': self.skaa_dashboards[ u ].no_essay.to_html(),
+                    'skaa_no_review': self.skaa_dashboards[ u ].non_reviewed.to_html(),
+                    'no_posts': self.discussion_dashboards[ u ].non_posters.to_html(),
+                    'discussion_no_review': self.discussion_dashboards[ u ].non_reviewed.to_html(),
+                }
+
+                tables.append( out_temp.format( **d ) )
+
+        out = ' '.join( tables )
+
+        self._display( out, latex=latex )
 
 
 class SkaaDashboard:
@@ -66,7 +265,10 @@ class SkaaDashboard:
         confusing in this context
         :return: DataFrame
         """
-        return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
+        try:
+            return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
+        except AttributeError:
+            return self.repo.non_reviewed
 
     @property
     def metareviewed( self ):
@@ -79,7 +281,12 @@ class SkaaDashboard:
 
         :return: DataFrame
         """
-        return self.repo.metareviewed.drop( [ 'reviewed_by' ], axis=1 )
+        try:
+            return self.repo.metareviewed.drop( [ 'reviewed_by' ], axis=1 )
+        except AttributeError:
+            # This can happen when the data is empty but we still need to return something
+            return self.repo.metareviewed
+
 
     @property
     def non_metareviewed( self ):
@@ -92,7 +299,11 @@ class SkaaDashboard:
 
         :return: DataFrame
         """
-        return self.repo.non_metareviewed.drop( [ 'reviewed_by' ], axis=1 )
+        try:
+            return self.repo.non_metareviewed.drop( [ 'reviewed_by' ], axis=1 )
+        except AttributeError:
+            # This can happen when the data is empty but we still need to return something
+            return self.repo.non_metareviewed
 
     def print_counts( self ):
         print( "\n~~~~~~~~~~~~~~~~~~~~~ SKAA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" )
@@ -152,7 +363,11 @@ class DiscussionDashboard:
         Drops the reviewing column to avoid confusion
         :return:
         """
-        return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
+        try:
+            return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
+        except AttributeError:
+            # This can happen when the data is empty but we still need to return something
+            return self.repo.non_reviewed
 
     def print_counts( self ):
         print( "\n~~~~~~~~~~~~~~~~~~~ DISCUSSION ~~~~~~~~~~~~~~~~~~~~~~~~~" )

@@ -106,26 +106,39 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
 
-        # Instantiate these in the callback in case values have changed
-        discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
-                                                        stop_unit=stop_unit_box.value )
-        skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
-                                            stop_unit=stop_unit_box.value )
+        # todo very inefficient to have each thing load it's own unit definitions
 
         # Move any downloaded report files into the correct location
         file_reports(environment.DOWNLOAD_FOLDER,
                      unit_start=start_unit_box.value,
                      unit_stop=stop_unit_box.value)
 
+        # Instantiate these in the callback in case values have changed
+        discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
+                                                        stop_unit=stop_unit_box.value )
+        skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
+                                            stop_unit=stop_unit_box.value )
+
         if tasks.value == 'Both':
-            control_store['all_steps'].append(skaa_runner.run(**kwargs))
-            control_store['all_steps'].append(discussion_runner.run(**kwargs))
+            # control_store['all_steps'].append(skaa_runner.run(**kwargs))
+            # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+            control_store.completed_steps = skaa_runner.run(**kwargs)
+            control_store.completed_steps = discussion_runner.run(**kwargs)
 
         elif tasks.value == 'SKAA':
-            control_store['all_steps'].append(skaa_runner.run(**kwargs))
+            control_store.completed_steps = skaa_runner.run(**kwargs)
+
+            # control_store['all_steps'].append(skaa_runner.run(**kwargs))
 
         elif tasks.value == 'Discussion':
-            control_store['all_steps'].append(discussion_runner.run(**kwargs))
+            control_store.completed_steps = discussion_runner.run(**kwargs)
+
+            # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+
+        # Load dashboards to summarize student progress
+        # will just load both kinds, regardless of what was run
+        for unit_number in range(start_unit_box.value, stop_unit_box.value + 1):
+            control_store.load_unit(unit_number)
 
         RUNNING = False
 
