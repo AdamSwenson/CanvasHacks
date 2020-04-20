@@ -18,6 +18,19 @@ TEST_CREDENTIALS = "{}/test-credentials.ini"
 
 
 class Configuration( object ):
+    """
+    Holds all global values.
+
+    Attributes
+    ---------
+    unit: Unit
+        The unit currently being acted upon
+
+    unit_store: dict
+        Other unit objects which have been previously loaded
+        to avoid the performance hit of loading them multiple times.
+
+    """
     archive_folder = False
     # Which assignments we should be grading
     assignments = [ ]
@@ -33,8 +46,11 @@ class Configuration( object ):
     # Whether in test environment
     is_test = False
     log_folder = False
+
     # a Unit definition object
     unit = None
+
+
     # Number of the unit
     unit_number = None
     test_course_id = None
