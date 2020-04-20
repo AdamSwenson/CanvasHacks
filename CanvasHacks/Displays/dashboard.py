@@ -22,14 +22,56 @@ DISCUSSION_ORDER = [ 'student', 'reviewing', 'reviewed_by', 'invited_to_discussi
 
 
 class ControlStore:
+    stats_template = """
+    <div class='unit-stats'>
+        <h2>Unit {unit_number}</h2>
+        <h3>SKAA</h3>
+            <p><strong>Submitted essay</strong>: {essay}</p>
+            <p><strong>Did not submit essay</strong>: {no_essay}</p>
+            <p><strong>Reviewer has not submitted</strong>: {skaa_no_review}</p>
+
+        <h3>Discussion</h3>
+            <p><strong>Posted required amount:</strong> {posts}</p>
+            <p><strong>Has not reached post trigger amount:</strong> {no_posts}</p>
+            <p><strong>Reviewer has not submitted:</strong> {discussion_no_review} </p>
+    </div>
+    """
+
+    incomplete_tables_template = """
+    <div class='unit-tables-incomplete'>
+        <h2>Unit {unit_number}</h2>
+        <h3>SKAA</h3>
+            <h4>Did not submit essay</h4>
+                {no_essay}
+            <h4>Reviewer has not submitted</h4>
+                {skaa_no_review}
+
+        <h3>Discussion</h3>
+            <h4>Has not reached post trigger amount</h4>
+                {no_posts}
+            <h4>Reviewer has not submitted </h4>
+                {discussion_no_review}
+    </div>
+    """
+
+    complete_tables_template = """
+    <div class='unit-tables-complete'>
+        <h2>Unit {unit_number}</h2>
+        <h3>SKAA</h3>
+            <h4>Submitted essay</h4>
+                {essay}
+            <h4>Reviewer has submitted</h4>
+                {skaa_review}
+
+        <h3>Discussion</h3>
+            <h4>Has reached post trigger amount</h4>
+                {posts}
+            <h4>Reviewer has submitted </h4>
+                {discussion_review}
+    </div>
+    """
 
     def __init__( self ):
-
-        # self.skaa_overview_repo = SkaaOverviewRepository()
-        # self.disc_overview_repo = DiscussionOverviewRepository()
-        #
-        # self.skaa_dash = SkaaDashboard( self.skaa_overview_repo )
-        # self.discussion_dash = DiscussionDashboard( self.disc_overview_repo )
 
         self.skaa_dashboards = { }
         self.discussion_dashboards = { }
@@ -41,14 +83,6 @@ class ControlStore:
         self._completed_steps = [ ]
 
         self.units = { }
-        # return {
-        #     'skaa_repo': sr,
-        #     'diss_repo': dr,
-        #     'skaa_dash': SkaaDashboard( sr ),
-        #     'diss_dash': DiscussionDashboard( dr ),
-        #     # holds results from multiple_unit_control
-        #     'all_steps': [ ]
-        # }
 
     @property
     def completed_steps( self ):
@@ -96,34 +130,6 @@ class ControlStore:
         k.sort()
         return k
 
-    # def non_poster_tables( self, display_tables=False, latex=False ):
-    #     """Displays students who have not posted to the forum"""
-    #     # Not ready for this
-    #     assert (latex is False)
-    #
-    #     tables = [ ]
-    #     for u in self.unit_numbers:
-    #         label = "Unit {}".format( u )
-    #         if latex:
-    #             raise NotImplementedError
-    #         #     out = Latex( out )
-    #         #     t = self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label )
-    #
-    #         else:
-    #             # default html table
-    #             t = self.discussion_dashboards[ u ].non_posters.to_html()
-    #             h = "<h3>{}</h3>".format( label )
-    #             t = h + t
-    #
-    #         tables.append( t )
-    #
-    #     out = ' '.join( tables )
-    #     if display_tables:
-    #         self._display( out, latex=latex )
-    #
-    #     else:
-    #         return out
-
     def _display( self, out, latex=False ):
         # Display all of them
         if latex:
@@ -134,6 +140,11 @@ class ControlStore:
         display( out )
 
     def display_stats( self, latex=False ):
+        """
+        Displays statistics about the assignment using html template
+        :param latex:
+        :return:
+        """
         assert(latex is False)
 
         out = []
@@ -144,34 +155,25 @@ class ControlStore:
                 # tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
 
             else:
-                out_temp = """
-                <div class='all-units'>
-                    <h2>Unit {unit_number}</h2>
-                    <h3>SKAA</h3>
-                        <p><strong>Did not submit essay</strong>:{no_essay}</p>
-                        <p><strong>Reviewer has not submitted</strong>: {skaa_no_review}</p>
 
-                    <h3>Discussion</h3>
-                        <p><strong>Has not reached post trigger amount:</strong> {no_posts}</p>
-                        <p><strong>Reviewer has not submitted</strong>: {discussion_no_review} </p>
-                </div>
-                """
                 # default html table
                 d = {
                     'unit_number': u,
+                    'essay': len(self.skaa_dashboards[ u ].essay),
                     'no_essay': len(self.skaa_dashboards[ u ].no_essay),
                     'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
+                    'posts': len(self.discussion_dashboards[ u ].posters),
                     'no_posts': len(self.discussion_dashboards[ u ].non_posters),
                     'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
                 }
-                out.append(out_temp.format(**d))
+                out.append(self.stats_template.format(**d))
         out = ' '.join(out)
         self._display(out)
 
 
-    def display_tables( self, latex=False ):
+    def display_incomplete_tables( self, latex=False ):
         """
-        Displays students whose reviewers has not turned in the review
+        Displays students where some aspect has not been completed
 
         :param latex:
         :return:
@@ -183,23 +185,7 @@ class ControlStore:
                 tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
 
             else:
-                out_temp = """
-                <div class='all-units'>
-                    <h2>Unit {unit_number}</h2>
-                    <h3>SKAA</h3>
-                        <h4>Did not submit essay</h4>
-                            {no_essay}
-                        <h4>Reviewer has not submitted</h4>
-                            {skaa_no_review}
-                
-                    <h3>Discussion</h3>
-                        <h4>Has not reached post trigger amount</h4>
-                            {no_posts}
-                        <h4>Reviewer has not submitted </h4>
-                            {discussion_no_review}
-                </div>
-                """
-                # default html table
+
                 d = {
                     'unit_number': u,
                     'no_essay': self.skaa_dashboards[ u ].no_essay.to_html(),
@@ -208,7 +194,39 @@ class ControlStore:
                     'discussion_no_review': self.discussion_dashboards[ u ].non_reviewed.to_html(),
                 }
 
-                tables.append( out_temp.format( **d ) )
+                # Populate the table template and add to the list
+                tables.append( self.incomplete_tables_template.format( **d ) )
+
+        out = ' '.join( tables )
+
+        self._display( out, latex=latex )
+
+
+    def display_complete_tables( self, latex=False ):
+        """
+        Displays students where tasks have been completed.
+
+        :param latex:
+        :return:
+        """
+        tables = [ ]
+        for u in self.unit_numbers:
+            if latex:
+                label = "Unit {}".format( u )
+                tables.append( self.skaa_dashboards[ u ].reviewed.to_latex( caption=label ) )
+
+            else:
+
+                d = {
+                    'unit_number': u,
+                    'essay': self.skaa_dashboards[ u ].essay.to_html(),
+                    'skaa_review': self.skaa_dashboards[ u ].reviewed.to_html(),
+                    'posts': self.discussion_dashboards[ u ].posters.to_html(),
+                    'discussion_review': self.discussion_dashboards[ u ].reviewed.to_html(),
+                }
+
+                # Populate the table template and add to the list
+                tables.append( self.complete_tables_template.format( **d ) )
 
         out = ' '.join( tables )
 
@@ -328,7 +346,7 @@ class DiscussionDashboard:
 
     """
 
-    def __init__( self, overview_repo ):
+    def __init__( self, overview_repo: DiscussionOverviewRepository ):
         self.repo = overview_repo
 
     @property
