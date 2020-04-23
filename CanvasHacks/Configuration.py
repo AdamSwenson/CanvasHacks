@@ -10,7 +10,7 @@ from canvasapi import Canvas
 
 # Needed for managing some test cases
 import CanvasHacks.testglobals
-
+from CanvasHacks.Definitions.unit import Unit
 
 CREDENTIALS_FOLDER_PATH = "{}/private"
 LIVE_CREDENTIALS = "{}/canvas-credentials.ini"
@@ -23,6 +23,29 @@ class Configuration( object ):
 
     Attributes
     ---------
+    assignments: list
+        Which assignments we should be grading
+
+    discussions: list
+        Which discussions we should grading
+
+    course: Canvas.Course
+         The canvas api object to use for the current course
+    course_ids: list
+         Id numbers of courses to act upon
+
+    canvas_token: str or False
+        The user's access token for the canvas api
+
+    canvas_url_base: str or False
+        The url to be used in all calls
+
+    excluded_users: list
+        Ids of users, e.g., the teacher to exclude from grading operations
+
+    is_test: bool
+        Whether we are currently in the test environment
+
     unit: Unit
         The unit currently being acted upon
 
@@ -46,12 +69,9 @@ class Configuration( object ):
     # Whether in test environment
     is_test = False
     log_folder = False
-
     # a Unit definition object
     unit = None
-
-
-    # Number of the unit
+    unit_store = {}
     unit_number = None
     test_course_id = None
 
@@ -122,36 +142,6 @@ class Configuration( object ):
         cls.reset_canvas_token()
         cls.reset_course_ids()
 
-    # ------------ Unit selection
-    @classmethod
-    def set_unit_number( cls, unit_number, name=None ):
-        cls.unit_number = unit_number
-
-    @classmethod
-    def initialize_canvas_objs( cls ):
-        """Sets a canvas, course, and unit object on the config
-        Creates a unit object by downloading from canvas using the first defined course id
-        todo Make this work with multiple courses
-        """
-
-        COURSE_ID = cls.course_ids[0]
-        # print("Working on course: ", COURSE_ID)
-        cls.canvas = Canvas(cls.canvas_url_base, cls.canvas_token)
-        cls.course = cls.canvas.get_course(COURSE_ID)
-        # if cls.unit_number is not None:
-        #     cls.unit = Unit(cls.course, cls.unit_number)
-
-    @classmethod
-    def reset_unit_number( cls, dummy_param=None):
-        cls.unit = None
-        cls.unit_number = None
-
-    @classmethod
-    def get_unit_number( cls ):
-        """I know, stupid. But it parallels other methods
-        so the selection buttons will work the same"""
-        return [cls.unit_number]
-
     @classmethod
     def load_section_ids( cls ):
         try:
@@ -183,6 +173,101 @@ class Configuration( object ):
         print(" ".join([" LIVE " for _ in range(0, 5)]))
         # Set on the global variable (which is only used in certain tests)
         CanvasHacks.testglobals.TEST = False
+
+        # --------------- Unit object management
+        @classmethod
+        def get_unit_from_storage(cls, unit_number):
+            return cls.unit_store
+
+    # ------------ Unit selection
+    @classmethod
+    def set_unit_number( cls, unit_number, name=None ):
+        cls.unit_number = unit_number
+
+    @classmethod
+    def set_unit( cls, unit ):
+        """
+        Takes a unit object or its unit number and sets
+        all relevant values.
+        This should replace the older versions
+        Introduced in CAN-68
+
+        :param unit: int or Unit
+        :return:
+        """
+        if isinstance(unit, int):
+            # we presumably received the unit number
+            # if we got the unit number, we load the unit object
+            # First we see if we already have it in storage
+            try:
+                unit = cls.retrieve_unit_object(unit)
+            except KeyError:
+                # The unit is not present in storage, so we load it
+                cls.initialize_canvas_objs()
+                # unit = {}
+                unit = Unit( cls.course, unit )
+
+        # Now we can set it and related values directly
+        cls.unit = unit
+        cls.unit_number = unit.unit_number
+        # We store it for future use
+        cls.store_unit_object(unit)
+        # Finally, we return it since some other processes
+        # will call this as part of assembling their own collection
+        # of unit objects
+        return unit
+
+
+    @classmethod
+    def initialize_canvas_objs( cls ):
+        """Sets a canvas, course, and unit object on the config
+        Creates a unit object by downloading from canvas using the first defined course id
+        todo Make this work with multiple courses
+        """
+
+        COURSE_ID = cls.course_ids[0]
+        # print("Working on course: ", COURSE_ID)
+        cls.canvas = Canvas(cls.canvas_url_base, cls.canvas_token)
+        cls.course = cls.canvas.get_course(COURSE_ID)
+        # if cls.unit_number is not None:
+        #     cls.unit = Unit(cls.course, cls.unit_number)
+
+    @classmethod
+    def reset_unit_number( cls, dummy_param=None):
+        cls.unit = None
+        cls.unit_number = None
+
+    @classmethod
+    def get_unit_number( cls ):
+        """I know, stupid. But it parallels other methods
+        so the selection buttons will work the same"""
+        return [cls.unit_number]
+
+    @classmethod
+    def store_unit_object( cls, unit ):
+        """
+        Puts a unit object which has already been loaded from
+        canvas into storage so we don't need to load it again
+        :param unit:
+        :return:
+        """
+        cls.unit_store[unit.unit_number] = unit
+
+    @classmethod
+    def retrieve_unit_object( cls, unit_number ):
+        """
+        Tries to retrieve a stored unit object
+        :param unit_number:
+        :raises: KeyError
+        :return:
+        """
+        try:
+            return cls.unit_store[unit_number]
+        except KeyError as e:
+            # if create_if_absent:
+            #     # todo
+            #     pass
+            raise e
 
 
 class InteractiveConfiguration( Configuration ):

@@ -35,7 +35,7 @@ class TokenFiltrationMixin:
 
         :return:
         """
-        self._remove += [ '``', "''", "'s" ]
+        self._remove += [ '``', "''", "'s", '“', ]
         self._remove += [ "%s" % i for i in range( 0, 100 ) ]
         self._remove += [ 'none', '305' ]
         self._remove += string.punctuation
@@ -62,7 +62,8 @@ class TokenFiltrationMixin:
         :return:
         """
         # Any freestanding numbers or number containing
-        remove = [ "\d+" ]
+        remove = [ "\d+"]
+
 
         # punctuation
         remove += ["[{}]".format( "".join( string.punctuation ))]
@@ -116,6 +117,27 @@ class TokenFiltrationMixin:
 
         return rx.match(token) is None
 
+    @property
+    def punctuation_table( self ):
+        """
+        Returns a mapping table that can be used to remove any punctuation
+
+        idea from https://machinelearningmastery.com/clean-text-machine-learning-python/
+
+        """
+        punct = '’' + '“' + string.punctuation
+        return str.maketrans( '', '', punct )
+
+    def clean_punctuation( self, word ):
+        """Returns the word provided with any punctuation
+        removed.
+        Needed since the original downloading did not fully remove
+        punctuation"""
+        r = word.translate(self.punctuation_table)
+        if len(r) > 0:
+            return r
+
+
 # def filter_on_regex( word, rx=rx ):
 #     if rx.match( word ) is None:
 #         return word
@@ -130,6 +152,7 @@ class WordbagMaker( ITextProcessor, TokenFiltrationMixin ):
             self._remove = remove
         self.keep_stopwords = keep_stopwords
 
+
     def process( self, content ):
         """
         Returns a list of words
@@ -139,7 +162,7 @@ class WordbagMaker( ITextProcessor, TokenFiltrationMixin ):
         if not isinstance( content, str ):
             raise NonStringInContentField
 
-        return [ word.lower() for sent in nltk.tokenize.sent_tokenize( content ) for word in
+        return [ self.clean_punctuation(word.lower()) for sent in nltk.tokenize.sent_tokenize( content ) for word in
                  nltk.tokenize.word_tokenize( sent ) if self.keep(word.lower(), keep_stopwords=self.keep_stopwords) ]
 
         # return [ word.lower() for sent in nltk.tokenize.sent_tokenize( content ) for word in

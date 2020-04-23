@@ -36,6 +36,9 @@ if CanvasHacks.testglobals.use_api:
         TOKEN = FileBasedConfiguration.canvas_token
         URL_BASE = FileBasedConfiguration.canvas_url_base
 
+        # words we should ignore in text analysis
+        IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER
+
     else:
         CONFIG = InteractiveConfiguration
         TOKEN = InteractiveConfiguration.canvas_token

@@ -102,7 +102,11 @@ class ControlStore:
     def _initialize_unit_obj( self, unit_number, course=env.CONFIG.course ):
         """Retrieves all assignments etc and creates a Unit
         object. Replaces existing unit object if there was one"""
-        unit = Unit( course, unit_number )
+
+        # As of CAN-68 we use the method which will check if the object
+        # is already stored to save calls to the api
+        unit = env.CONFIG.set_unit(unit_number)
+        # unit = Unit( course, unit_number )
         self.units[ unit_number ] = unit
         return unit
 

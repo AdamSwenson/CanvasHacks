@@ -470,3 +470,58 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
         with self.assertRaises( NoAvailablePartner ):
             obj.run()
+
+
+
+class TestRefactorToUseKwargs( TestingBase ):
+    """Makes sure that everything gets called with expected values.
+      Not super diagnostic since many of the mocked calls are
+      where we'd actually expect failure. Still, useful for catching
+      problems when update code etc"""
+
+    def setUp( self ):
+        self.config_for_test()
+        self.dao = SqliteDAO()
+
+        self.course = MagicMock()
+        # review = Review(**activity_data_factory())
+        self.unit = unit_factory()
+        # self.unit.components.append(review)
+
+    def test_loading_w_provided_student_repo( self,  ):
+        """
+        Refactoring as part of CAN-68 to allow shared use of things like studentRepo
+        This is just to test that everything works normally
+        """
+        students = [ student_factory(), student_factory() ]
+
+        studentRepoMock = MagicMock()
+        studentRepoMock.download = MagicMock( return_value=students )
+
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True, studentRepo=studentRepoMock )
+
+        # make sure the kwargs passed all the way through
+        self.assertEqual(self.course, obj.course, "Course was set")
+        self.assertEqual( self.unit, obj.unit, "Unit was set" )
+        self.assertEqual( True, obj.is_test, "is test was set" )
+        self.assertEqual( True, obj.send, "Send was set" )
+        self.assertEqual(studentRepoMock, obj.studentRepo, "Set the repo passed instead of creating a new one")
+        studentRepoMock.download.assert_not_called()
+
+    @patch( 'CanvasHacks.SkaaSteps.ISkaaSteps.StudentRepository' )
+    def test_loading_without_provided_student_repo( self , studentRepoMock):
+        students = [ student_factory(), student_factory() ]
+        # studentRepoMock.download = MagicMock( return_value=students )
+
+        obj = SendInitialWorkToReviewer( course=self.course, unit=self.unit, is_test=True, send=True )
+
+        # make sure the kwargs passed all the way through
+        self.assertEqual( self.course, obj.course, "Course was set" )
+        self.assertEqual( self.unit, obj.unit, "Unit was set" )
+        self.assertEqual( True, obj.is_test, "is test was set" )
+        self.assertEqual( True, obj.send, "Send was set" )
+
+        # todo fix this test
+        # self.assertEqual( studentRepoMock, obj.studentRepo, "created new repo" )
+        studentRepoMock.assert_any_call()
+

@@ -93,7 +93,12 @@ def file_reports(download_folder_path, unit_start=1, unit_stop=6):
     :return:
     """
     print("Checking for reports in: ", download_folder_path)
-    units = { u:  Unit( env.CONFIG.course, u ) for u in range(unit_start, unit_stop + 1) }
+
+    # As of CAN-68 we use the method which will check if the object
+    # is already stored to save calls to the api
+    units = { u: env.CONFIG.set_unit(u) for u in range( unit_start, unit_stop + 1 ) }
+    # units = { u:  Unit( env.CONFIG.course, u ) for u in range(unit_start, unit_stop + 1) }
+
     fiter = report_file_iterator( download_folder_path )
     moved_files = []
     try:
@@ -101,6 +106,11 @@ def file_reports(download_folder_path, unit_start=1, unit_stop=6):
             f = next(fiter)
             # print("Working on: ", f)
             if f['activity'] is not None:
+                if f['unit_number'] < unit_stop or f['unit_number'] > unit_stop:
+                    # We shouldn't process files that aren't in the range
+                    # of units that we're working on. So we skip this iteration.
+                    continue
+
                 unit = units.get(f['unit_number'])
                 activity = unit.get_by_class(f['activity'])
                 src = f['path']

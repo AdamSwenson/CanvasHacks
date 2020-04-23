@@ -5,6 +5,7 @@ __author__ = 'adam'
 from CanvasHacks import environment
 
 from CanvasHacks.Files.FromDownloadFolder import file_reports
+from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.executables.run_discussion_on_multiple_units import RunDiscussionMultipleUnits
 from CanvasHacks.executables.run_skaa_on_multiple_units import RunSkaaMultipleUnits
 from CanvasHacks.executables.run_skaa_on_single_unit import run_all_steps
@@ -35,9 +36,6 @@ def skaa_run_button( control_store, return_button=False, width='auto', **kwargs 
         RUNNING = True
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
-        #         print('beep')
-        #         time.sleep(3)
-        #         print('boop')
 
         steps = run_all_steps( SEND=True, download=True )
 
@@ -106,18 +104,22 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
 
-        # todo very inefficient to have each thing load it's own unit definitions
+        # todo very inefficient to have each thing load it's own unit definitions and students
+        studentRepo = StudentRepository(environment.CONFIG.course)
 
         # Move any downloaded report files into the correct location
         file_reports(environment.DOWNLOAD_FOLDER,
                      unit_start=start_unit_box.value,
                      unit_stop=stop_unit_box.value)
 
+
         # Instantiate these in the callback in case values have changed
         discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
-                                                        stop_unit=stop_unit_box.value )
+                                                        stop_unit=stop_unit_box.value,
+                                                        studentRepo=studentRepo)
         skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
-                                            stop_unit=stop_unit_box.value )
+                                            stop_unit=stop_unit_box.value,
+                                            studentRepo=studentRepo)
 
         if tasks.value == 'Both':
             # control_store['all_steps'].append(skaa_runner.run(**kwargs))

@@ -24,11 +24,15 @@ def run_discussion_steps( SEND=True, download=True, post_threshold=REQUIRED_MIN_
     step1 = SendForumPostsToReviewer( course=environment.CONFIG.course,
                                       unit=environment.CONFIG.unit,
                                       send=SEND,
-                                      post_threshold=post_threshold )
+                                      post_threshold=post_threshold,
+                                      **kwargs)
     step1.run( rest_timeout=5 )
 
     print( "\n====================== DISTRIBUTE DISCUSSION REVIEWS ======================" )
-    step2 = SendDiscussionReviewToPoster( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
+    step2 = SendDiscussionReviewToPoster( environment.CONFIG.course,
+                                          environment.CONFIG.unit,
+                                          send=SEND,
+                                          **kwargs)
     step2.run( rest_timeout=5, download=download )
 
     # Return in case need to check values on them

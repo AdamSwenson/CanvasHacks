@@ -4,24 +4,34 @@ from CanvasHacks.SkaaSteps.SendMetareviewToReviewer import SendMetareviewToRevie
 from CanvasHacks.SkaaSteps.SendReviewToReviewee import SendReviewToReviewee
 
 
-def run_all_steps( SEND=True, download=True ):
+def run_all_steps( SEND=True, download=True, **kwargs ):
     """
     Runs all steps for a unit defined in environment
-    :param SEND:
-    :param download:
+    :param studentRepo: If not defined, each step will instantiate it's own repo
+    :param SEND: Whether to send messages (also governs whether record association)
+    :param download: Whether to try downloading
     :return:
     """
     print( "====================== STEP 1 ======================" )
-    step1 = SendInitialWorkToReviewer( course=environment.CONFIG.course, unit=environment.CONFIG.unit, send=SEND )
+    step1 = SendInitialWorkToReviewer( course=environment.CONFIG.course,
+                                       unit=environment.CONFIG.unit,
+                                       send=SEND,
+                                       **kwargs)
     step1.run( rest_timeout=5 )
 
     print( "\n====================== STEP 2 ======================" )
-    step2 = SendReviewToReviewee( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
+    step2 = SendReviewToReviewee( environment.CONFIG.course,
+                                  environment.CONFIG.unit,
+                                  send=SEND,
+                                  **kwargs)
     step2.run( rest_timeout=5, download=download )
 
     try:
         print( "\n====================== STEP 3 ======================" )
-        step3 = SendMetareviewToReviewer( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
+        step3 = SendMetareviewToReviewer( environment.CONFIG.course,
+                                          environment.CONFIG.unit,
+                                          send=SEND,
+                                          **kwargs)
         step3.run( rest_timeout=5, download=download )
     except AttributeError as e:
         # This may be raised when there is no metareview assignment

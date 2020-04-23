@@ -10,27 +10,33 @@ import os
 
 from CanvasHacks import environment
 
-DATA_FOLDER = '%s/data' % environment.CONFIG.proj_base
-IGNORE_FILE = "%s/ignore.csv" % DATA_FOLDER
-JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % environment.CONFIG.archive_folder
-LOG_FOLDER = environment.CONFIG.log_folder
+# DATA_FOLDER = '%s/data' % environment.CONFIG.proj_base
+
+# JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % environment.CONFIG.archive_folder
+# LOG_FOLDER = environment.CONFIG.log_folder
 
 
 # ----------------- create files
 
-def journal_folder_name( journal_name, course_id, journal_folder=JOURNAL_ARCHIVE_FOLDER ):
-    """Creates a folder to store student work for the unit"""
+def journal_folder_name( journal_name, course_id, journal_folder=None ):
+    """Creates a folder to store student work for the unit
+    If want to use a custom destination, set that via journal_folder
+    otherwise keeping the call to environment inside the function so won't
+    kill everything on system load
+    """
+    journal_folder = environment.JOURNAL_ARCHIVE_FOLDER if journal_folder is None else journal_folder
     folder_name = journal_name.replace( '(', '' ).replace( ')', '' ).replace( ' ', '-' )
     return "%s/%s-%s" % (journal_folder, course_id, folder_name)
 
 
-def get_journal_folders( journal_archive=JOURNAL_ARCHIVE_FOLDER ):
+def get_journal_folders( journal_archive=None ):
     """Constructs paths to all journal folders and returns the list
         example result: [
             '/Users/adam/Box Sync/Phil 305 Business ethics/Student work/41181-Journal-week-2',
              '/Users/adam/Box Sync/Phil 305 Business ethics/Student work/41181-Journal-week-3',
              ....
     """
+    journal_archive = environment.JOURNAL_ARCHIVE_FOLDER if journal_archive is None else journal_archive
     journal_folders = [ ]
     for root, dirs, files in os.walk(journal_archive):
         for d in dirs:
@@ -53,7 +59,8 @@ def calculate_journal_counts( journal_folders, data_file_name='all-submissions' 
     return cnt
 
 
-def load_words_to_ignore( file=IGNORE_FILE ):
+def load_words_to_ignore( file=None ):
+    file = environment.IGNORE_FILE if file is None else file
     words = [ ]
     with open( file, 'r' ) as csvfile:
         reader = csv.DictReader( csvfile )  # , delimiter=',', quotechar='|')

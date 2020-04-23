@@ -14,7 +14,7 @@ from CanvasHacks.executables.run_skaa_on_single_unit import run_all_steps
 
 class RunSkaaMultipleUnits:
 
-    def __init__(self, start_unit, stop_unit, **kwargs):
+    def __init__( self, start_unit: int, stop_unit: int, **kwargs ):
 
         self.stop_unit = stop_unit
         self.start_unit = start_unit
@@ -33,9 +33,13 @@ class RunSkaaMultipleUnits:
             print( "\n~~~~~~~~~~~~~~~~~~~~~~ UNIT {} ~~~~~~~~~~~~~~~~~~~~~~".format(unit_number))
 
             # Set the unit on environment
-            environment.CONFIG.set_unit_number( unit_number)
-            environment.CONFIG.initialize_canvas_objs()
-            environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
+            # As of CAN-68 we use the method which will check if the object
+            # is already stored to save calls to the api
+            environment.CONFIG.set_unit(unit_number)
+
+            # environment.CONFIG.set_unit_number( unit_number)
+            # environment.CONFIG.initialize_canvas_objs()
+            # environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
 
             results[unit_number] = run_all_steps( **kwargs )
         return results

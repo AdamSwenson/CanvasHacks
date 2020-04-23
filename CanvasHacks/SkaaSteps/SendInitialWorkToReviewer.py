@@ -26,7 +26,11 @@ class SendInitialWorkToReviewer( IStep ):
         :param unit:
         :param is_test:
         :param send: Whether to actually send the messages
+        :param studentRepo: Student repository passed in as a kwarg
+
         """
+        # super().__init__(  **kwargs )
+
         super().__init__( course, unit, is_test, send, **kwargs )
 
         # The activity whose results we are going to be doing something with

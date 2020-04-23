@@ -31,9 +31,12 @@ class RunDiscussionMultipleUnits:
             print( "\n~~~~~~~~~~~~~~~~~~~~~~ UNIT {} ~~~~~~~~~~~~~~~~~~~~~~".format(unit_number))
 
             # Set the unit on environment
-            environment.CONFIG.set_unit_number( unit_number)
-            environment.CONFIG.initialize_canvas_objs()
-            environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
+            # As of CAN-68 we use the method which will check if the object
+            # is already stored to save calls to the api
+            environment.CONFIG.set_unit(unit_number)
+            # environment.CONFIG.set_unit_number( unit_number)
+            # environment.CONFIG.initialize_canvas_objs()
+            # environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
             try:
                 results[unit_number] = run_discussion_steps( **kwargs )
             except NoStudentWorkDataLoaded as e:
