@@ -104,9 +104,11 @@ def file_reports(download_folder_path, unit_start=1, unit_stop=6):
     try:
         while True:
             f = next(fiter)
-            # print("Working on: ", f)
+            # print( "Working on: ", f )
+
             if f['activity'] is not None:
-                if f['unit_number'] < unit_stop or f['unit_number'] > unit_stop:
+                if f['unit_number'] < unit_start or f['unit_number'] > unit_stop:
+
                     # We shouldn't process files that aren't in the range
                     # of units that we're working on. So we skip this iteration.
                     continue

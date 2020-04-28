@@ -118,7 +118,7 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin, Rev
     def email_subject( self ):
         """Since unit number will be set after initialization
         we need to do this as a property"""
-        return "Unit {} peer-review of content unit".format( self.unit_number )
+        return "Unit {} peer-review of essay".format( self.unit_number )
 
 
 class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, StoredDataFileMixin, ReviewType ):

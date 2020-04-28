@@ -335,8 +335,12 @@ class FileBasedConfiguration( Configuration ):
     @classmethod
     def load_local_filepaths( cls ):
         root = os.getenv( "HOME" )
+        # class related data
         cls.archive_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'STUDENT_WORK_ARCHIVE_FOLDER' ))
         cls.log_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'LOG_FOLDER' ))
+        cls.assessment_data_folder = "{}/{}".format(root, cls.configuration[ 'folders' ].get( 'ASSESSMENT_DATA_FOLDER' ))
+
+        # canvas hacks program folders
         cls.data_folder = '{}/data'.format(cls.proj_base)
 
     @classmethod

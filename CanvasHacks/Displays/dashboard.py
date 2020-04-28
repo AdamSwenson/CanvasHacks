@@ -5,6 +5,7 @@ __author__ = 'adam'
 
 from IPython.display import HTML, Latex
 from IPython.display import display
+import pandas as pd
 
 import CanvasHacks.environment as env
 from CanvasHacks.Definitions.unit import Unit
@@ -363,7 +364,10 @@ class DiscussionDashboard:
         Students who have posted and been assigned reviewers
         :return: DataFrame
         """
+        # try:
         return self.repo.posters
+        # except AttributeError:
+        #     return pd.DataFrame()
 
     @property
     def non_posters( self ):

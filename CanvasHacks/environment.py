@@ -24,12 +24,21 @@ if CanvasHacks.testglobals.use_api:
     if ROOT[ :12 ] == '/Users/adam':
         FileBasedConfiguration.load( CanvasHacks.testglobals.TEST )
         CONFIG = FileBasedConfiguration
+
         TEMP_DATA_PATH = "%s/temp" % FileBasedConfiguration.proj_base
         ARCHIVE_FOLDER = FileBasedConfiguration.archive_folder
         JOURNAL_ARCHIVE_FOLDER = "%s/Journals" % ARCHIVE_FOLDER
         LOG_FOLDER = FileBasedConfiguration.log_folder
         DATA_FOLDER = "%s/data" % FileBasedConfiguration.proj_base
+
+        # System location where downloaded quiz reports will be
         DOWNLOAD_FOLDER = "{}/Downloads".format(ROOT)
+
+        # Data for assessment tools
+        # ASSESSMENT_DATA_FOLDER = FileBasedConfiguration.assessment_data_folder
+        ASSESSMENT_JOURNALS_FOLDER = "{}/journals".format( FileBasedConfiguration.assessment_data_folder )
+        ASSESSMENT_ESSAYS_FOLDER = "{}/essays".format( FileBasedConfiguration.assessment_data_folder )
+
         # Testing
         TEST_DATA_PATH = "{}/tests/testdata".format( FileBasedConfiguration.proj_base )
 
@@ -45,12 +54,14 @@ if CanvasHacks.testglobals.use_api:
         URL_BASE = InteractiveConfiguration.canvas_url_base
         # Logging should stream
         LOG_FOLDER = None
+        ASSESSMENT_DATA_FOLDER = None
 else:
     # Testing without api access
     CONFIG = TestingConfiguration
     if CanvasHacks.testglobals.TEST:
         CONFIG.is_test = CanvasHacks.testglobals.TEST
     LOG_FOLDER = None
+    ASSESSMENT_DATA_FOLDER = None
 
 # DB
 REVIEW_ASSOCIATIONS_TABLE_NAME = "review_associations"
@@ -76,3 +87,4 @@ LIKERT_NUM_MAP = { 'Forgot': 0, 'Strongly disagree': 1, 'Disagree': 2, 'Agree': 
 REPORT_KEEP_COLUMNS = [ 'attempt', 'course_id', 'finished_at_date',
                         'fudge_points', 'id', 'name', 'quiz_id', 'score',
                         'section_sis_id', 'student_id', 'submission_id', 'user_id', 'workflow_state' ]
+
