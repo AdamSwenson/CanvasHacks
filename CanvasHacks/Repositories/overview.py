@@ -82,6 +82,9 @@ class SkaaOverviewRepository( DaoMixin ):
                         # get the name
                         d[ 'reviewed_by' ] = self.studentRepo.get_student_name( b.assessor_id )
                         d[ 'reviewed_by_id' ] = b.assessor_id
+
+                        # add unit and assign info to make more readable
+                        d['activity'] = c.name
                     except AttributeError:
                         pass
 
@@ -234,6 +237,9 @@ class DiscussionOverviewRepository( DaoMixin ):
             }
             for c in self.components:
                 if len( self.assignRepo.get_associations() ) > 0:
+                    # add unit and assign info to make more readable
+                    d[ 'activity' ] = c.name
+
                     try:
                         # get the record where the student is the reviwer
                         a = self.assignRepo.get_by_reviewer( sid )

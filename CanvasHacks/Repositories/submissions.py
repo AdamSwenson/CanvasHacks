@@ -104,6 +104,41 @@ class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
                 # elif s.attempt == attempt:
                 return s
 
+    @property
+    def submitted( self ):
+        """
+        Returns those submission objects where the workflow
+        state is submitted
+
+        :return:
+        """
+        return [d.attributes for d in self.data if d.workflow_state == 'submitted']
+
+    def get_daily_counts( self, activity_name=None ):
+        """
+        Returns a dataframe containing the counts of submissions
+        for each day
+
+        Optionally set a name of the activity on the returned frame
+
+        :return: DataFrame with columns [sent_at, activity_id, activity_name, count_column_name]
+        """
+        subs = [ d.attributes for d in self.data ]
+        frame = pd.DataFrame( subs )
+
+        frame.submitted_at = pd.to_datetime( frame.submitted_at )
+        frame = frame[ ~frame.submitted_at.isnull() ]
+        frame = frame.set_index( 'submitted_at' )\
+            .rename( { 'user_id': 'num_submissions' }, axis=1 )\
+            .resample( '1D' )\
+            .count()
+
+        frame = frame[ [ 'num_submissions' ] ]
+        if activity_name:
+            frame['activity_name'] = activity_name
+
+        return frame
+
 
 class AssignmentSubmissionRepository( SubmissionRepository ):
     body_column_name = 'body'
@@ -192,6 +227,7 @@ class QuizSubmissionRepository( ISubmissionRepo ):
 
     def get_by_student_id( self, student_id, attempt=None ):
         return [ d for d in self.data if d.user_id == student_id and d.attempt == attempt ][ 0 ]
+
 
 
 if __name__ == '__main__':

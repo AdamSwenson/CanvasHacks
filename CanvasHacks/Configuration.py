@@ -174,10 +174,10 @@ class Configuration( object ):
         # Set on the global variable (which is only used in certain tests)
         CanvasHacks.testglobals.TEST = False
 
-        # --------------- Unit object management
-        @classmethod
-        def get_unit_from_storage(cls, unit_number):
-            return cls.unit_store
+    # --------------- Unit object management
+    @classmethod
+    def get_unit_from_storage(cls, unit_number):
+        return cls.unit_store
 
     # ------------ Unit selection
     @classmethod

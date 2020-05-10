@@ -1,12 +1,14 @@
 """
 Created by adam on 2/23/20
 """
+import pandas as pd
+
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.Definitions.activity import Activity
+from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Models.review_association import ReviewAssociation
 from CanvasHacks.Models.status_record import ComplexStatusRecord, FeedbackReceivedRecord, InvitationReceivedRecord,\
     StatusRecord
-from CanvasHacks.Definitions.activity import Activity
-from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.interfaces import IRepo
 
 __author__ = 'adam'
@@ -54,6 +56,33 @@ class IStatusRepository( StudentWorkMixin, IRepo ):
         """
         raise NotImplementedError
 
+    def get_all_as_dataframe( self ):
+        """
+        Returns a dataframe containing all records for
+        the activity
+        :return:
+        """
+        raise NotImplementedError
+
+    def get_daily_counts( self ):
+        """
+        Returns a dataframe containing the counts of invites
+        for each day
+        :return: DataFrame with columns [sent_at, activity_id, activity_name, count_column_name]
+        """
+        frame = self.get_all_as_dataframe()
+
+        frame = frame.set_index( 'sent_at' )\
+            .rename( { 'student_id': self.count_column_name }, axis=1 )\
+            .resample( '1D' )\
+            .count()
+        frame.activity_id = self.activity.id
+        frame['activity_name'] = self.activity.activity_name
+        frame.reset_index(inplace=True)
+        return frame
+
+
+
 
 class InvitationStatusRepository( IStatusRepository ):
     """
@@ -68,7 +97,12 @@ class InvitationStatusRepository( IStatusRepository ):
     Metareview: Invite sent is recorded on the author once they are sent the feedback
     created in the Review assignment.
 
+    Attributes
+        count_column_name: The name of the result column returned by get_daily_counts
+
     """
+    count_column_name = 'num invites'
+
 
     def __init__( self, dao: SqliteDAO, activity: Activity ):
         """
@@ -153,6 +187,17 @@ class InvitationStatusRepository( IStatusRepository ):
         self.session.commit()
         return rec
 
+    def get_all_as_dataframe( self ):
+        """
+        Returns a dataframe containing all records for
+        the activity
+        :return:
+        """
+        rs = self.session.query( InvitationReceivedRecord )\
+            .filter( InvitationReceivedRecord.activity_id == self.activity.id )\
+            .all()
+        return pd.DataFrame( [ r.__dict__ for r in rs ] ).drop( [ '_sa_instance_state' ], axis=1 )
+
 
 class FeedbackStatusRepository( IStatusRepository ):
     """
@@ -167,7 +212,11 @@ class FeedbackStatusRepository( IStatusRepository ):
 
     Metareview: Not called.
 
+    Attributes
+        count_column_name: The name of the result column returned by get_daily_counts
+
     """
+    count_column_name = 'num feedback'
 
     def __init__( self, dao: SqliteDAO, activity: Activity, review_pairings_activity=None ):
         """
@@ -313,6 +362,21 @@ class FeedbackStatusRepository( IStatusRepository ):
         #     if result is not None:  #         result  #         # authors.append( result.student_id )  #  # return authors
 
         #  #  # td = {'review_association_table' : env.REVIEW_ASSOCIATIONS_TABLE_NAME,  #       'feedback_sent_table': env.FEEDBACK_RECEIVED_STATUS_TABLE_NAME}  # query = """  # SELECT fb.student_id FROM {feedback_sent_table} fb  # INNER JOIN {review_association_table} ra  # ON fb.student_id = ra.assessee_id  # WHERE ra.assessor_id = :student_id  # AND ra.activity_id = :activity_id  # AND fb.activity_id = :activity_id  # """.format(**td)  #  # authors = []  # for student in reviewers:  #     student_id = self._handle_id(student)  #  #     params = {  #         'activity_id' : self.activity.id,  #           'student_id' : student_id  #     }  #  #     stmt = text(query)  #     stmt = stmt.columns( FeedbackReceivedRecord.student_id)  #     result = self.session.query( FeedbackReceivedRecord.student_id)\  #         .from_statement( stmt )\  #         .params( **params )\  #         .one_or_none()  #     if result is not None:  #         authors.append(result)  # return authors
+
+    def get_all_as_dataframe( self ):
+        """
+        Returns a dataframe containing all records for
+        the activity
+        :return:
+        """
+        try:
+            rs = self.session.query( FeedbackReceivedRecord )\
+                .filter( FeedbackReceivedRecord.activity_id == self.activity.id )\
+                .all()
+            return pd.DataFrame( [ r.__dict__ for r in rs ] ).drop( [ '_sa_instance_state' ], axis=1 )
+        except KeyError:
+            # will hit this if there were no records returned
+            return pd.DataFrame()
 
 
 # class MetareviewStatusRepository( IStatusRepository ):

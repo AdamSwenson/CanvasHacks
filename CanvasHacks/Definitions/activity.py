@@ -139,6 +139,18 @@ class Activity( Model ):
     def description( self, text ):
         self._description_text = text
 
+    @property
+    def activity_name( self, include_unit_num=True ):
+        """
+        Returns the name that will be used to identify
+        the activity in things like statistical summaries
+        :return:
+        """
+        if include_unit_num:
+            return "Unit {} {}".format(self.unit_number, self.title_base)
+        else:
+            return self.title_base
+
     # def creation_dict( self ):
     #     """A dictionary of all the values needed to
     #     create one of these activities on canvas"""

@@ -5,10 +5,15 @@ __author__ = 'adam'
 
 from CanvasHacks import environment
 from CanvasHacks.Definitions.journal import Journal
+from CanvasHacks.GradingHandlers.journal import JournalGrader
 from CanvasHacks.Models.model import StoreMixin
 
 
 # todo dev
+from CanvasHacks.Repositories.DataManagement import DataStoreNew
+from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
+from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository
+
 
 class GradeJournalStep(StoreMixin):
     """

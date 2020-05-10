@@ -3,6 +3,7 @@ Created by adam on 3/13/20
 """
 __author__ = 'adam'
 import CanvasHacks.environment as env
+from CanvasHacks.DAOs.db_files import DBFilePathHandler
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 import CanvasHacks.testglobals
 
@@ -24,7 +25,9 @@ class DaoMixin:
 
         try:
             t = 'TEST-' if env.CONFIG.is_test else ""
-            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, unit_number )
+            self.db_filepath = DBFilePathHandler.essay_review(unit_number=unit_number)
+            # make_essay_review_db_filepath(unit_number)
+            # "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, unit_number )
         except AttributeError as e:
             # This is likely to happen during testing
             print(e)

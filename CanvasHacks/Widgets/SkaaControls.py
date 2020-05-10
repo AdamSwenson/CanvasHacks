@@ -9,6 +9,8 @@ from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.executables.run_discussion_on_multiple_units import RunDiscussionMultipleUnits
 from CanvasHacks.executables.run_skaa_on_multiple_units import RunSkaaMultipleUnits
 from CanvasHacks.executables.run_skaa_on_single_unit import run_all_steps
+from time import sleep
+import datetime
 
 if __name__ == '__main__':
     pass
@@ -92,10 +94,14 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
     unit_nums = widgets.HBox([start_unit_box, stop_unit_box])
     task_box = widgets.HBox([tasks])
 
+    repeat_button = widgets.Checkbox(description='Loop', value=True)
+    time_box = widgets.IntText(description='Minutes', value=15, disabled=False)
+    rbbx = widgets.HBox([repeat_button, time_box])
+
     out = widgets.Output( layout={ 'border': '1px solid black' } )
 
     button_box = widgets.HBox([b])
-    container = widgets.VBox([unit_nums, task_box, button_box, out])
+    container = widgets.VBox([unit_nums, task_box, rbbx, button_box, out])
 
 
     @out.capture(clear_output=True)
@@ -107,40 +113,52 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
         # todo very inefficient to have each thing load it's own unit definitions and students
         studentRepo = StudentRepository(environment.CONFIG.course)
 
-        # Move any downloaded report files into the correct location
-        file_reports(environment.DOWNLOAD_FOLDER,
-                     unit_start=start_unit_box.value,
-                     unit_stop=stop_unit_box.value)
+        while True:
+            print( datetime.datetime.isoformat( datetime.datetime.now() ) )
+            print( 'RUNNING' )
+
+            # Move any downloaded report files into the correct location
+            file_reports(environment.DOWNLOAD_FOLDER,
+                         unit_start=start_unit_box.value,
+                         unit_stop=stop_unit_box.value)
 
 
-        # Instantiate these in the callback in case values have changed
-        discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
-                                                        stop_unit=stop_unit_box.value,
-                                                        studentRepo=studentRepo)
-        skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
-                                            stop_unit=stop_unit_box.value,
-                                            studentRepo=studentRepo)
+            # Instantiate these in the callback in case values have changed
+            discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
+                                                            stop_unit=stop_unit_box.value,
+                                                            studentRepo=studentRepo)
+            skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
+                                                stop_unit=stop_unit_box.value,
+                                                studentRepo=studentRepo)
 
-        if tasks.value == 'Both':
-            # control_store['all_steps'].append(skaa_runner.run(**kwargs))
-            # control_store['all_steps'].append(discussion_runner.run(**kwargs))
-            control_store.completed_steps = skaa_runner.run(**kwargs)
-            control_store.completed_steps = discussion_runner.run(**kwargs)
+            if tasks.value == 'Both':
+                # control_store['all_steps'].append(skaa_runner.run(**kwargs))
+                # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+                control_store.completed_steps = skaa_runner.run(**kwargs)
+                control_store.completed_steps = discussion_runner.run(**kwargs)
 
-        elif tasks.value == 'SKAA':
-            control_store.completed_steps = skaa_runner.run(**kwargs)
+            elif tasks.value == 'SKAA':
+                control_store.completed_steps = skaa_runner.run(**kwargs)
 
-            # control_store['all_steps'].append(skaa_runner.run(**kwargs))
+                # control_store['all_steps'].append(skaa_runner.run(**kwargs))
 
-        elif tasks.value == 'Discussion':
-            control_store.completed_steps = discussion_runner.run(**kwargs)
+            elif tasks.value == 'Discussion':
+                control_store.completed_steps = discussion_runner.run(**kwargs)
 
-            # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+                # control_store['all_steps'].append(discussion_runner.run(**kwargs))
 
-        # Load dashboards to summarize student progress
-        # will just load both kinds, regardless of what was run
-        for unit_number in range(start_unit_box.value, stop_unit_box.value + 1):
-            control_store.load_unit(unit_number)
+            # Load dashboards to summarize student progress
+            # will just load both kinds, regardless of what was run
+            for unit_number in range(start_unit_box.value, stop_unit_box.value + 1):
+                control_store.load_unit(unit_number)
+
+            if not repeat_button.value:
+                break
+
+            print( datetime.datetime.isoformat( datetime.datetime.now() ) )
+            print( 'RESTING' )
+            rest_seconds = time_box.value * 60
+            sleep( rest_seconds )
 
         RUNNING = False
 
