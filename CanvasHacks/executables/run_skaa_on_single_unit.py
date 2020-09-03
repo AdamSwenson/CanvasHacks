@@ -8,7 +8,7 @@ def run_all_steps( SEND=True, download=True, **kwargs ):
     """
     Runs all steps for a unit defined in environment
     :param studentRepo: If not defined, each step will instantiate it's own repo
-    :param SEND: Whether to send messages (also governs whether record association)
+    :param SEND: Whether to send messages (also governs whether records the association between author and reviewer)
     :param download: Whether to try downloading
     :return:
     """

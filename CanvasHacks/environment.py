@@ -39,6 +39,9 @@ if CanvasHacks.testglobals.use_api:
         ASSESSMENT_JOURNALS_FOLDER = "{}/journals".format( FileBasedConfiguration.assessment_data_folder )
         ASSESSMENT_ESSAYS_FOLDER = "{}/essays".format( FileBasedConfiguration.assessment_data_folder )
 
+        # Skaa run logging
+        RUN_DATA_LOG_PATH = "{}/run-data.xlsx".format(LOG_FOLDER)
+
         # Testing
         TEST_DATA_PATH = "{}/tests/testdata".format( FileBasedConfiguration.proj_base )
 
@@ -78,6 +81,7 @@ t = "TEST-" if CONFIG.is_test else ""
 STUDENT_WORK_PROCESSING_LOGNAME = '{}student-work-processing-log.txt'.format( t )
 MESSAGE_LOGNAME = "{}message-log.txt".format( t )
 RUN_LOGNAME = "{}run-log.txt".format( t )
+
 
 # Plotting stuff
 LIKERT_PLOT_ORDER = [ 'Forgot', 'Strongly disagree', 'Disagree', 'Agree', 'Strongly agree' ]

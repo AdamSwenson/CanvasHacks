@@ -2,13 +2,16 @@
 Created by adam on 4/23/20
 """
 __author__ = 'adam'
+
 from collections import namedtuple
+
+from afinn import Afinn
 
 # A journal assignment which was done by one class on one week in one term
 # Thus on one week in one term there may be multiple CourseJournals
 from CanvasHacks.Assessment.files import EssayFiles, JournalFiles
 from CanvasHacks.Text.process import TokenFiltrationMixin
-from afinn import Afinn
+
 afinn = Afinn()
 import json
 
@@ -38,6 +41,7 @@ def load_stored_bags( file_handler ):
     try:
         while True:
             with open( next( fiter ), 'r' ) as f:
+                print( f.name )
                 d = json.load( f )
                 o = AssignmentObj( **d )
                 data.append( o )
@@ -84,11 +88,27 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
     An assignment which was done by one class on one week in one term
     Thus on one week in one term there may be multiple CourseJournals
     This holds the data and handles most calculations via properties
+
+    Attributes
+        content: List of dictionaries with keys sid, body, bag
+        term: String, e.g., 'S20'
+        course_id: Integer
+        id: The particular assignment's id
+        unit_number: Integer
+
     """
+    # id: int
+    # term: str
+    # content: list
+    # unit_number: int
+    # course_id: int
 
     def __init__( self, **kwargs ):
-        for k, v in kwargs.items():
-            setattr( self, k, v )
+        try:
+            for k, v in kwargs.items():
+                setattr( self, k, v )
+        except AttributeError as e:
+            print(e, f"\n {k} => {v}")
         self._fix_errors()
 
     #         self.token_filter = TokenFiltrationMixin()
@@ -106,6 +126,8 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
         """
         b = [ ]
         [ b.extend( l ) for l in self.bags ]
+        # remove None type since things will be expecting a list of strings
+        b = [w for w in b if w is not None]
         return b
 
     @property
@@ -145,16 +167,28 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
     def calc_sentiment( self, bag ):
         """
         Calculates a total sentiment score of items in the bag
+        If the bag is None it will return 0 to avoid
+        having to do type checking elsewhere. This should be fine since we
+        only care about sentiment score sums
         """
-        txt = ' '.join( bag )
-        return afinn.score( txt )
+        try:
+            txt = ' '.join( bag )
+            return afinn.score( txt )
+        except TypeError as e:
+            print(e)
+            return 0
 
     def _fix_errors( self ):
-        for c in self.content:
-            # Not sure why but one entry from f19 has no bag.
-            # maybe was the instructor or test student
-            if 'bag' not in c.keys():
-                c[ 'bag' ] = [ ]
+        try:
+            for c in self.content:
+                # Not sure why but one entry from f19 has no bag.
+                # maybe was the instructor or test student
+                if 'bag' not in c.keys():
+                    c[ 'bag' ] = [ ]
+        except AttributeError as e:
+            # sometimes we want to load an empty object
+            # which will not have a content attribute
+            print(e)
 
 
 class JournalAssignment( SingleAssignmentStore ):
@@ -162,27 +196,27 @@ class JournalAssignment( SingleAssignmentStore ):
     Journal specific version
     """
 
-    @property
-    def week_num( self ):
-        return self.week
+    # @property
+    # def week_num( self ):
+    #     return self.week
 
     @property
     def week_number( self ):
         return self.week
 
 
-
-class EssayAssignment(SingleAssignmentStore):
+class EssayAssignment( SingleAssignmentStore ):
     """
     Essay specific
     """
+
     @property
     def unit_num( self ):
         return self.unit
 
-    @property
-    def unit_number( self ):
-        return self.unit
+    # @property
+    # def unit_number( self ):
+    #     return self.unit
 
 
 class TermWeekStore( TokenFiltrationMixin ):
@@ -237,7 +271,6 @@ class TermWeekStore( TokenFiltrationMixin ):
         return self.week
 
 
-
 class TermUnitStore( TokenFiltrationMixin ):
     """Represents a particular unit in a particular term
     Handles combining multiple classes into one data store
@@ -285,12 +318,11 @@ class TermUnitStore( TokenFiltrationMixin ):
 
     @property
     def bag_word_counts( self ):
-        return [len(b) for b in self.bags]
+        return [ len( b ) for b in self.bags ]
 
     @property
     def unit_num( self ):
         return self.unit
-
 
 
 if __name__ == '__main__':

@@ -2,15 +2,16 @@
 Created by adam on 3/12/20
 """
 __author__ = 'adam'
-from CanvasHacks import environment
 
+import datetime
+from time import sleep
+
+from CanvasHacks import environment
 from CanvasHacks.Files.FromDownloadFolder import file_reports
 from CanvasHacks.Repositories.students import StudentRepository
 from CanvasHacks.executables.run_discussion_on_multiple_units import RunDiscussionMultipleUnits
 from CanvasHacks.executables.run_skaa_on_multiple_units import RunSkaaMultipleUnits
 from CanvasHacks.executables.run_skaa_on_single_unit import run_all_steps
-from time import sleep
-import datetime
 
 if __name__ == '__main__':
     pass
@@ -59,6 +60,14 @@ def skaa_run_button( control_store, return_button=False, width='auto', **kwargs 
 
 
 def multiple_unit_control( control_store, return_button=False, width='auto', **kwargs ):
+    """
+
+    :param control_store:
+    :param return_button:
+    :param width:
+    :param kwargs: these can include SEND. If want to do dry run, SEND=False should be passed in here. Association between author and reviewer will not be recorded.
+    :return:
+    """
     RUNNING = False
 
     def get_style( is_running=False ):
@@ -91,71 +100,74 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
         # tooltips=[ 'Description of slow', 'Description of regular', 'Description of fast' ],
         #     icons=['check'] * 3
     )
-    unit_nums = widgets.HBox([start_unit_box, stop_unit_box])
-    task_box = widgets.HBox([tasks])
+    unit_nums = widgets.HBox( [ start_unit_box, stop_unit_box ] )
+    task_box = widgets.HBox( [ tasks ] )
 
-    repeat_button = widgets.Checkbox(description='Loop', value=True)
-    time_box = widgets.IntText(description='Minutes', value=15, disabled=False)
-    rbbx = widgets.HBox([repeat_button, time_box])
+    repeat_button = widgets.Checkbox( description='Loop', value=True )
+    time_box = widgets.IntText( description='Minutes', value=15, disabled=False )
+    rbbx = widgets.HBox( [ repeat_button, time_box ] )
 
     out = widgets.Output( layout={ 'border': '1px solid black' } )
 
-    button_box = widgets.HBox([b])
-    container = widgets.VBox([unit_nums, task_box, rbbx, button_box, out])
+    button_box = widgets.HBox( [ b ] )
+    container = widgets.VBox( [ unit_nums, task_box, rbbx, button_box, out ] )
 
-
-    @out.capture(clear_output=True)
+    @out.capture( clear_output=True )
     def callback( change ):
         RUNNING = True
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
 
         # todo very inefficient to have each thing load it's own unit definitions and students
-        studentRepo = StudentRepository(environment.CONFIG.course)
+        studentRepo = StudentRepository( environment.CONFIG.course )
 
         while True:
             print( datetime.datetime.isoformat( datetime.datetime.now() ) )
             print( 'RUNNING' )
 
             # Move any downloaded report files into the correct location
-            file_reports(environment.DOWNLOAD_FOLDER,
-                         unit_start=start_unit_box.value,
-                         unit_stop=stop_unit_box.value)
+            file_reports( environment.DOWNLOAD_FOLDER,
+                          unit_start=start_unit_box.value,
+                          unit_stop=stop_unit_box.value )
 
+            try:
+                # Instantiate these in the callback in case values have changed
+                discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value, stop_unit=stop_unit_box.value, studentRepo=studentRepo )
 
-            # Instantiate these in the callback in case values have changed
-            discussion_runner = RunDiscussionMultipleUnits( start_unit=start_unit_box.value,
-                                                            stop_unit=stop_unit_box.value,
-                                                            studentRepo=studentRepo)
-            skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
-                                                stop_unit=stop_unit_box.value,
-                                                studentRepo=studentRepo)
+                skaa_runner = RunSkaaMultipleUnits( start_unit=start_unit_box.value,
+                                                    stop_unit=stop_unit_box.value,
+                                                    studentRepo=studentRepo )
 
-            if tasks.value == 'Both':
-                # control_store['all_steps'].append(skaa_runner.run(**kwargs))
-                # control_store['all_steps'].append(discussion_runner.run(**kwargs))
-                control_store.completed_steps = skaa_runner.run(**kwargs)
-                control_store.completed_steps = discussion_runner.run(**kwargs)
+                if tasks.value == 'Both':
+                    # control_store['all_steps'].append(skaa_runner.run(**kwargs))
+                    # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+                    control_store.completed_steps = skaa_runner.run( **kwargs )
+                    control_store.completed_steps = discussion_runner.run( **kwargs )
 
-            elif tasks.value == 'SKAA':
-                control_store.completed_steps = skaa_runner.run(**kwargs)
+                elif tasks.value == 'SKAA':
+                    control_store.completed_steps = skaa_runner.run( **kwargs )
 
-                # control_store['all_steps'].append(skaa_runner.run(**kwargs))
+                    # control_store['all_steps'].append(skaa_runner.run(**kwargs))
 
-            elif tasks.value == 'Discussion':
-                control_store.completed_steps = discussion_runner.run(**kwargs)
+                elif tasks.value == 'Discussion':
+                    control_store.completed_steps = discussion_runner.run( **kwargs )
 
-                # control_store['all_steps'].append(discussion_runner.run(**kwargs))
+                    # control_store['all_steps'].append(discussion_runner.run(**kwargs))
 
-            # Load dashboards to summarize student progress
-            # will just load both kinds, regardless of what was run
-            for unit_number in range(start_unit_box.value, stop_unit_box.value + 1):
-                control_store.load_unit(unit_number)
+                # Load dashboards to summarize student progress
+                # will just load both kinds, regardless of what was run
+                for unit_number in range( start_unit_box.value, stop_unit_box.value + 1 ):
+                    control_store.load_unit( unit_number )
+
+            except ConnectionError as e:
+                print( e )
 
             if not repeat_button.value:
                 break
 
-            print( datetime.datetime.isoformat( datetime.datetime.now() ) )
+            stop_time = datetime.datetime.now()
+            control_store.save_run_data(run_timestamp=stop_time)
+            print( datetime.datetime.isoformat( stop_time ) )
             print( 'RESTING' )
             rest_seconds = time_box.value * 60
             sleep( rest_seconds )
@@ -164,7 +176,6 @@ def multiple_unit_control( control_store, return_button=False, width='auto', **k
 
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
-
 
     b.on_click( callback )
 

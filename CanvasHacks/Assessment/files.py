@@ -23,6 +23,10 @@ def make_week_iterator( start=1, stop=16 ):
 
 
 class IAssessmentFileHandler( StoreMixin ):
+    """
+    These provide all filepath and filename information
+    for assessment data
+    """
 
 
     def __init__(self, **kwargs):

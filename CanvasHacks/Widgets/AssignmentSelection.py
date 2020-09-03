@@ -119,7 +119,7 @@ def make_assignment_chooser(activity=None,  return_button=False, **kwargs):
     buttons = [ ]
     # Get list of all assignments for the courses
     for course_id in environment.CONFIG.course_ids:
-        assignments += get_assignments_with_submissions( course_id )
+        assignments += get_assignments_with_submissions( course_id, **kwargs )
     assignments = [ (a[ 'id' ], a[ 'name' ]) for a in assignments ]
 
     if activity is not None:

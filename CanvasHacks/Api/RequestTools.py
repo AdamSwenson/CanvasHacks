@@ -69,6 +69,27 @@ def send_put_request( url, data ):
     return response.json()
 
 
+def _handle_pagination(url, data):
+    """
+    Will handle the paginated response by
+    following the links sent
+    :param url:
+    :param data:
+    :return: List of response.json()
+    """
+    url = "%s?per_page=50" % url
+
+    responses = [ ]
+    try:
+        while True:
+            print( 'GET', url )
+            response = requests.get( url, headers=make_request_header(), data=data )
+            responses += response.json()
+            url = response.links[ 'next' ][ 'url' ]
+    except KeyError:
+        return responses
+
+
 # Assignments
 # Get unit list
 def get_all_course_assignments( course_id ):
@@ -76,8 +97,21 @@ def get_all_course_assignments( course_id ):
     Uses api: GET /api/v1/courses/:course_id/assignments
     """
     url = make_url( course_id, 'assignments' )
-    url = "%s?per_page=50" % url
-    return send_get_request( url, { 'include': 'submissions' } )
+    # url = "%s?per_page=50" % url
+    data = { 'include': 'submissions' }
+
+    return _handle_pagination(url=url, data=data)
+
+    # responses = [ ]
+    # try:
+    #     while True:
+    #         print( url )
+    #         response = requests.get( url, headers=make_request_header(), data=data )
+    #         responses += response.json()
+    #         url = response.links[ 'next' ][ 'url' ]
+    # except KeyError:
+    #     return responses
+
 
 
 def get_assignment( course_id, assignment_id ):
@@ -87,12 +121,37 @@ def get_assignment( course_id, assignment_id ):
     #     print(url)
     return send_get_request( url )
 
+def check_needs_grading(assignment):
+    """Returns boolean if needs grading.
+    This is necessary since some things use a dictionary to
+    hold the info and others use an object
+    """
+    try:
+        return assignment.needs_grading_count > 0
+    except AttributeError:
+        return assignment['needs_grading_count'] > 0
+
+def check_has_submissions(assignment):
+    """Returns boolean if has submissions.
+    This is necessary since some things use a dictionary to
+    hold the info and others use an object
+    """
+    try:
+        return assignment.has_submitted_submissions is True
+    except AttributeError:
+        return assignment[ "has_submitted_submissions" ] is True
+
 
 def get_assignments_needing_grading( course_id ):
     """Returns a list of tuples (name, id) of assignments which
     have at least one ungraded submission"""
+
     assigns = get_all_course_assignments( course_id )
-    assigns = [ a for a in assigns if a[ 'needs_grading_count' ] > 0 ]
+
+    assigns = [ a for a in assigns if check_needs_grading(a)]
+
+    # assigns = [ a for a in assigns if a.needs_grading_count > 0 ]
+    # assigns = [ a for a in assigns if a[ 'needs_grading_count' ] > 0 ]
 
     # to_grade = [ (g[ 'name' ].strip(), g[ 'id' ]) for g in to_grade ]
     return assigns
@@ -105,8 +164,8 @@ def get_assignments_with_submissions( course_id, needs_grading=True ):
     student has submitted."""
     assignments = get_all_course_assignments( course_id )
     if needs_grading:
-        assignments = [ a for a in assignments if a[ 'needs_grading_count' ] > 0 ]
-    assignments = [ a for a in assignments if a[ "has_submitted_submissions" ] is True ]
+        assignments = [ a for a in assignments if check_needs_grading(a)]
+    assignments = [ a for a in assignments if check_has_submissions(a)]
     return assignments
 
 

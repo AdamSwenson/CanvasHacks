@@ -3,6 +3,8 @@ Created by adam on 3/13/20
 """
 __author__ = 'adam'
 
+import datetime
+
 from IPython.display import HTML, Latex
 from IPython.display import display
 import pandas as pd
@@ -10,7 +12,7 @@ import pandas as pd
 import CanvasHacks.environment as env
 from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.overview import DiscussionOverviewRepository, SkaaOverviewRepository
-
+import os
 if __name__ == '__main__':
     pass
 
@@ -144,6 +146,57 @@ class ControlStore:
 
         display( out )
 
+    def _get_unit_run_data( self, unit_number ):
+        return  {
+            'unit_number': unit_number,
+            'essay': len( self.skaa_dashboards[ unit_number ].essay ),
+            'no_essay': len( self.skaa_dashboards[ unit_number ].no_essay ),
+            'skaa_no_review': len( self.skaa_dashboards[ unit_number ].non_reviewed ),
+            'posts': len( self.discussion_dashboards[ unit_number ].posters ),
+            'no_posts': len( self.discussion_dashboards[ unit_number ].non_posters ),
+            'discussion_no_review': len( self.discussion_dashboards[ unit_number ].non_reviewed ),
+        }
+
+    def run_data( self, run_timestamp: datetime.datetime.timestamp = None ):
+        """
+        Returns a list containing dictionaries of stats for each unit
+        :type run_timestamp: Will use current time if None
+        :return:
+        """
+        if run_timestamp is None:
+            run_timestamp = datetime.datetime.now()
+
+        d = []
+        for u in self.unit_numbers:
+            dt = self._get_unit_run_data(u)
+            dt['ran_at'] = run_timestamp
+            d.append(dt)
+
+        return d
+
+    def save_run_data( self, file_path=env.RUN_DATA_LOG_PATH, run_timestamp: datetime.datetime.timestamp = None  ):
+        d = self.run_data(run_timestamp=run_timestamp)
+        d = pd.DataFrame(d)
+        d.ran_at = pd.to_datetime(d.ran_at)
+
+        try:
+            # Instead of appending to the csv file which was causing
+            # errors, we read it in and then overwrite it
+            # switched to using xlsx instead of csv because of
+            # errors with alignment and dates
+            existing = pd.read_excel(file_path)
+            d = pd.concat([d, existing])
+        except FileNotFoundError:
+            pass
+
+        # We check whether the file already exists
+        # so that we don't keep writing header rows into the file
+        header = not os.path.exists(file_path)
+
+        # Append it to the csv log file
+        # d.to_csv(file_path, mode='a', header=header)
+        d.to_excel(file_path)
+
     def display_stats( self, latex=False ):
         """
         Displays statistics about the assignment using html template
@@ -162,15 +215,16 @@ class ControlStore:
             else:
 
                 # default html table
-                d = {
-                    'unit_number': u,
-                    'essay': len(self.skaa_dashboards[ u ].essay),
-                    'no_essay': len(self.skaa_dashboards[ u ].no_essay),
-                    'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
-                    'posts': len(self.discussion_dashboards[ u ].posters),
-                    'no_posts': len(self.discussion_dashboards[ u ].non_posters),
-                    'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
-                }
+                d = self._get_unit_run_data(u)
+                # d = {
+                #     'unit_number': u,
+                #     'essay': len(self.skaa_dashboards[ u ].essay),
+                #     'no_essay': len(self.skaa_dashboards[ u ].no_essay),
+                #     'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
+                #     'posts': len(self.discussion_dashboards[ u ].posters),
+                #     'no_posts': len(self.discussion_dashboards[ u ].non_posters),
+                #     'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
+                # }
                 out.append(self.stats_template.format(**d))
         out = ' '.join(out)
         self._display(out)

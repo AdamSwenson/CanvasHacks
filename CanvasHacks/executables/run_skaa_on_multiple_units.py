@@ -21,9 +21,8 @@ class RunSkaaMultipleUnits:
 
     def run( self, **kwargs ):
         """
-
         run all steps parameters include
-            SEND=True,
+            SEND=True If want to do dry run, SEND=False should be passed in here. Association between author and reviewer will not be recorded.
             download=True
         :param kwargs:
         :return:

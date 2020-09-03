@@ -85,6 +85,7 @@ def store_course_essays( course_id, term, start_unit=None ):
     """
     course = env.CONFIG.canvas.get_course(course_id)
     essays = get_all_essay_assigns_for_class(course_id, term)
+    print(f'downloaded {len(essays)} essays')
     filename_maker = EssayFiles()
     cleaner = TextCleaner()
     for j in essays:

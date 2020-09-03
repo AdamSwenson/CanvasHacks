@@ -243,6 +243,25 @@ class ReviewRepository( QuizRepository ):
         content = "\n".join( content )
         return content
 
+    def add_review_assignments( self, associationRepo ):
+        """
+        Will use an association repository to add the id the person was assigned
+        to review to each row.
+
+        :param associationRepo:
+        :return:
+        """
+        self.data[ 'assessee_id' ] = self.data.apply(lambda x: associationRepo.get_assessee( self.activity, x.name ), axis=1 )
+
+
+class DiscussionReviewRepository(ReviewRepository):
+    """
+    Repository for handling reviews of discussion posts
+    """
+
+    def __init__( self, activity, course=None ):
+        super().__init__(activity=activity, course=course)
+
 
 if __name__ == '__main__':
     pass
