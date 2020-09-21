@@ -102,6 +102,7 @@ class SendInitialWorkToReviewer( IStep ):
         self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.statusRepos )
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
+
         self.messenger.notify( self.associations, self.send )
         # self.messenger.notify( self.associationRepo.data, self.send )
         #  todo Want some way of tracking if messages fail to send so can resend
@@ -123,8 +124,15 @@ class SendInitialWorkToReviewer( IStep ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         self.display_manager.initially_loaded = self.work_repo.data
 
-        # hotfix needed to filter unsubmitted for non quiz ca
-        self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
+        # hotfix to filter unsubmitted for non quiz essays (from s20); updated in f20u1hotfixes
+        if isinstance( self.work_repo.data, pd.DataFrame ):
+            if 'workflow_state' in self.work_repo.data.columns:
+                self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
+
+        # dev
+        # print(self.work_repo.data)
+
+        # self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
         if isinstance( self.work_repo.data, pd.DataFrame ):
             self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
 

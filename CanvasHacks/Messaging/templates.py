@@ -24,7 +24,7 @@ REVIEW_NOTICE_TEMPLATE = """
              {review_url}
     {access_code_message}
     
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on {due_date}. 
     
     You may open and look at the peer review assignment as many times as you like.
     
@@ -80,7 +80,7 @@ METAREVIEW_NOTICE_TEMPLATE = """
              {review_url}
      {access_code_message}
     
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on {due_date}. 
     
     You may open and look at the metareview assignment as many times as you like.
         

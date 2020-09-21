@@ -42,7 +42,12 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
 
             # The assessee did the work that we want to send
             # to the assessor
-            content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
+            #todo dev MASSIVE HOTFIX
+            if env.CONFIG.course.id == 79991 and env.CONFIG.unit.unit_number == 1:
+                print('In screwed up unit using Messaging/skaa line 48 hotfix')
+                content = self.content_repository.data.loc[review_assignment.assessee_id].body
+            else:
+                content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
             return self._make_message_data( receiving_student, content, other=None )
 
@@ -104,6 +109,7 @@ class FeedbackFromReviewMessenger(MetareviewInvitationMessenger):
     Sends the feedback to the original author with no request to complete
     the metareview
     """
+
     message_template = REVIEW_FEEDBACK_ONLY_TEMPLATE
 
     def __init__( self, unit: Unit, student_repository, content_repository,
