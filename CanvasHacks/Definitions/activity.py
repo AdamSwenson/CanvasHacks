@@ -39,6 +39,8 @@ class Activity( Model ):
         # // when to unlock the activity_inviting_to_complete
         self.unlock_at = None
         self.points_possible = None
+        # reviewer assigned points
+        self.reviewer_assigned_points = None
         self._unit_number = None
         self._description_text = ''
 
