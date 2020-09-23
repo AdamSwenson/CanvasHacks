@@ -246,12 +246,20 @@ class ControlStore:
             else:
 
                 d = {
-                    'unit_number': u,
-                    'no_essay': self.skaa_dashboards[ u ].no_essay.to_html(),
-                    'skaa_no_review': self.skaa_dashboards[ u ].non_reviewed.to_html(),
-                    'no_posts': self.discussion_dashboards[ u ].non_posters.to_html(),
-                    'discussion_no_review': self.discussion_dashboards[ u ].non_reviewed.to_html(),
-                }
+                    'unit_number': u
+                    }
+                try:
+                    d['no_essay'] = self.skaa_dashboards[ u ].no_essay.to_html(),
+                    d['skaa_no_review'] = self.skaa_dashboards[ u ].non_reviewed.to_html(),
+                except KeyError:
+                    print('Bad skaa data')
+                    pass
+                try:
+                    d['no_posts'] = self.discussion_dashboards[ u ].non_posters.to_html(),
+                    d['discussion_no_review'] = self.discussion_dashboards[ u ].non_reviewed.to_html()
+                except KeyError:
+                    print('Bad discussion data')
+                    pass
 
                 # Populate the table template and add to the list
                 tables.append( self.incomplete_tables_template.format( **d ) )
@@ -344,7 +352,7 @@ class SkaaDashboard:
         """
         try:
             return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
-        except AttributeError:
+        except (AttributeError, KeyError):
             return self.repo.non_reviewed
 
     @property
@@ -360,7 +368,7 @@ class SkaaDashboard:
         """
         try:
             return self.repo.metareviewed.drop( [ 'reviewed_by' ], axis=1 )
-        except AttributeError:
+        except (AttributeError, KeyError):
             # This can happen when the data is empty but we still need to return something
             return self.repo.metareviewed
 
@@ -378,7 +386,7 @@ class SkaaDashboard:
         """
         try:
             return self.repo.non_metareviewed.drop( [ 'reviewed_by' ], axis=1 )
-        except AttributeError:
+        except (AttributeError, KeyError):
             # This can happen when the data is empty but we still need to return something
             return self.repo.non_metareviewed
 
@@ -445,7 +453,7 @@ class DiscussionDashboard:
         """
         try:
             return self.repo.non_reviewed.drop( [ 'reviewing' ], axis=1 )
-        except AttributeError:
+        except (AttributeError, KeyError):
             # This can happen when the data is empty but we still need to return something
             return self.repo.non_reviewed
 
