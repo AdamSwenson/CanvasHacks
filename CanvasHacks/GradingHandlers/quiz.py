@@ -27,6 +27,7 @@ class QuizGrader( IGrader ):
         :param work_repo:
         :param submission_repo:
         :param kwargs:
+            may contain no_late_penalty
         """
         self.work_repo = work_repo
         self.submission_repo = submission_repo
@@ -125,10 +126,14 @@ class QuizGrader( IGrader ):
             questions[ qid ] = { 'score': pts }
             total_score += pts
 
-            # Compute penalty if needed
-            # Will be 0 if not docking for lateness
-            # Records of penalty will be stored on self.penalizer.penalized_records
-            fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
+            fudge_points = 0
+
+            if not self.no_late_penalty:
+
+                # Compute penalty if needed
+                # Will be 0 if not docking for lateness
+                # Records of penalty will be stored on self.penalizer.penalized_records
+                fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
 
         out = self._make_graded_row_output(row, questions, fudge_points)
 

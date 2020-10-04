@@ -3,6 +3,8 @@ Created by adam on 3/16/20
 """
 __author__ = 'adam'
 
+from canvasapi.exceptions import CanvasException
+
 from CanvasHacks import environment
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Definitions.base import BlockableActivity
@@ -90,7 +92,8 @@ class GradeQuiz( StoreMixin ):
         grader = GradingHandlerFactory.make( activity=self.activity,
                                              work_repo=self.workRepo,
                                              submission_repo=self.subRepo,
-                                             association_repo=self.association_repo )
+                                             association_repo=self.association_repo,
+                                             no_late_penalty=self.no_late_penalty)
 
         # grader = QuizGrader( work_repo=self.workRepo,
         #                      submission_repo=self.subRepo,
@@ -109,9 +112,12 @@ class GradeQuiz( StoreMixin ):
         self.uploaded = 0
         # Upload grades
         for g in self.graded:
-            sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )[ 0 ]
-            sub.update_score_and_comments( quiz_submissions=g[ 'data' ][ 'quiz_submissions' ] )
-            self.uploaded += 1
+            try:
+                sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )[ 0 ]
+                sub.update_score_and_comments( quiz_submissions=g[ 'data' ][ 'quiz_submissions' ] )
+                self.uploaded += 1
+            except CanvasException as e:
+                print(e)
 
 
         self._log_uploaded()

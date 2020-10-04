@@ -34,6 +34,11 @@ def activity_data_factory( name=None ):
         'lock_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
         'completion_points': random.randint( 0, 1000 ),
         'max_points': random.randint( 0, 1000 ),
+
+        # # need to explicitly add empty lists since not using specs
+        # 'corrections' : [],
+        # 'penalizers' : [],
+        # 'grade_methods': []
     }
 
 

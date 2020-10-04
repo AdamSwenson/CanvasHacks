@@ -89,11 +89,12 @@ class TestReviewBasedPoints( TestingBase ):
 
     @patch('CanvasHacks.GradingMethods.review.WorkRepositoryLoaderFactory')
     def test_grade( self, workRepoMock ):
-        possible_scores = [ i for i in range(0,3)]
+        max_points = 3
+        possible_scores = [ i for i in range(0, max_points)]
 
         for reviewer_score in possible_scores:
             print("checking reviewer score: ", reviewer_score)
-            expected = reviewer_score / (self.pct_reviewer_assigned * self.max_activity_points)
+            expected = reviewer_score #/ (self.pct_reviewer_assigned * self.max_activity_points)
 
             p = {'get_student_work.return_value': pd.DataFrame([
                 {'student_id': self.students[0].student_id,
@@ -107,7 +108,8 @@ class TestReviewBasedPoints( TestingBase ):
             self.obj = ReviewBasedPoints( graded_activity=self.graded_activity,
                                           review_activity=self.review_activity,
                                           pct_of_score=self.pct_reviewer_assigned,
-                                          review_columns=self.column_names )
+                                          review_columns=self.column_names,
+                                          max_possible_points=max_points +1)
             self.session = self.obj.dao.session
             self.create_preexisting_review_pairings(activity_id=self.graded_activity.id,
                                                     preexisting_students=self.students)
@@ -117,7 +119,7 @@ class TestReviewBasedPoints( TestingBase ):
 
             # check
 
-            print(expected, expected * self.max_activity_points)
+            print(expected, expected) # * self.max_activity_points)
             self.assertEqual(result, expected, "returns expected pct: {}".format(expected))
 
 

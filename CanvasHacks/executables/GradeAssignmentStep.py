@@ -8,7 +8,9 @@ from CanvasHacks import environment
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Definitions.base import BlockableActivity
 # todo Switch to assignment_new when ready
+from CanvasHacks.GradingHandlers.assignment import AssignmentGraderPoints
 from CanvasHacks.GradingHandlers.factories import GradingHandlerFactory
+from CanvasHacks.Logging.grade_composition import log_points
 from CanvasHacks.Models.model import StoreMixin
 from CanvasHacks.Repositories.DataManagement import DataStoreNew
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
@@ -29,9 +31,19 @@ class GradeAssignment( StoreMixin ):
     """
 
     def __init__( self, activity=None, rest_timeout=5, no_late_penalty=True, upload_grades=True, **kwargs ):
+        """
+
+        :param activity:
+        :param rest_timeout:
+        :param no_late_penalty:
+        :param upload_grades: If false, does a dry run without uploading or otherwise
+        recording scores. If true, uploads to canvas.
+        :param kwargs:
+        """
         self.upload_grades = upload_grades
-        self.wait = rest_timeout
+        self.rest_timeout = rest_timeout
         self.no_late_penalty = no_late_penalty
+
         if activity is None:
             # Use what's stored in environment
             selected_activities = environment.CONFIG.get_assignment_ids()
@@ -45,6 +57,11 @@ class GradeAssignment( StoreMixin ):
             self.activity.due_at = self.activity.lock_at
 
         self.graded = [ ]
+        """Holds submission, score tuples for use in uploading"""
+
+        self.grade_records = []
+        """List of PointsRecord objects. Each holds details of a student's points and the methods which assigned them"""
+
 
         self.handle_kwargs( **kwargs )
 
@@ -55,16 +72,16 @@ class GradeAssignment( StoreMixin ):
         """
         self.workRepo = WorkRepositoryLoaderFactory.make( course=environment.CONFIG.course,
                                                           activity=self.activity,
-                                                          rest_timeout=self.wait )
+                                                          rest_timeout=self.rest_timeout )
 
 
         self.assignment = environment.CONFIG.course.get_assignment( self.activity.id )
 
         self.subRepo = AssignmentSubmissionRepository( self.assignment )
+
         # shove the activity onto a sub repo so it will resemble
         # a quizrepo for the grader
         self.subRepo.activity = self.activity
-
 
         # Filter previously graded
         self.subRepo.data = [ s for s in self.subRepo.data if s.workflow_state != 'complete' ]
@@ -87,21 +104,33 @@ class GradeAssignment( StoreMixin ):
         grader = GradingHandlerFactory.make( activity=self.activity,
                                              work_repo=self.workRepo,
                                              submission_repo=self.subRepo,
-                                             association_repo=self.association_repo )
+                                             association_repo=self.association_repo,
+                                             no_late_penalty=self.no_late_penalty)
 
-        #     store.results = GT.new_determine_journal_credit(journal, subRepo)
-        #     if GRADING_LATE:
-        #         store.results = [j for j in store.results if j[0].grade != 'complete']
-
-        # grader = assignmentGrader( work_repo=self.workRepo,
-        #                      submission_repo=self.subRepo,
-        #                      association_repo=self.association_repo )
-        g = grader.grade( on_empty=0 )
+        # Grader returns tuple of lists ( [(submission, points/pct credit)], [PointsRecord]
+        # If the grader is non-points-based, it will return an empty list for grade_records
+        g, grade_records = grader.grade( on_empty=0 )
         self.graded += g
-        print( "Graded: ", len( self.graded ) )
+        self.grade_records += grade_records
+
+        print(f"Graded {len( self.graded )} assignments"  )
+
 
         if self.upload_grades:
-            self._upload_step()
+
+            # Write the details of how each score total was arrived at to log file
+            self.log_point_bases( is_dry_run=False )
+
+            if isinstance(grader, AssignmentGraderPoints):
+                self._upload_step_points()
+            else:
+                self._upload_step_percentage()
+
+            print(f"Uploaded {self.uploaded} grades")
+
+        else:
+            print("This was a dry run. No scores uploaded")
+            self.log_point_bases( is_dry_run=True )
 
     def get_submission_object( self, student_id, attempt ):
         """
@@ -112,7 +141,14 @@ class GradeAssignment( StoreMixin ):
         """
         return [ d for d in self.subRepo.data if d.user_id == student_id and d.attempt == attempt ][0]
 
-    def _upload_step( self ):
+    def _upload_step_percentage( self ):
+        """
+        Handles uploading where the score will be sent as
+        a percentage of the total possible points
+        :return:
+        """
+        print("Uploading scores as percentage of total possible points")
+
         self.uploaded = 0
         # Upload grades
         for g, pct_credit in self.graded:
@@ -121,6 +157,32 @@ class GradeAssignment( StoreMixin ):
             sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )
             sub.edit(submission={'posted_grade': score})
             self.uploaded += 1
+
+    def _upload_step_points( self ):
+        """
+        Handles uploading where the score will be sent as a float of
+        total points
+        :return:
+        """
+        print("Uploading scores as points")
+
+        self.uploaded = 0
+        # Upload grades
+        for g, score in self.graded:
+            # call the put method on the returned canvas api submission
+            # score = "{}%".format(pct_credit)
+            sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )
+            sub.edit(submission={'posted_grade': score})
+            self.uploaded += 1
+
+
+    def log_point_bases( self, is_dry_run):
+        """Writes the details of how points were determined to
+        the logfile.
+        NB, this happens before uploading (and still happens when uploading is turned
+        off)
+        """
+        log_points(self.activity, self.grade_records, is_dry_run=is_dry_run)
 
 
 if __name__ == '__main__':

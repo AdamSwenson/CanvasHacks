@@ -104,7 +104,10 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         except (ValueError, KeyError):
             # The student id may not be set as the index, depending
             # on the source of the data
-            return self.data.set_index( 'student_id' ).loc[ student_id ]
+            if 'student_id' in self.data.columns:
+                return self.data.set_index( 'student_id' ).loc[ student_id ]
+
+
 
     def get_formatted_work_by( self, student_id ):
         """Returns all review entries by the student, formatted for
