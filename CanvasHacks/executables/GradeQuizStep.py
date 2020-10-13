@@ -47,6 +47,10 @@ class GradeQuiz( StoreMixin ):
             self.activity.due_at = self.activity.lock_at
 
         self.graded = [ ]
+        """Holds submission, score tuples for use in uploading"""
+
+        self.grade_records = []
+        """List of PointsRecord objects. Each holds details of a student's points and the methods which assigned them. [Added CAN-72]"""
 
         self.handle_kwargs( **kwargs )
 
@@ -98,8 +102,14 @@ class GradeQuiz( StoreMixin ):
         # grader = QuizGrader( work_repo=self.workRepo,
         #                      submission_repo=self.subRepo,
         #                      association_repo=self.association_repo )
-        g = grader.grade( on_empty=0 )
+
+        # Grader returns tuple of lists ( [(submission, points/pct credit)], [PointsRecord]
+        # If the grader is non-points-based, it will return an empty list for grade_records
+        # todo configure on_empty. was set to 0; maybe this caused the giving everyone who hadn't completed it 0's?
+        g, grade_records = grader.grade( on_empty=None )
         self.graded += g
+        self.grade_records += grade_records
+
         print( "Graded: ", len( self.graded ) )
 
         if self.upload_grades:

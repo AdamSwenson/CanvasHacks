@@ -45,16 +45,18 @@ class SkaaMessenger:
     def send_errors( self ):
         return self.sender.errors
 
-    def _make_message_data( self, receiving_student, content, other=None ):
+    def _make_message_data( self, receiving_student, content, subject=None, other=None ):
         """
         Creates a dictionary with data to be passed to the
         method which actually sends the info to the receiving student
         """
         message = self._make_message_content( content, other, receiving_student )
+        # todo dev moving away from this being defined on the objects
+        email_subject = subject if subject is not None else self.activity_inviting_to_complete.invitation_email_subject
 
         return {
             'student_id': receiving_student.id,
-            'subject': self.activity_inviting_to_complete.email_subject,
+            'subject': email_subject,
             'body': message
         }
 

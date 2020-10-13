@@ -58,7 +58,7 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         # check
         self.assertEqual( obj.message_template, METAREVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.author.id, "Message is going to author of the ca (inviting to review the reviewer)" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.email_subject, "Expected subject" )
+        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Expected subject" )
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
@@ -88,7 +88,7 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.author.id,  "Message is going to author of the ca (inviting to review the reviewer)"  )
-        self.assertEqual(kwargs['subject'], self.unit.metareview.email_subject, "Sent with expected subject line ")
+        self.assertEqual( kwargs['subject'], self.unit.metareview.invitation_email_subject, "Sent with expected subject line " )
 
         # self.assertEqual(kwargs['subject'], self.FeedbackFromMetareviewMessenger.subject, "Sent with expected subject line -- remember this one is different")
         d = self.obj._make_template_input( self.work, None, self.author )

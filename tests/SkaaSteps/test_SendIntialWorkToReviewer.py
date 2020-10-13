@@ -393,7 +393,7 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
 
         # Check that all messages have the correct subject
         for sid, subj, body in messenger_args:
-            self.assertEqual(self.unit.review.email_subject, subj, "Correct subject line")
+            self.assertEqual( self.unit.review.invitation_email_subject, subj, "Correct subject line" )
 
         # Status repo calls on messenger (only 1 repo)
         obj.messenger.status_repositories[0].record.assert_called()

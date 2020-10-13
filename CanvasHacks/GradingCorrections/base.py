@@ -41,6 +41,12 @@ class IGradeCorrection(ABC):
         """
         raise NotImplementedError
 
+    @property
+    def name( self ):
+        """Returns the class name of the grading method. Often used in
+        storing method name as a key"""
+        return self.__class__.__name__
+
 
 
 class IGradeCorrectionPoints(ABC):
@@ -52,7 +58,7 @@ class IGradeCorrectionPoints(ABC):
 
     """
 
-    def analyze( self, record: PointsRecord, *args, **kwargs ):
+    def analyze( self, *args, **kwargs ):
         """
         Returns a signed float of the points
         the contribution the evaluated item makes to the
@@ -65,7 +71,12 @@ class IGradeCorrectionPoints(ABC):
         and this correction applies to A, the result 0.5
         means their overall score should be 3
 
-        :param record:
-        :return: PointsRecord
         """
         raise NotImplementedError
+
+    @property
+    def name( self ):
+        """Returns the class name of the grading method. Often used in
+        storing method name as a key"""
+        return self.__class__.__name__
+

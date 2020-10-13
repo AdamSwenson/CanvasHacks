@@ -94,6 +94,11 @@ class IPenalizer(ABC):
             return stem.format( row[ 'student_id' ], row[ 'submitted' ], due_at, penalty )
 
 
+    @property
+    def name( self ):
+        """Returns the class name of the grading method. Often used in
+        storing method name as a key"""
+        return self.__class__.__name__
 
 
 class NoLatePenalty( IPenalizer ):

@@ -3,8 +3,10 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingHandlers.base import IGrader
+from CanvasHacks.GradingHandlers.records import PointsRecord
 from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingCorrections.penalities import get_penalty, IPenalizer
+from CanvasHacks.GradingMethods.review import ReviewBasedPoints
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository
 
@@ -37,6 +39,7 @@ class QuizGrader( IGrader ):
         self.grade_method = self.activity.grade_method
 
         self.graded = [ ]
+        self.grade_records = []
 
     def grade( self, **kwargs):
         """
@@ -55,13 +58,15 @@ class QuizGrader( IGrader ):
         # The penalizer object leaves this task up to us
         self.report_late_penalties()
 
-        return self.graded
+        # todo Add recording of grade records
+        return self.graded, self.grade_records
 
     def report_late_penalties( self ):
         # Report late penalties
         if len( self.penalizer.penalized_records ) > 0:
             for penalty_dict in self.penalizer.penalized_records:
                 self._penalty_message(penalty_dict['penalty'], penalty_dict['record'])
+
 
     def _get_score( self, content, on_empty=None ):
         """

@@ -21,7 +21,7 @@ class ForfeitedPointsCorrectorPoints(IGradeCorrectionPoints):
     reviewer forfeited
     """
 
-    def analyze( self, record: PointsRecord, *args, **kwargs ):
+    def analyze( self, *args, **kwargs ):
         """
 
         :param args:

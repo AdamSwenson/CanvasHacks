@@ -60,7 +60,7 @@ class GradeAssignment( StoreMixin ):
         """Holds submission, score tuples for use in uploading"""
 
         self.grade_records = []
-        """List of PointsRecord objects. Each holds details of a student's points and the methods which assigned them"""
+        """List of PointsRecord objects. Each holds details of a student's points and the methods which assigned them. [Added CAN-72]"""
 
 
         self.handle_kwargs( **kwargs )

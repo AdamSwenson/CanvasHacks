@@ -23,6 +23,8 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
     """
     message_template = REVIEW_NOTICE_TEMPLATE
 
+    email_subject_template = "Unit {}: Another student's essay to peer review "
+
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: IStatusRepository ):
 
@@ -49,7 +51,9 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
             else:
                 content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
-            return self._make_message_data( receiving_student, content, other=None )
+            subject = self.email_subject_template.format(self.unit.unit_number)
+
+            return self._make_message_data( receiving_student, content, other=None, subject=subject )
 
         except Exception as e:
             # todo exception handling
@@ -64,6 +68,8 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
     to the author of the content assignment with invite to do metareview
     """
     message_template = METAREVIEW_NOTICE_TEMPLATE
+
+    email_subject_template = "Unit {}: feedback on your essay and invitation to do the metareview"
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: StatusRepository ):
@@ -90,7 +96,9 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
             # to the assessee
             content = self.content_repository.get_formatted_work_by( review_assignment.assessor_id )
 
-            return self._make_message_data( receiving_student, content, other=None )
+            subject = self.email_subject_template.format(self.unit.unit_number )
+
+            return self._make_message_data( receiving_student, content, other=None, subject=subject )
 
         except Exception as e:
             # todo exception handling
@@ -173,8 +181,10 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     did the initial peer review
     """
     message_template = METAREVIEW_CONTENT_TEMPLATE
+
     subject = "Unit {}: Feedback on your peer review"
-    intro = "Here is the feedback the author gave on your peer review. "
+
+    intro = "Here is the feedback the author gave on your review of their essay. These are the answers they provided in filling out the metareview. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: IStatusRepository ):
@@ -291,7 +301,7 @@ def metareview_send_message_to_reviewers( review_assignments, studentRepo, conte
                 f.write( "\n=========\n {}".format( message ) )
 
                 if send:
-                    subject = activity.email_subject
+                    subject = activity.invitation_email_subject
                     m = send_message_to_student(
                         student_id=rev.assessee_id,
                         subject=subject,
@@ -339,7 +349,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
             message = make_notice( d )
 
             if send:
-                subject = activity.email_subject
+                subject = activity.invitation_email_subject
                 # fix this you fucking idiot
                 m = send_message_to_student( student_id=rev.assessor_id, subject=subject, body=message )
                 print( m )
