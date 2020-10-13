@@ -37,6 +37,10 @@ def run_all_steps( SEND=True, download=True, **kwargs ):
         # This may be raised when there is no metareview assignment
         print("Step 3 encountered an error: ",  e)
 
+    except IndexError as e:
+        # This may happen when there are no results for the metareview
+        print("Problem loading files for Step 3 ", e)
+
     # Return in case need to check values on them
     return (step1, step2, step3)
 
