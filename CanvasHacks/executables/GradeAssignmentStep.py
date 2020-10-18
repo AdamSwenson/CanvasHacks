@@ -15,6 +15,7 @@ from CanvasHacks.Models.model import StoreMixin
 from CanvasHacks.Repositories.DataManagement import DataStoreNew
 from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
+from CanvasHacks.Repositories.students import StudentRepository
 
 from CanvasHacks.Repositories.submissions import SubmissionRepository, AssignmentSubmissionRepository
 
@@ -95,6 +96,12 @@ class GradeAssignment( StoreMixin ):
         if isinstance( self.activity, BlockableActivity ):
             dao = SqliteDAO()
             self.association_repo = AssociationRepository( dao, self.activity )
+
+        # Create a student repository that will mainly be used for logging
+        # and perhaps messaging
+        self.studentRepo = StudentRepository( environment.CONFIG.course )
+        self.studentRepo.download()
+
 
     def run( self, **kwargs ):
         self.handle_kwargs( **kwargs )
@@ -182,6 +189,13 @@ class GradeAssignment( StoreMixin ):
         NB, this happens before uploading (and still happens when uploading is turned
         off)
         """
+        # Add student names to the records before logging
+        for g in self.grade_records:
+            g.student_name = self.studentRepo.get_student_name(g.student_id)
+
+            # todo Add email too if the log will be used in messaging. Points record is set up to handle this by setting g.student_email
+
+
         log_points(self.activity, self.grade_records, is_dry_run=is_dry_run)
 
 

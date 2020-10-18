@@ -3,6 +3,7 @@ Created by adam on 2/28/20
 """
 __author__ = 'adam'
 
+from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import ConversationMessageSender
 from CanvasHacks.Models.student import get_first_name
@@ -112,22 +113,35 @@ class SkaaMessenger:
         """
         messages = [ ]
         for rev in review_assignments:
-            # print( rev )
-            message_data = self.prepare_message( rev, other )
-            # messages.append( message_data )
+            try:
+                # print( rev )
+                message_data = self.prepare_message( rev, other )
+                # messages.append( message_data )
 
-            if send:
-                m = self.sender.send( **message_data )
-                # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
-                # self.logger.write(m)
+                if send:
+                    m = self.sender.send( **message_data )
+                    # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
+                    # self.logger.write(m)
 
-                messages.append( m )
-                self.update_status( message_data )
+                    messages.append( m )
+                    self.update_status( message_data )
 
-            else:
-                # For test runs
-                messages.append( message_data )
-                print( message_data )
+                else:
+                    # For test runs
+                    messages.append( message_data )
+                    print( message_data )
+            except MessageDataCreationError as e:
+                p = """
+                
+                XXXXXXXXXXXXXXXXXXXXXXXXXXX
+                        SERIOUS ERROR IN MESSAGE CREATION!
+                        
+                        {}
+                        
+                        
+                XXXXXXXXXXXXXXXXXXXXXXXXXXX
+                """
+                print(p.format(e))
         # Returns for testing / auditing
         return messages
 

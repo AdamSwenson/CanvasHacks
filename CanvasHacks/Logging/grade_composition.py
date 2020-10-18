@@ -22,6 +22,7 @@ def log_points( activity: Activity, list_of_points_records: list, is_dry_run=Fal
     Writes the details of how points were determined to
     the logfile.
 
+    :param studentRepo:
     :param activity:
     :param list_of_points_records:
     :param is_dry_run:
@@ -32,6 +33,9 @@ def log_points( activity: Activity, list_of_points_records: list, is_dry_run=Fal
     # add details
     frame[ 'activity' ] = activity.activity_name
     frame[ 'timestamp' ] = datetime.datetime.now().isoformat()
+
+    # Do this if we've been given a student repo for looking up names etc
+
 
     # save
     v = { 'path': env.LOG_FOLDER,

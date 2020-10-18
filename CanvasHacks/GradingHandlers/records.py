@@ -22,6 +22,11 @@ class PointsRecord( StoreMixin ):
 
         self.student_id = None
 
+        # These can be optionally added for use in logging or
+        # messaging
+        self.student_name = None
+        self.student_email = None
+
         self.grade_dict = { }
         """Keys will be names of the grading / penalty / correction method which 
         assigned the number of points or, for quizzes, the name of the question which
@@ -118,6 +123,12 @@ class PointsRecord( StoreMixin ):
         :return:
         """
         d = { 'student_id': self.student_id }
+
+        if self.student_name is not None:
+            d['student_name'] = self.student_name
+
+        if self.student_email is not None:
+            d['student_email'] = self.student_email
 
         for k, v in self.grade_dict.items():
             # Add the points to the dictionary

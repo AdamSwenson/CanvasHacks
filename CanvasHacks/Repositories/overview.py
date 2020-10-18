@@ -46,7 +46,6 @@ class SkaaOverviewRepository( DaoMixin ):
 
         self.components = [ c for c in self.unit.components if isinstance( c, SkaaReviewGroup ) ]
 
-
         self._initialize_db()
 
         self.assignRepo = AssociationRepository( self.dao, self.activity_for_review_pairings )

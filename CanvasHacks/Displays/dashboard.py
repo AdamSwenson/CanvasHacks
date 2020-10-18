@@ -4,15 +4,15 @@ Created by adam on 3/13/20
 __author__ = 'adam'
 
 import datetime
+import os
 
+import pandas as pd
 from IPython.display import HTML, Latex
 from IPython.display import display
-import pandas as pd
 
 import CanvasHacks.environment as env
-from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.overview import DiscussionOverviewRepository, SkaaOverviewRepository
-import os
+
 if __name__ == '__main__':
     pass
 
@@ -28,15 +28,27 @@ class ControlStore:
     stats_template = """
     <div class='unit-stats'>
         <h2>Unit {unit_number}</h2>
+        <div class='skaa'>
         <h3>SKAA</h3>
-            <p><strong>Submitted essay</strong>: {essay}</p>
-            <p><strong>Did not submit essay</strong>: {no_essay}</p>
-            <p><strong>Reviewer has not submitted</strong>: {skaa_no_review}</p>
-
+            <h4>Essay</h4>
+            <p><strong>    Submitted essay</strong>: {essay}</p>
+            <p><strong>    Did not submit essay</strong>: {no_essay}</p>
+            
+            <h4>Review</h4>
+            <p><strong>    Reviewer submitted</strong>: {skaa_review}</p>
+            <p><strong>    Reviewer has not submitted</strong>: {skaa_no_review}</p>
+            
+            <h4>Metareview (including blocked)</h4>
+            <p><strong>    Author submitted</strong>: {skaa_metareview}</p>
+            <p><strong>    Author has not submitted</strong>: {skaa_no_metareview}</p>
+        </div>
+        
+        <div class='discussion'>    
         <h3>Discussion</h3>
-            <p><strong>Posted required amount:</strong> {posts}</p>
-            <p><strong>Has not reached post trigger amount:</strong> {no_posts}</p>
-            <p><strong>Reviewer has not submitted:</strong> {discussion_no_review} </p>
+            <p><strong>    Posted required amount:</strong> {posts}</p>
+            <p><strong>    Has not reached post trigger amount:</strong> {no_posts}</p>
+            <p><strong>    Reviewer has not submitted:</strong> {discussion_no_review} </p>
+        </div>
     </div>
     """
 
@@ -48,6 +60,8 @@ class ControlStore:
                 {no_essay}
             <h4>Reviewer has not submitted</h4>
                 {skaa_no_review}
+            <h4>Metareview has not submitted (including blocked)</h4>
+                {skaa_no_metareview}
 
         <h3>Discussion</h3>
             <h4>Has not reached post trigger amount</h4>
@@ -108,7 +122,7 @@ class ControlStore:
 
         # As of CAN-68 we use the method which will check if the object
         # is already stored to save calls to the api
-        unit = env.CONFIG.set_unit(unit_number)
+        unit = env.CONFIG.set_unit( unit_number )
         # unit = Unit( course, unit_number )
         self.units[ unit_number ] = unit
         return unit
@@ -147,11 +161,18 @@ class ControlStore:
         display( out )
 
     def _get_unit_run_data( self, unit_number ):
-        return  {
+        return {
             'unit_number': unit_number,
+
             'essay': len( self.skaa_dashboards[ unit_number ].essay ),
             'no_essay': len( self.skaa_dashboards[ unit_number ].no_essay ),
+
+            'skaa_review': len( self.skaa_dashboards[ unit_number ].reviewed ),
             'skaa_no_review': len( self.skaa_dashboards[ unit_number ].non_reviewed ),
+
+            'skaa_metareview': len( self.skaa_dashboards[ unit_number ].metareviewed ),
+            'skaa_no_metareview': len( self.skaa_dashboards[ unit_number ].non_metareviewed ),
+
             'posts': len( self.discussion_dashboards[ unit_number ].posters ),
             'no_posts': len( self.discussion_dashboards[ unit_number ].non_posters ),
             'discussion_no_review': len( self.discussion_dashboards[ unit_number ].non_reviewed ),
@@ -166,36 +187,36 @@ class ControlStore:
         if run_timestamp is None:
             run_timestamp = datetime.datetime.now()
 
-        d = []
+        d = [ ]
         for u in self.unit_numbers:
-            dt = self._get_unit_run_data(u)
-            dt['ran_at'] = run_timestamp
-            d.append(dt)
+            dt = self._get_unit_run_data( u )
+            dt[ 'ran_at' ] = run_timestamp
+            d.append( dt )
 
         return d
 
-    def save_run_data( self, file_path=env.RUN_DATA_LOG_PATH, run_timestamp: datetime.datetime.timestamp = None  ):
-        d = self.run_data(run_timestamp=run_timestamp)
-        d = pd.DataFrame(d)
-        d.ran_at = pd.to_datetime(d.ran_at)
+    def save_run_data( self, file_path=env.RUN_DATA_LOG_PATH, run_timestamp: datetime.datetime.timestamp = None ):
+        d = self.run_data( run_timestamp=run_timestamp )
+        d = pd.DataFrame( d )
+        d.ran_at = pd.to_datetime( d.ran_at )
 
         try:
             # Instead of appending to the csv file which was causing
             # errors, we read it in and then overwrite it
             # switched to using xlsx instead of csv because of
             # errors with alignment and dates
-            existing = pd.read_excel(file_path)
-            d = pd.concat([d, existing])
+            existing = pd.read_excel( file_path )
+            d = pd.concat( [ d, existing ] )
         except FileNotFoundError:
             pass
 
         # We check whether the file already exists
         # so that we don't keep writing header rows into the file
-        header = not os.path.exists(file_path)
+        header = not os.path.exists( file_path )
 
         # Append it to the csv log file
         # d.to_csv(file_path, mode='a', header=header)
-        d.to_excel(file_path)
+        d.to_excel( file_path )
 
     def display_stats( self, latex=False ):
         """
@@ -203,9 +224,9 @@ class ControlStore:
         :param latex:
         :return:
         """
-        assert(latex is False)
+        assert (latex is False)
 
-        out = []
+        out = [ ]
 
         for u in self.unit_numbers:
             if latex:
@@ -215,7 +236,7 @@ class ControlStore:
             else:
 
                 # default html table
-                d = self._get_unit_run_data(u)
+                d = self._get_unit_run_data( u )
                 # d = {
                 #     'unit_number': u,
                 #     'essay': len(self.skaa_dashboards[ u ].essay),
@@ -225,10 +246,9 @@ class ControlStore:
                 #     'no_posts': len(self.discussion_dashboards[ u ].non_posters),
                 #     'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
                 # }
-                out.append(self.stats_template.format(**d))
-        out = ' '.join(out)
-        self._display(out)
-
+                out.append( self.stats_template.format( **d ) )
+        out = ' '.join( out )
+        self._display( out )
 
     def display_incomplete_tables( self, latex=False ):
         """
@@ -247,18 +267,19 @@ class ControlStore:
 
                 d = {
                     'unit_number': u
-                    }
+                }
                 try:
-                    d['no_essay'] = self.skaa_dashboards[ u ].no_essay.to_html(),
-                    d['skaa_no_review'] = self.skaa_dashboards[ u ].non_reviewed.to_html(),
+                    d[ 'no_essay' ] = self.skaa_dashboards[ u ].no_essay.to_html(),
+                    d[ 'skaa_no_review' ] = self.skaa_dashboards[ u ].non_reviewed.to_html(),
+                    d[ 'skaa_no_metareview' ] = self.skaa_dashboards[ u ].non_metareviewed.to_html(),
                 except KeyError:
-                    print('Bad skaa data')
+                    print( 'Bad skaa data' )
                     pass
                 try:
-                    d['no_posts'] = self.discussion_dashboards[ u ].non_posters.to_html(),
-                    d['discussion_no_review'] = self.discussion_dashboards[ u ].non_reviewed.to_html()
+                    d[ 'no_posts' ] = self.discussion_dashboards[ u ].non_posters.to_html(),
+                    d[ 'discussion_no_review' ] = self.discussion_dashboards[ u ].non_reviewed.to_html()
                 except KeyError:
-                    print('Bad discussion data')
+                    print( 'Bad discussion data' )
                     pass
 
                 # Populate the table template and add to the list
@@ -267,7 +288,6 @@ class ControlStore:
         out = ' '.join( tables )
 
         self._display( out, latex=latex )
-
 
     def display_complete_tables( self, latex=False ):
         """
@@ -372,12 +392,11 @@ class SkaaDashboard:
             # This can happen when the data is empty but we still need to return something
             return self.repo.metareviewed
 
-
     @property
     def non_metareviewed( self ):
         """
         Returns the subset of students who have turned in the initial work
-        whose author has turned in the metareview
+        but author has not turned in the metareview
 
         Drops the 'reviewed_by' column in results since that can be
         confusing in this context
