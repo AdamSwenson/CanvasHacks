@@ -161,22 +161,29 @@ class ControlStore:
         display( out )
 
     def _get_unit_run_data( self, unit_number ):
-        return {
-            'unit_number': unit_number,
+        try:
+            return {
 
-            'essay': len( self.skaa_dashboards[ unit_number ].essay ),
-            'no_essay': len( self.skaa_dashboards[ unit_number ].no_essay ),
+                    'unit_number': unit_number,
 
-            'skaa_review': len( self.skaa_dashboards[ unit_number ].reviewed ),
-            'skaa_no_review': len( self.skaa_dashboards[ unit_number ].non_reviewed ),
+                    'essay': len( self.skaa_dashboards[ unit_number ].essay ),
+                    'no_essay': len( self.skaa_dashboards[ unit_number ].no_essay ),
 
-            'skaa_metareview': len( self.skaa_dashboards[ unit_number ].metareviewed ),
-            'skaa_no_metareview': len( self.skaa_dashboards[ unit_number ].non_metareviewed ),
+                    'skaa_review': len( self.skaa_dashboards[ unit_number ].reviewed ),
+                    'skaa_no_review': len( self.skaa_dashboards[ unit_number ].non_reviewed ),
 
-            'posts': len( self.discussion_dashboards[ unit_number ].posters ),
-            'no_posts': len( self.discussion_dashboards[ unit_number ].non_posters ),
-            'discussion_no_review': len( self.discussion_dashboards[ unit_number ].non_reviewed ),
-        }
+                    'skaa_metareview': len( self.skaa_dashboards[ unit_number ].metareviewed ),
+                    'skaa_no_metareview': len( self.skaa_dashboards[ unit_number ].non_metareviewed ),
+
+                    'posts': len( self.discussion_dashboards[ unit_number ].posters ),
+                    'no_posts': len( self.discussion_dashboards[ unit_number ].non_posters ),
+                    'discussion_no_review': len( self.discussion_dashboards[ unit_number ].non_reviewed ),
+            }
+        except (TypeError, AttributeError) as e:
+            # we will likely hit this if there is no data yet
+            # for the unit requested. Since we don't want to take down the whole
+            # operation, we just print the error
+            print(e)
 
     def run_data( self, run_timestamp: datetime.datetime.timestamp = None ):
         """
@@ -189,34 +196,40 @@ class ControlStore:
 
         d = [ ]
         for u in self.unit_numbers:
-            dt = self._get_unit_run_data( u )
-            dt[ 'ran_at' ] = run_timestamp
-            d.append( dt )
+            try:
+                dt = self._get_unit_run_data( u )
+                dt[ 'ran_at' ] = run_timestamp
+                d.append( dt )
+            except (TypeError, AttributeError):
+                pass
 
         return d
 
     def save_run_data( self, file_path=env.RUN_DATA_LOG_PATH, run_timestamp: datetime.datetime.timestamp = None ):
-        d = self.run_data( run_timestamp=run_timestamp )
-        d = pd.DataFrame( d )
-        d.ran_at = pd.to_datetime( d.ran_at )
-
         try:
-            # Instead of appending to the csv file which was causing
-            # errors, we read it in and then overwrite it
-            # switched to using xlsx instead of csv because of
-            # errors with alignment and dates
-            existing = pd.read_excel( file_path )
-            d = pd.concat( [ d, existing ] )
-        except FileNotFoundError:
+            d = self.run_data( run_timestamp=run_timestamp )
+            d = pd.DataFrame( d )
+            d.ran_at = pd.to_datetime( d.ran_at )
+
+            try:
+                # Instead of appending to the csv file which was causing
+                # errors, we read it in and then overwrite it
+                # switched to using xlsx instead of csv because of
+                # errors with alignment and dates
+                existing = pd.read_excel( file_path )
+                d = pd.concat( [ d, existing ] )
+            except FileNotFoundError:
+                pass
+
+            # We check whether the file already exists
+            # so that we don't keep writing header rows into the file
+            header = not os.path.exists( file_path )
+
+            # Append it to the csv log file
+            # d.to_csv(file_path, mode='a', header=header)
+            d.to_excel( file_path )
+        except (TypeError, AttributeError):
             pass
-
-        # We check whether the file already exists
-        # so that we don't keep writing header rows into the file
-        header = not os.path.exists( file_path )
-
-        # Append it to the csv log file
-        # d.to_csv(file_path, mode='a', header=header)
-        d.to_excel( file_path )
 
     def display_stats( self, latex=False ):
         """
@@ -229,24 +242,29 @@ class ControlStore:
         out = [ ]
 
         for u in self.unit_numbers:
-            if latex:
+            try:
+                if latex:
+                    pass
+                    # tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
+
+                else:
+
+                    # default html table
+                    d = self._get_unit_run_data( u )
+                    # d = {
+                    #     'unit_number': u,
+                    #     'essay': len(self.skaa_dashboards[ u ].essay),
+                    #     'no_essay': len(self.skaa_dashboards[ u ].no_essay),
+                    #     'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
+                    #     'posts': len(self.discussion_dashboards[ u ].posters),
+                    #     'no_posts': len(self.discussion_dashboards[ u ].non_posters),
+                    #     'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
+                    # }
+                    if d is not None:
+                        out.append( self.stats_template.format( **d ) )
+            except (TypeError, AttributeError):
                 pass
-                # tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
 
-            else:
-
-                # default html table
-                d = self._get_unit_run_data( u )
-                # d = {
-                #     'unit_number': u,
-                #     'essay': len(self.skaa_dashboards[ u ].essay),
-                #     'no_essay': len(self.skaa_dashboards[ u ].no_essay),
-                #     'skaa_no_review': len(self.skaa_dashboards[ u ].non_reviewed),
-                #     'posts': len(self.discussion_dashboards[ u ].posters),
-                #     'no_posts': len(self.discussion_dashboards[ u ].non_posters),
-                #     'discussion_no_review': len(self.discussion_dashboards[ u ].non_reviewed),
-                # }
-                out.append( self.stats_template.format( **d ) )
         out = ' '.join( out )
         self._display( out )
 
@@ -259,31 +277,34 @@ class ControlStore:
         """
         tables = [ ]
         for u in self.unit_numbers:
-            label = "Unit {}".format( u )
-            if latex:
-                tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
+            try:
+                label = "Unit {}".format( u )
+                if latex:
+                    tables.append( self.skaa_dashboards[ u ].non_reviewed.to_latex( caption=label ) )
 
-            else:
+                else:
 
-                d = {
-                    'unit_number': u
-                }
-                try:
-                    d[ 'no_essay' ] = self.skaa_dashboards[ u ].no_essay.to_html(),
-                    d[ 'skaa_no_review' ] = self.skaa_dashboards[ u ].non_reviewed.to_html(),
-                    d[ 'skaa_no_metareview' ] = self.skaa_dashboards[ u ].non_metareviewed.to_html(),
-                except KeyError:
-                    print( 'Bad skaa data' )
-                    pass
-                try:
-                    d[ 'no_posts' ] = self.discussion_dashboards[ u ].non_posters.to_html(),
-                    d[ 'discussion_no_review' ] = self.discussion_dashboards[ u ].non_reviewed.to_html()
-                except KeyError:
-                    print( 'Bad discussion data' )
-                    pass
+                    d = {
+                        'unit_number': u
+                    }
+                    try:
+                        d[ 'no_essay' ] = self.skaa_dashboards[ u ].no_essay.to_html(),
+                        d[ 'skaa_no_review' ] = self.skaa_dashboards[ u ].non_reviewed.to_html(),
+                        d[ 'skaa_no_metareview' ] = self.skaa_dashboards[ u ].non_metareviewed.to_html(),
+                    except KeyError:
+                        print( 'Bad skaa data' )
+                        pass
+                    try:
+                        d[ 'no_posts' ] = self.discussion_dashboards[ u ].non_posters.to_html(),
+                        d[ 'discussion_no_review' ] = self.discussion_dashboards[ u ].non_reviewed.to_html()
+                    except KeyError:
+                        print( 'Bad discussion data' )
+                        pass
 
-                # Populate the table template and add to the list
-                tables.append( self.incomplete_tables_template.format( **d ) )
+                    # Populate the table template and add to the list
+                    tables.append( self.incomplete_tables_template.format( **d ) )
+            except (TypeError, AttributeError):
+                pass
 
         out = ' '.join( tables )
 
@@ -298,22 +319,25 @@ class ControlStore:
         """
         tables = [ ]
         for u in self.unit_numbers:
-            if latex:
-                label = "Unit {}".format( u )
-                tables.append( self.skaa_dashboards[ u ].reviewed.to_latex( caption=label ) )
+            try:
+                if latex:
+                    label = "Unit {}".format( u )
+                    tables.append( self.skaa_dashboards[ u ].reviewed.to_latex( caption=label ) )
 
-            else:
+                else:
 
-                d = {
-                    'unit_number': u,
-                    'essay': self.skaa_dashboards[ u ].essay.to_html(),
-                    'skaa_review': self.skaa_dashboards[ u ].reviewed.to_html(),
-                    'posts': self.discussion_dashboards[ u ].posters.to_html(),
-                    'discussion_review': self.discussion_dashboards[ u ].reviewed.to_html(),
-                }
+                    d = {
+                        'unit_number': u,
+                        'essay': self.skaa_dashboards[ u ].essay.to_html(),
+                        'skaa_review': self.skaa_dashboards[ u ].reviewed.to_html(),
+                        'posts': self.discussion_dashboards[ u ].posters.to_html(),
+                        'discussion_review': self.discussion_dashboards[ u ].reviewed.to_html(),
+                    }
 
-                # Populate the table template and add to the list
-                tables.append( self.complete_tables_template.format( **d ) )
+                    # Populate the table template and add to the list
+                    tables.append( self.complete_tables_template.format( **d ) )
+            except (TypeError, AttributeError):
+                pass
 
         out = ' '.join( tables )
 

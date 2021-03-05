@@ -114,7 +114,7 @@ class InvitationStatusRepository( IStatusRepository ):
 
     def get( self, student ):
         """
-        Returns the record for the student for this unit or none
+        Returns the record for the student for this activity or none
         if no record has been created yet
         :param student: Student or student id
         :return: FeedbackReceivedRecord or None

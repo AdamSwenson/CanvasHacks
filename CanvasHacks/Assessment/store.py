@@ -97,6 +97,7 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
         unit_number: Integer
 
     """
+
     # id: int
     # term: str
     # content: list
@@ -108,7 +109,7 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
             for k, v in kwargs.items():
                 setattr( self, k, v )
         except AttributeError as e:
-            print(e, f"\n {k} => {v}")
+            print( e, f"\n {k} => {v}" )
         self._fix_errors()
 
     #         self.token_filter = TokenFiltrationMixin()
@@ -127,7 +128,7 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
         b = [ ]
         [ b.extend( l ) for l in self.bags ]
         # remove None type since things will be expecting a list of strings
-        b = [w for w in b if w is not None]
+        b = [ w for w in b if w is not None ]
         return b
 
     @property
@@ -175,7 +176,7 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
             txt = ' '.join( bag )
             return afinn.score( txt )
         except TypeError as e:
-            print(e)
+            print( e )
             return 0
 
     def _fix_errors( self ):
@@ -188,7 +189,7 @@ class SingleAssignmentStore( TokenFiltrationMixin ):
         except AttributeError as e:
             # sometimes we want to load an empty object
             # which will not have a content attribute
-            print(e)
+            print( e )
 
 
 class JournalAssignment( SingleAssignmentStore ):
@@ -251,6 +252,9 @@ class TermWeekStore( TokenFiltrationMixin ):
     @property
     def no_stops_bag( self ):
         """A wordbag comprising every word submitted by students sans stopwords"""
+        if len( self.combo_bag ) == 0 :
+            return [ ]
+
         return [ self.clean_punctuation( w ) for w in self.combo_bag if
                  self.keep( w, keep_stopwords=False ) ]  # not in self.to_remove]
 

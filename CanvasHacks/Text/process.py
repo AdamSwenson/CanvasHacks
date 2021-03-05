@@ -110,12 +110,16 @@ class TokenFiltrationMixin:
         :param keep_stopwords:
         :return:
         """
-        if keep_stopwords:
-            rx = self.to_remove_regex
-        else:
-            rx = self.to_remove_inc_stops_regex
+        try:
+            if keep_stopwords:
+                rx = self.to_remove_regex
+            else:
+                rx = self.to_remove_inc_stops_regex
 
-        return rx.match(token) is None
+            return rx.match(token) is None
+        except TypeError as e:
+            # print(e , token)
+            return False
 
     @property
     def punctuation_table( self ):

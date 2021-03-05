@@ -84,7 +84,7 @@ class SkaaOverviewRepository( DaoMixin ):
 
                         # add unit and assign info to make more readable
                         d['activity'] = c.name
-                    except AttributeError:
+                    except (TypeError, AttributeError):
                         pass
 
                 self.add_invites( d, c, sid )

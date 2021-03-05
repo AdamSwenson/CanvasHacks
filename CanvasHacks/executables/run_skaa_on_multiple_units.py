@@ -30,17 +30,23 @@ class RunSkaaMultipleUnits:
         results = {}
         for unit_number in range(self.start_unit, self.stop_unit + 1):
             print( "\n~~~~~~~~~~~~~~~~~~~~~~ UNIT {} ~~~~~~~~~~~~~~~~~~~~~~".format(unit_number))
+            try:
 
-            # Set the unit on environment
-            # As of CAN-68 we use the method which will check if the object
-            # is already stored to save calls to the api
-            environment.CONFIG.set_unit(unit_number)
+                # Set the unit on environment
+                # As of CAN-68 we use the method which will check if the object
+                # is already stored to save calls to the api
+                environment.CONFIG.set_unit(unit_number)
 
-            # environment.CONFIG.set_unit_number( unit_number)
-            # environment.CONFIG.initialize_canvas_objs()
-            # environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
+                # environment.CONFIG.set_unit_number( unit_number)
+                # environment.CONFIG.initialize_canvas_objs()
+                # environment.CONFIG.unit = Unit( environment.CONFIG.course, unit_number )
 
-            results[unit_number] = run_all_steps( **kwargs )
+                results[unit_number] = run_all_steps( **kwargs )
+
+            except AttributeError as e:
+                # Likely because unit does not exist (e.g., it was skipped)
+                print(e)
+
         return results
 
 
