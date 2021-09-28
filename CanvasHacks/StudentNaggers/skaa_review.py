@@ -22,6 +22,7 @@ class SkaaReviewNagger(IStep):
             """
             self.send = send
             self.overview_repo = overview_repo
+
             # This will be the student repo and preempt loading of a new one in the
             # call to _initialize_db under _initialize()
             self.studentRepo = self.overview_repo.studentRepo
@@ -33,6 +34,7 @@ class SkaaReviewNagger(IStep):
             # in the message
             # ------------------
             super().__init__(  is_test=is_test, send=send, **kwargs )
+
             # The activity whose results we are going to be doing something with
             self.activity = self.unit.review
 
@@ -54,8 +56,10 @@ class SkaaReviewNagger(IStep):
         Returns list of (canvas id, name)
         :return:
         """
-        return [ (cid, self.studentRepo.get_student_first_name( cid )) for cid in
+        rps = [ (cid, self.studentRepo.get_student_first_name( cid )) for cid in
                  self.overview_repo.non_reviewed.reviewed_by_id.tolist() ]
+        # prune out any student who have dropped (their name will be an empty string)
+        return [r for r in rps if len(r[1]) > 0]
 
     def run( self ):
 

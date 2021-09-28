@@ -29,15 +29,19 @@ class EssayNagger:
         Returns list of (canvas id, name)
         :return:
         """
-        return [ (cid, self.studentRepo.get_student_first_name( cid )) for cid in
+        rps = [ (cid, self.studentRepo.get_student_first_name( cid )) for cid in
                  self.overview_repo.no_essay.reviewed_by_id.tolist() ]
 
-    def run( self ):
-        # Initialize these here since may not have values when class instantiated
-        self.unit = self.overview_repo.unit
-        self.messenger = EssayNonSubmittersMessaging( self.unit, send=self.send )
+        # prune out any student who have dropped (their name will be an empty string)
+        return [r for r in rps if len(r[1]) > 0]
 
-        print( "Going to nag {} students to turn in essay".format( len( self.recipients ) ) )
 
-        for cid, name in self.recipients:
-            self.messenger.send_message_to_student( cid, name )
+def run( self ):
+    # Initialize these here since may not have values when class instantiated
+    self.unit = self.overview_repo.unit
+    self.messenger = EssayNonSubmittersMessaging( self.unit, send=self.send )
+
+    print( "Going to nag {} students to turn in essay".format( len( self.recipients ) ) )
+
+    for cid, name in self.recipients:
+        self.messenger.send_message_to_student( cid, name )
