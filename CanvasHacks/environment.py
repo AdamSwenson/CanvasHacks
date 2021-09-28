@@ -38,6 +38,8 @@ if CanvasHacks.testglobals.use_api:
         # ASSESSMENT_DATA_FOLDER = FileBasedConfiguration.assessment_data_folder
         ASSESSMENT_JOURNALS_FOLDER = "{}/journals".format( FileBasedConfiguration.assessment_data_folder )
         ASSESSMENT_ESSAYS_FOLDER = "{}/essays".format( FileBasedConfiguration.assessment_data_folder )
+        ASSESSMENT_REVIEWS_FOLDER = "{}/reviews".format( FileBasedConfiguration.assessment_data_folder )
+
 
         # Skaa run logging
         RUN_DATA_LOG_PATH = "{}/run-data.xlsx".format(LOG_FOLDER)

@@ -76,7 +76,7 @@ class AllQuizReportDownloader( INewLoader ):
         student_work_frame = retrieve_quiz_data( quiz, **kwargs )
 
         if student_work_frame is None:
-            print( 'uhoh' )
+            # print( 'uhoh' )
             raise NoWorkDownloaded
 
         if save:

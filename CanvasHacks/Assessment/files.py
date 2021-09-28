@@ -153,5 +153,52 @@ class EssayFiles( IAssessmentFileHandler ):
 
 
 
+class ReviewFiles( IAssessmentFileHandler ):
+    """
+    Combined review and metareview
+    """
+    content_filename_templ = "{path}/{term}-{course_id}-unit{unit_number}-content.json"
+    bag_filename_templ = "{path}/{term}-{course_id}-unit{unit_number}-bag.json"
+
+    def __init__(self, **kwargs):
+        """
+        data_folder
+            can be passed in and it will be set on the object overwriting
+            the default
+        :param kwargs:
+        """
+        self.data_folder = env.ASSESSMENT_REVIEWS_FOLDER
+        self.handle_kwargs(**kwargs)
+
+    def make_content_filepath( self, term, unit_number, course_id=None, **kwargs ):
+        """
+        Returns a full filepath to the content file for the given term, unit, course
+        :param term:
+        :param unit_number:
+        :param course_id:
+        :param kwargs:
+        :return:
+        """
+        return self.content_filename_templ.format( path=self.content_folder_root,
+                                                   term=term,
+                                                   course_id=course_id,
+                                                   unit_number=unit_number )
+
+    def make_bag_filepath( self, term, unit_number, course_id=None, **kwargs ):
+        """
+        Returns a full filepath to the bag file for the given term, unit, course
+        :param term:
+        :param unit_number:
+        :param course_id:
+        :param kwargs:
+        :return:
+        """
+        return self.bag_filename_templ.format( path=self.bag_folder_root,
+                                               term=term,
+                                               course_id=course_id,
+                                               unit_number=unit_number )
+
+
+
 if __name__ == '__main__':
     pass

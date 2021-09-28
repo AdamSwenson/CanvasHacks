@@ -24,7 +24,8 @@ def run_all_steps( SEND=True, download=True, **kwargs ):
                                   environment.CONFIG.unit,
                                   send=SEND,
                                   **kwargs)
-    step2.run( rest_timeout=5, download=download )
+    step2.run(  download=download,  **kwargs )
+    # step2.run( rest_timeout=5, download=download )
 
     try:
         print( "\n====================== STEP 3 ======================" )
@@ -32,7 +33,8 @@ def run_all_steps( SEND=True, download=True, **kwargs ):
                                           environment.CONFIG.unit,
                                           send=SEND,
                                           **kwargs)
-        step3.run( rest_timeout=5, download=download )
+        step3.run( download=download, **kwargs )
+        # step3.run( rest_timeout=5, download=download )
     except AttributeError as e:
         # This may be raised when there is no metareview assignment
         print("Step 3 encountered an error: ",  e)

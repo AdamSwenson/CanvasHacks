@@ -15,6 +15,9 @@ from CanvasHacks.executables.run_skaa_on_multiple_units import RunSkaaMultipleUn
 
 def run_multiple_units( control_store, start_unit=0, stop_unit=8, rest_minutes=30, **kwargs ):
     """
+    Easy shortcut for running all skaa processes
+    rather than using the buttons, which entail restarting
+    the notebook.
 
     :param stop_unit:
     :param rest_minutes:

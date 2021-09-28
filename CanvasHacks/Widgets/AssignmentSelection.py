@@ -157,9 +157,6 @@ def make_unit_button( unit_number , **kwargs):
         """ This is used so that can also _initialize all the
         canvas objects on the configuration
         """
-        environment.CONFIG.set_unit_number(unit_number, name)
-        environment.CONFIG.initialize_canvas_objs()
-        environment.CONFIG.unit = Unit(environment.CONFIG.course, unit_number)
 
 
     return make_selection_button( unit_number,
