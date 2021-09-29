@@ -46,6 +46,10 @@ PS, If we've already spoken about this, apologies for this semi-automated remind
 class EssayNonSubmittersMessaging(DateFormatterMixin):
 
     def __init__( self, unit, send=True ):
+        """
+        :param unit: The Unit object for the unit in question
+        :param send: Whether to actually send the message to the student
+        """
         self.send = send
         self.unit = unit
         self.activity = self.unit.initial_work
@@ -64,6 +68,14 @@ class EssayNonSubmittersMessaging(DateFormatterMixin):
         return ESSAY_NON_SUBMITTER_TEMPLATE.format( **data )
 
     def send_message_to_student( self, student_id, first_name ):
+        """
+        Populates the relevant template with the student's name and
+        sends the message via canvas.
+        If send was False when initialized, merely prints the text.
+        :param student_id:
+        :param first_name:
+        :return:
+        """
 
         # student_id = student.id if isinstance(student, User) else student.student_id
         body = self.prepare_message( first_name )
@@ -80,6 +92,11 @@ class ReviewNonSubmittersMessaging(DateFormatterMixin):
     SUBJECT_TEMPLATE = "Missing Unit {} Peer Review"
 
     def __init__( self, unit, send=True, dao=None ):
+        """
+        :param unit: The Unit object for the unit in question
+        :param send: Whether to actually send the message to the student
+        :param dao: The status repository object to use. If none, InvitationStatusRepository will be used
+        """
         self.dao = dao
         self.send = send
         self.unit = unit

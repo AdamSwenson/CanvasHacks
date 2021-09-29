@@ -157,6 +157,8 @@ def make_unit_button( unit_number , **kwargs):
         """ This is used so that can also _initialize all the
         canvas objects on the configuration
         """
+        environment.CONFIG.set_unit(unit_number)
+
 
 
     return make_selection_button( unit_number,
@@ -169,7 +171,7 @@ def make_unit_button( unit_number , **kwargs):
                                   )
 
 
-def make_unit_chooser( num_units=6, return_button=False, **kwargs ):
+def make_unit_chooser( num_units=7, return_button=False, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG

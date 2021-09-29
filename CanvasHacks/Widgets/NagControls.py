@@ -59,15 +59,23 @@ def nag_button( label, nag_obj, return_button=False, width='auto', **kwargs ):
         display( b )
 
 
-def nag_button_area( control_store, **kwargs ):
+def nag_button_area( control_store, show_discussion=False, **kwargs ):
     # items_layout = Layout( width='auto' )  # override the default width of the button to 'auto' to let the button grow
+    controls = [ ]
+
+    essay_and_review = [ ('ESSAY', EssayNagger( control_store[ 'skaa_repo' ] )),
+                         ('SKAA REVIEW', SkaaReviewNagger( control_store[ 'skaa_repo' ] )),
+                         ]
+
+    controls += essay_and_review
+
+    if show_discussion:
+        discussion = [ ('DISCUSSION', DiscussionNagger( control_store[ 'diss_repo' ] )),
+            ('DISCUSSION REVIEW', DiscussionReviewNagger( control_store[ 'diss_repo' ]) )
+        ]
+        controls += discussion
 
 
-    controls = [ ('ESSAY', EssayNagger( control_store[ 'skaa_repo' ] )),
-                 ('SKAA REVIEW', SkaaReviewNagger( control_store[ 'skaa_repo' ] )),
-                 ('DISCUSSION', DiscussionNagger( control_store[ 'diss_repo' ] )),
-                 ('DISCUSSION REVIEW', DiscussionReviewNagger( control_store[ 'diss_repo' ] ))
-                 ]
 
     box_layout = Layout(border='solid', **kwargs)
 
