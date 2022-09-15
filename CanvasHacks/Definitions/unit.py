@@ -54,8 +54,19 @@ class Unit:
         # Get all assignments for the course
         assignments = [ a for a in self.course.get_assignments() ]
         print( "{} assignments in course".format( len( assignments ) ) )
+
+
+
         # Parse out the assignments which have the unit number in their names
         unit_assignments = self.find_for_unit( self.unit_number, assignments )
+
+
+        #dev
+        #print(type(unit_assignments))
+        #u = unit_assignments[0]
+        #print(u.__dict__)
+        #[print(type(u)) for u in unit_assignments]
+
         print( "{} assignments found for unit # {}".format( len( unit_assignments ), self.unit_number ) )
         self.find_components( unit_assignments )
         for c in self.components:
@@ -69,7 +80,11 @@ class Unit:
         for t in self.component_types:
             for a in unit_assignments:
                 if t.is_activity_type( a.name ):
-                    o = t( **a.attributes )
+
+                    # Chaged in F22 hotfix
+                    o = t(**a.__dict__)
+                    #o = t( **a.__dict__ )
+
                     o.access_code = self._set_access_code( o )
                     self.components.append( o )
 

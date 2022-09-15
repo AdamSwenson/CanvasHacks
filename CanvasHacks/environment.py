@@ -21,7 +21,7 @@ ROOT = os.getenv( "HOME" )
 
 if CanvasHacks.testglobals.use_api:
     # Check whether it is being run on my machine or remotely
-    if ROOT[ :12 ] == '/Users/adam':
+    if ROOT[ :12 ] == '/Users/adam' or ROOT[:16] == '/Users/ars62917':
         FileBasedConfiguration.load( CanvasHacks.testglobals.TEST )
         CONFIG = FileBasedConfiguration
 

@@ -227,6 +227,7 @@ class Configuration( object ):
 
         COURSE_ID = cls.course_ids[0]
         # print("Working on course: ", COURSE_ID)
+        print(f"url base: {cls.canvas_url_base} \n course id: {COURSE_ID}")
         cls.canvas = Canvas(cls.canvas_url_base, cls.canvas_token)
         cls.course = cls.canvas.get_course(COURSE_ID)
         # if cls.unit_number is not None:

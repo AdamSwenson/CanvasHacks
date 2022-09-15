@@ -257,7 +257,7 @@ def extract_body(submission):
 
     else:
         # The student submitted the journal as a separate document
-        if 'attachments' in submission.attributes.keys() and len( submission.attributes[ 'attachments' ] ) > 0:
+        if 'attachments' in submission.__dict__.keys() and len( submission.__dict__[ 'attachments' ] ) > 0:
             url = submission.attachments[ 0 ][ 'url' ]
             # download the submitted file
             # print( "Downloading: ", url )

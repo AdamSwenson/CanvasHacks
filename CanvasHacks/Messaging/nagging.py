@@ -17,7 +17,7 @@ REVIEW_NON_SUBMITTER_TEMPLATE = """Hi {name},
 
 I hope everything is okay with you. It looks like you haven't yet submitted the {assignment_name} which you were invited to complete on {invite_sent_date}.
 
-This is a gentle nudge to please do this as soon as you have enough time to do a good job. The person you're reviewing is waiting for your feedback; they cannot do the metareview until you have completed the review. I also can't upload a grade for their essay until I know how many points you assigned.
+This is a gentle nudge to please do this as soon as you have enough time to do a good job. The person you're reviewing is waiting for your feedback; they cannot do the metareview until you have completed the review. 
 
 Please let me know if you have any questions or are having any trouble.
 

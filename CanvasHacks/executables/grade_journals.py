@@ -74,7 +74,7 @@ class GradeJournalStep(StoreMixin):
             # canvas api object
             assignment = self.course.get_assignment( int( a[ 0 ] ) )
             # activity object to define the features
-            journal = Journal( **assignment.attributes )
+            journal = Journal( **assignment.__dict__ )
             # Download submissions
             subRepo = SubmissionRepository( assignment )
             # parse out already graded submissions

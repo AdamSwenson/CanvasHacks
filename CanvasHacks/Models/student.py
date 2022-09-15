@@ -51,7 +51,7 @@ def student_from_canvas_user(user_obj):
     s = Student()
     s.student_id = user_obj.id
     # The id will cause a collision with the student.id
-    vals = { k : user_obj.attributes[k] for k in user_obj.attributes if k != 'id'}
+    vals = { k : user_obj.__dict__[k] for k in user_obj.__dict__ if k != 'id'}
     s.handle_kwargs(**vals)
     return s
 

@@ -112,7 +112,7 @@ class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
 
         :return:
         """
-        return [d.attributes for d in self.data if d.workflow_state == 'submitted']
+        return [d.__dict__ for d in self.data if d.workflow_state == 'submitted']
 
     def get_daily_counts( self, activity_name=None ):
         """
@@ -123,7 +123,7 @@ class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
 
         :return: DataFrame with columns [sent_at, activity_id, activity_name, count_column_name]
         """
-        subs = [ d.attributes for d in self.data ]
+        subs = [ d.__dict__ for d in self.data ]
         frame = pd.DataFrame( subs )
 
         frame.submitted_at = pd.to_datetime( frame.submitted_at )
