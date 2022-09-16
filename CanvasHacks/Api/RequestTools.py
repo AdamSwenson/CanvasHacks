@@ -84,6 +84,10 @@ def _handle_pagination(url, data):
         while True:
             print( 'GET', url )
             response = requests.get( url, headers=make_request_header(), data=data )
+
+            #dev
+            print(response)
+
             responses += response.json()
             url = response.links[ 'next' ][ 'url' ]
     except KeyError:
@@ -96,6 +100,8 @@ def get_all_course_assignments( course_id ):
     """Returns a list of all the assignments for the course
     Uses api: GET /api/v1/courses/:course_id/assignments
     """
+    #url = f"{environment.CONFIG.canvas_url_base}/api/v1/courses/{course_id}/assignments"
+
     url = make_url( course_id, 'assignments' )
     # url = "%s?per_page=50" % url
     data = { 'include': 'submissions' }
