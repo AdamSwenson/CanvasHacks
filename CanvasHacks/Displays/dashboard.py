@@ -235,7 +235,7 @@ class ControlStore:
         """
         Displays statistics about the assignment using html template
         :param latex:
-        :return:
+        :return:`
         """
         assert (latex is False)
 

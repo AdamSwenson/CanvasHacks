@@ -31,7 +31,7 @@ ESSAY_NON_SUBMITTER_TEMPLATE = """Hi {name},
 
 It looks like you haven't yet submitted the {assignment_name} which was due {original_due_date}. So I just wanted to check in to make sure everything is okay with you and give a very gentle nudge about this assignment.
 
-No pressure. As always, the due dates for the essays are not strict and it's perfectly fine to take the time you need. 
+No pressure. As always, the due dates for the essays are not strict and it's perfectly fine to take the time you need. Indeed, given the flexibility in due dates, no matter how far behind you are right now, it's still perfectly possible to get a good grade in the class ---with the exception of journals, it is possible to turn things in at the very end of the semester and get full credit for them.
 
 Please let me know if you have any questions.
 
@@ -45,7 +45,7 @@ PS, If we've already spoken about this, apologies for this semi-automated remind
 
 class EssayNonSubmittersMessaging(DateFormatterMixin):
 
-    def __init__( self, unit, send=True ):
+    def __init__( self, unit, send=True, **kwargs ):
         """
         :param unit: The Unit object for the unit in question
         :param send: Whether to actually send the message to the student
@@ -84,6 +84,7 @@ class EssayNonSubmittersMessaging(DateFormatterMixin):
             self.sent.append( (student_id, msg) )
             print( msg )
         else:
+            print("------------ Dry run EssayNonSubmitterNagger --------------")
             self.sent.append( (student_id, body) )
             print( body )
 

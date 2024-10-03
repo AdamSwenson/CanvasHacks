@@ -40,6 +40,8 @@ if CanvasHacks.testglobals.use_api:
         ASSESSMENT_ESSAYS_FOLDER = "{}/essays".format( FileBasedConfiguration.assessment_data_folder )
         ASSESSMENT_REVIEWS_FOLDER = "{}/reviews".format( FileBasedConfiguration.assessment_data_folder )
 
+        # F24 messaging clusterfuck (CAN-77)
+        EMAIL_LIST_FILE = f"{FileBasedConfiguration.course_folder_root}/Phil305 {FileBasedConfiguration.semester_name} emails.xlsx"
 
         # Skaa run logging
         RUN_DATA_LOG_PATH = "{}/run-data.xlsx".format(LOG_FOLDER)

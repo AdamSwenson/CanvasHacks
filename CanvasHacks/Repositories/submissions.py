@@ -57,6 +57,8 @@ class SubmissionRepository( ISubmissionRepo, ObjectHandlerMixin ):
                 d.body = extract_body( d )
             except PdfReadError as e:
                 print(e)
+            except Exception as e2:
+                print(e2)
 
         print( "Downloaded {} submissions for unit id {}".format( len( self.data ), self.assignment.id ) )
 

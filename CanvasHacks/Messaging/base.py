@@ -5,9 +5,11 @@ __author__ = 'adam'
 
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
-from CanvasHacks.Messaging.SendTools import ConversationMessageSender
+from CanvasHacks.Messaging.SendTools import ConversationMessageSender, DummyEmailSender
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
+
+from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
 
 if __name__ == '__main__':
     pass
@@ -28,7 +30,10 @@ class SkaaMessenger:
         self.content_repository = content_repository
 
         # Object responsible for actually sending message
-        self.sender = ConversationMessageSender()
+        # Changed in CAN-77 to deal with problem sending via canvas
+        # self.sender = ConversationMessageSender()
+        self.sender = ExchangeMessageSender()
+        # self.sender = DummyEmailSender()
 
         # Objects in charge of storing change in status
         # after sent. Should be a list of InvitationStatusRepository
@@ -111,6 +116,7 @@ class SkaaMessenger:
         appropriate notification message to the correct person
         for the unit
         """
+        devstuff = []
         messages = [ ]
         for rev in review_assignments:
             try:
@@ -129,7 +135,12 @@ class SkaaMessenger:
                 else:
                     # For test runs
                     messages.append( message_data )
-                    print( message_data )
+
+                    # todo
+                    devstuff.append({message_data['student_id']})
+                    print( f"\n +++++++++++++++++\n {message_data} \n +++++++++++++++++\n\n"  )
+
+                    # print(f"\n +++++++++++++++++\n {message_data['student_id']} \n +++++++++++++++++\n\n")
             except MessageDataCreationError as e:
                 p = """
                 
@@ -142,6 +153,7 @@ class SkaaMessenger:
                 XXXXXXXXXXXXXXXXXXXXXXXXXXX
                 """
                 print(p.format(e))
+        print(devstuff)
         # Returns for testing / auditing
         return messages
 

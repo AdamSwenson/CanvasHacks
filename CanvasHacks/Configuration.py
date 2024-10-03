@@ -325,13 +325,15 @@ class FileBasedConfiguration( Configuration ):
     def load( cls, is_test=False ):
         cls.is_test = is_test
         cls.read_config_file()
+        cls.semester_name = cls.configuration['names'].get('SEMESTER')
         cls.load_token()
+        cls.load_email_password()
         cls.load_url_base()
         cls.load_local_filepaths()
         cls.load_section_ids()
         cls.load_excluded_users()
         cls.initialize_canvas_objs()
-        cls.semester_name = cls.configuration['names'].get('SEMESTER')
+
 
     @classmethod
     def load_local_filepaths( cls ):
@@ -343,6 +345,12 @@ class FileBasedConfiguration( Configuration ):
 
         # canvas hacks program folders
         cls.data_folder = '{}/data'.format(cls.proj_base)
+
+        cls.course_folder_root = f"{root}/{cls.configuration['folders'].get('COURSE_FOLDER_ROOT')}/Phil305 {cls.semester_name}"
+
+    @classmethod
+    def load_email_password(cls):
+        cls.email_password = cls.configuration['credentials'].get('EMAIL_PASSWORD')
 
     @classmethod
     def load_token( cls ):

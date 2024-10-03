@@ -58,7 +58,8 @@ def send_post_request( url, data ):
     """
     head = { 'Authorization': 'Bearer {}'.format( environment.CONFIG.canvas_token ) }
     response = requests.post( url, headers=head, json=data )
-    return response.json()
+    response.raise_for_status()
+    return response
 
 
 def send_put_request( url, data ):

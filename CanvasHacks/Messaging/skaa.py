@@ -19,7 +19,8 @@ if __name__ == '__main__':
 
 
 class PeerReviewInvitationMessenger( SkaaMessenger ):
-    """Handles sending message containg student work from the initial content unit to the person who will conduct the peer review
+    """Handles sending message containg student work from the initial content unit
+    to the person who will conduct the peer review
     """
     message_template = REVIEW_NOTICE_TEMPLATE
 
