@@ -105,7 +105,7 @@ class AssociationRepository(ObjectHandlerMixin):
         if len(filtered_submitters) == 0:
             # We will return the original list because this likely
             # indicates people have done something wierd like resubmit late
-            raise AllAssigned(submitters)
+            raise AllAssigned([submitters, filtered_submitters])
 
         # Check whether we only have 1 new submitter
         # and thus will not be able to partner them up
