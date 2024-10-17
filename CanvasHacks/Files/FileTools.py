@@ -30,6 +30,26 @@ def get_newest_file( folder_path ):
     return newest
 
 
+def makeDataFileList(folderPath, exclude=[]):
+    """
+        Returns an list of all files in the source directory
+        so that each file has its path appended to it.
+
+        Args:
+            folderPath: The path to get file names from
+            exclude: file names which should not be included in the output list
+
+        """
+
+    outfiles = []
+    exclude = exclude if any( exclude ) else [ '.DS_Store' ]
+    for root, dirs, files in os.walk( folderPath ):
+        for name in files:
+            if name not in exclude:
+                outfiles.append(os.path.join( root, name ))
+    return outfiles
+
+
 def makeDataFileIterator( folderPath, exclude=[ ] ):
     """
     Returns an iterator of all files in the source directory

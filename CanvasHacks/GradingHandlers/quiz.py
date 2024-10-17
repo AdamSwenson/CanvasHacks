@@ -3,8 +3,10 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingHandlers.base import IGrader
+from CanvasHacks.GradingHandlers.records import PointsRecord
 from CanvasHacks.GradingMethods.base import IGradingMethod
 from CanvasHacks.GradingCorrections.penalities import get_penalty, IPenalizer
+from CanvasHacks.GradingMethods.review import ReviewBasedPoints
 from CanvasHacks.Repositories.interfaces import ISubmissionRepo
 from CanvasHacks.Repositories.quizzes import QuizRepository
 
@@ -27,6 +29,7 @@ class QuizGrader( IGrader ):
         :param work_repo:
         :param submission_repo:
         :param kwargs:
+            may contain no_late_penalty
         """
         self.work_repo = work_repo
         self.submission_repo = submission_repo
@@ -36,6 +39,7 @@ class QuizGrader( IGrader ):
         self.grade_method = self.activity.grade_method
 
         self.graded = [ ]
+        self.grade_records = []
 
     def grade( self, **kwargs):
         """
@@ -54,13 +58,15 @@ class QuizGrader( IGrader ):
         # The penalizer object leaves this task up to us
         self.report_late_penalties()
 
-        return self.graded
+        # todo Add recording of grade records
+        return self.graded, self.grade_records
 
     def report_late_penalties( self ):
         # Report late penalties
         if len( self.penalizer.penalized_records ) > 0:
             for penalty_dict in self.penalizer.penalized_records:
                 self._penalty_message(penalty_dict['penalty'], penalty_dict['record'])
+
 
     def _get_score( self, content, on_empty=None ):
         """
@@ -125,10 +131,14 @@ class QuizGrader( IGrader ):
             questions[ qid ] = { 'score': pts }
             total_score += pts
 
-            # Compute penalty if needed
-            # Will be 0 if not docking for lateness
-            # Records of penalty will be stored on self.penalizer.penalized_records
-            fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
+            fudge_points = 0
+
+            if not self.no_late_penalty:
+
+                # Compute penalty if needed
+                # Will be 0 if not docking for lateness
+                # Records of penalty will be stored on self.penalizer.penalized_records
+                fudge_points = self.penalizer.get_fudge_points(row['submitted'], total_score, row)
 
         out = self._make_graded_row_output(row, questions, fudge_points)
 

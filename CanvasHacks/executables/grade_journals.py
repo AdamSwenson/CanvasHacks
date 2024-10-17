@@ -5,10 +5,15 @@ __author__ = 'adam'
 
 from CanvasHacks import environment
 from CanvasHacks.Definitions.journal import Journal
+from CanvasHacks.GradingHandlers.journal import JournalGrader
 from CanvasHacks.Models.model import StoreMixin
 
 
 # todo dev
+from CanvasHacks.Repositories.DataManagement import DataStoreNew
+from CanvasHacks.Repositories.factories import WorkRepositoryLoaderFactory
+from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository
+
 
 class GradeJournalStep(StoreMixin):
     """
@@ -69,7 +74,7 @@ class GradeJournalStep(StoreMixin):
             # canvas api object
             assignment = self.course.get_assignment( int( a[ 0 ] ) )
             # activity object to define the features
-            journal = Journal( **assignment.attributes )
+            journal = Journal( **assignment.__dict__ )
             # Download submissions
             subRepo = SubmissionRepository( assignment )
             # parse out already graded submissions

@@ -3,9 +3,7 @@ Created by adam on 3/11/20
 """
 __author__ = 'adam'
 
-from unittest import TestCase
-
-from CanvasHacks.Processors.cleaners import HtmlCleaner
+from CanvasHacks.Text.cleaners import HtmlCleaner
 from TestingBase import TestingBase
 
 if __name__ == '__main__':

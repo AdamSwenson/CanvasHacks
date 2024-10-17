@@ -18,8 +18,8 @@ class DiscussionReviewInvitationMessenger( SkaaMessenger ):
     """Handles invitation to complete discussion review"""
     message_template = DISCUSSION_REVIEW_NOTICE_TEMPLATE
 
-    def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repositories: StatusRepository ):
+    def __init__( self, unit: Unit, student_repository, content_repository, status_repositories: StatusRepository ):
+
         self.activity_inviting_to_complete = unit.discussion_review
 
         super().__init__( unit, student_repository, content_repository, status_repositories )

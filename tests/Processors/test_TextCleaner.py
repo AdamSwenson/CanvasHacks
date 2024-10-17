@@ -3,7 +3,7 @@ Created by adam on 3/11/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Text.cleaners import TextCleaner
 from TestingBase import TestingBase
 
 if __name__ == '__main__':

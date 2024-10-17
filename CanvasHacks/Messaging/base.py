@@ -3,10 +3,13 @@ Created by adam on 2/28/20
 """
 __author__ = 'adam'
 
+from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
-from CanvasHacks.Messaging.SendTools import ConversationMessageSender
+from CanvasHacks.Messaging.SendTools import ConversationMessageSender, DummyEmailSender
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
+
+from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
 
 if __name__ == '__main__':
     pass
@@ -27,7 +30,10 @@ class SkaaMessenger:
         self.content_repository = content_repository
 
         # Object responsible for actually sending message
-        self.sender = ConversationMessageSender()
+        # Changed in CAN-77 to deal with problem sending via canvas
+        # self.sender = ConversationMessageSender()
+        self.sender = ExchangeMessageSender()
+        # self.sender = DummyEmailSender()
 
         # Objects in charge of storing change in status
         # after sent. Should be a list of InvitationStatusRepository
@@ -35,6 +41,7 @@ class SkaaMessenger:
         self.status_repositories = status_repositories
 
         self.logger = MessageLogger()
+
 
     @property
     def sent_count( self ):
@@ -44,16 +51,18 @@ class SkaaMessenger:
     def send_errors( self ):
         return self.sender.errors
 
-    def _make_message_data( self, receiving_student, content, other=None ):
+    def _make_message_data( self, receiving_student, content, subject=None, other=None ):
         """
         Creates a dictionary with data to be passed to the
         method which actually sends the info to the receiving student
         """
         message = self._make_message_content( content, other, receiving_student )
+        # todo dev moving away from this being defined on the objects
+        email_subject = subject if subject is not None else self.activity_inviting_to_complete.invitation_email_subject
 
         return {
             'student_id': receiving_student.id,
-            'subject': self.activity_inviting_to_complete.email_subject,
+            'subject': email_subject,
             'body': message
         }
 
@@ -107,24 +116,44 @@ class SkaaMessenger:
         appropriate notification message to the correct person
         for the unit
         """
+        devstuff = []
         messages = [ ]
         for rev in review_assignments:
-            # print( rev )
-            message_data = self.prepare_message( rev, other )
-            # messages.append( message_data )
+            try:
+                # print( rev )
+                message_data = self.prepare_message( rev, other )
+                # messages.append( message_data )
 
-            if send:
-                m = self.sender.send( **message_data )
-                # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
-                # self.logger.write(m)
+                if send:
+                    m = self.sender.send( **message_data )
+                    # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
+                    # self.logger.write(m)
 
-                messages.append( m )
-                self.update_status( message_data )
+                    messages.append( m )
+                    self.update_status( message_data )
 
-            else:
-                # For test runs
-                messages.append( message_data )
-                print( message_data )
+                else:
+                    # For test runs
+                    messages.append( message_data )
+
+                    # todo
+                    devstuff.append({message_data['student_id']})
+                    print( f"\n +++++++++++++++++\n {message_data} \n +++++++++++++++++\n\n"  )
+
+                    # print(f"\n +++++++++++++++++\n {message_data['student_id']} \n +++++++++++++++++\n\n")
+            except MessageDataCreationError as e:
+                p = """
+                
+                XXXXXXXXXXXXXXXXXXXXXXXXXXX
+                        SERIOUS ERROR IN MESSAGE CREATION!
+                        
+                        {}
+                        
+                        
+                XXXXXXXXXXXXXXXXXXXXXXXXXXX
+                """
+                print(p.format(e))
+        print(devstuff)
         # Returns for testing / auditing
         return messages
 

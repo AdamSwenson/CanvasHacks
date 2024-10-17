@@ -8,7 +8,7 @@ import re
 import pandas as pd
 
 from CanvasHacks.Definitions.activity import Activity
-from CanvasHacks.GradingCorrections.penalities import HalfLate
+from CanvasHacks.GradingCorrections.penalities import HalfLate, NoLatePenalty
 from CanvasHacks.GradingMethods.nonempty import CreditForNonEmptyOLD
 
 if __name__ == '__main__':
@@ -31,7 +31,8 @@ class Journal( Activity ):
         self.corrections = [ ]
 
         # The objects which will be used to penalize late assignments
-        self.penalizers = [HalfLate( self.due_at, self.grace_period )]
+        self.penalizers = [ NoLatePenalty() ]
+        # self.penalizers = [HalfLate( self.due_at, self.grace_period )]
         # The object which will be used to penalize late assignments
         # todo deprecated
         self.penalizer = self.penalizers[ 0 ]

@@ -5,7 +5,7 @@ __author__ = 'adam'
 
 from CanvasHacks.Definitions.activity import Activity
 from CanvasHacks.GradingAnalyzers.nonempty import NonEmpty
-from CanvasHacks.GradingMethods.review import ReviewBased
+from CanvasHacks.GradingMethods.review import ReviewBasedLikert
 from CanvasHacks.Models.model import Model
 from CanvasHacks.Text.stats import WordCount
 
@@ -21,6 +21,6 @@ class ActivityPoints(Model):
         self.composition = [
             (NonEmpty, 0.25),
             (WordCount, 0.50),
-            (ReviewBased, 0.25)
+            (ReviewBasedLikert, 0.25)
 
         ]

@@ -1,7 +1,7 @@
 """
 Created by adam on 1/27/20
 """
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Text.cleaners import TextCleaner
 from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Repositories.mixins import StudentWorkMixin
 from CanvasHacks.Api.UploadGradeTools import upload_credit
@@ -14,10 +14,10 @@ from CanvasHacks.Text.stats import WordCount
 class DiscussionRepository( IContentRepository, StudentWorkMixin ):
     """Manages the data for one discussion unit"""
 
-    def __init__( self, activity, course ):
+    def __init__( self, activity, course, **kwargs ):
         self.activity = activity
-        self.topic_id = activity.topic_id
         self.course = course
+        self.topic_id = activity.topic_id
 
         # List of dictionaries from parsed data:
         # [{'student_id', 'student_name', 'text'}]
@@ -29,6 +29,8 @@ class DiscussionRepository( IContentRepository, StudentWorkMixin ):
         self.text_cleaner = TextCleaner()
 
         self.analyzer = WordCount()
+
+        self.handle_kwargs( **kwargs)
 
 
     @property

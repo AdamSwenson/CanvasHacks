@@ -29,6 +29,7 @@ if __name__ == '__main__':
 class StoreMixin( object ):
 
     def handle_kwargs( self, **kwargs ):
+        """Sets object attributes based on key word arguments"""
         for key, value in kwargs.items():
             try:
                 setattr(self, key, value)

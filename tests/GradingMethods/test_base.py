@@ -18,13 +18,13 @@
 #
 #     def test_to_remove_no_stopwords( self ):
 #         obj = IGradingMethod()
-#         obj.count_stopwords = True
+#         obj.keep_stopwords = True
 #         self.assertIn('.', obj.to_remove)
 #         self.assertNotIn('the', obj.to_remove)
 #
 #     def test_to_remove_inc_stopwords( self ):
 #         obj = IGradingMethod()
-#         obj.count_stopwords = False
+#         obj.keep_stopwords = False
 #         self.assertIn( '.', obj.to_remove )
 #         self.assertIn( 'the', obj.to_remove )
 #
@@ -35,7 +35,7 @@
 #
 #     def test__determine_word_count( self ):
 #         obj = IGradingMethod()
-#         obj.count_stopwords = True
+#         obj.keep_stopwords = True
 #         expected = self.fake.random.randint(1, 1000)
 #         content = " ".join([ self.fake.word() for _ in range(0, expected)])
 #

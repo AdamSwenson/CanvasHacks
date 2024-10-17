@@ -55,7 +55,7 @@ class DataStoreNew(object):
     @property
     def submissions( self ):
         """Alias so can use interfaces for old version"""
-        r = [s[0].attributes for s in self.results]
+        r = [s[0].__dict__ for s in self.results]
         for s in r:
             s['student_id'] = s['user_id']
         return r

@@ -46,7 +46,6 @@ class SkaaOverviewRepository( DaoMixin ):
 
         self.components = [ c for c in self.unit.components if isinstance( c, SkaaReviewGroup ) ]
 
-
         self._initialize_db()
 
         self.assignRepo = AssociationRepository( self.dao, self.activity_for_review_pairings )
@@ -82,7 +81,10 @@ class SkaaOverviewRepository( DaoMixin ):
                         # get the name
                         d[ 'reviewed_by' ] = self.studentRepo.get_student_name( b.assessor_id )
                         d[ 'reviewed_by_id' ] = b.assessor_id
-                    except AttributeError:
+
+                        # add unit and assign info to make more readable
+                        d['activity'] = c.name
+                    except (TypeError, AttributeError):
                         pass
 
                 self.add_invites( d, c, sid )
@@ -234,19 +236,33 @@ class DiscussionOverviewRepository( DaoMixin ):
             }
             for c in self.components:
                 if len( self.assignRepo.get_associations() ) > 0:
+                    # add unit and assign info to make more readable
+                    d[ 'activity' ] = c.name
+
                     try:
                         # get the record where the student is the reviwer
                         a = self.assignRepo.get_by_reviewer( sid )
                         # get the name of the student being assessed
                         d[ 'reviewing' ] = self.studentRepo.get_student_name( a.assessee_id )
                         d[ 'reviewing_id' ] = a.assessee_id
+                    except AttributeError:
+                        # This can be hit when no one has done the assignment yet
+                        # Set to none so won't take down everything else
+                        d[ 'reviewing' ] = None
+                        d[ 'reviewing_id' ] = None
+
+                    try:
                         # get the record where the student is the author
                         b = self.assignRepo.get_by_author( sid )
                         # get the name
                         d[ 'reviewed_by' ] = self.studentRepo.get_student_name( b.assessor_id )
                         d[ 'reviewed_by_id' ] = b.assessor_id
                     except AttributeError:
-                        pass
+                        # This can be hit when no one has done the assignment yet
+                        # Set to none so won't take down everything else
+                        d[ 'reviewed_by' ] = None
+                        d[ 'reviewed_by_id' ] = None
+
 
                 self.add_invites( d, c, sid )
 
@@ -287,7 +303,10 @@ class DiscussionOverviewRepository( DaoMixin ):
         todo Consider whether should be using the assignment of reviewers or a status object
         :return: DataFrame
         """
-        return self.data[ ~self.data.reviewing.isnull() ]
+        try:
+            return self.data[ ~self.data.reviewing.isnull() ]
+        except AttributeError:
+            return pd.DataFrame()
 
     @property
     def non_posters( self ):
@@ -295,7 +314,10 @@ class DiscussionOverviewRepository( DaoMixin ):
         Students who have not posted and thus not been assigned a reviewer
         :return: DataFrame
         """
-        return self.data[ self.data.reviewing.isnull() ]
+        try:
+            return self.data[ self.data.reviewing.isnull() ]
+        except AttributeError:
+            return pd.DataFrame()
 
     @property
     def reviewed( self ):
@@ -303,7 +325,10 @@ class DiscussionOverviewRepository( DaoMixin ):
         Students whose reviewer has turned in the review
         :return: DataFrame
         """
-        return self.posters[ ~self.posters.received_discussion_feedback.isnull() ]
+        try:
+            return self.posters[ ~self.posters.received_discussion_feedback.isnull() ]
+        except AttributeError:
+            return pd.DataFrame()
 
     @property
     def non_reviewed( self ):
@@ -311,7 +336,10 @@ class DiscussionOverviewRepository( DaoMixin ):
         Students whose reviewer has NOT turned in the review
         :return: DataFrame
         """
-        return self.posters[ self.posters.received_discussion_feedback.isnull() ]
+        try:
+            return self.posters[ self.posters.received_discussion_feedback.isnull() ]
+        except AttributeError:
+            return pd.DataFrame()
 
     def add_invites( self, data_dict, component, student_id ):
         invite_fields = { DiscussionReview: 'invited_to_discussion_review' }

@@ -33,3 +33,49 @@ class IGradingMethod( ABC ):
 
     def grade( self, *args, **kwargs ):
         raise NotImplementedError
+
+    @property
+    def name( self ):
+        """Returns the class name of the grading method. Often used in
+        storing method name as a key"""
+        return self.__class__.__name__
+
+
+class IGradingMethodPoints( ABC ):
+    """
+    GradingMethods are in charge of taking whatever we are
+    grading and determining the initial score based on the content.
+
+    The grade method returns a float representing the
+    points that should be given for this component
+
+    Parent for those classes which return a
+    positive float to indicate the points a student should receive.
+
+    Normally applied to questions
+    """
+    def __init__(self):
+        self._initialize_message()
+
+    def grade( self, *args, **kwargs ):
+        """
+        Returns a float representing the
+         points that should be given for this component
+         """
+        raise NotImplementedError
+
+    @property
+    def name( self ):
+        """Returns the class name of the grading method. Often used in
+        storing method name as a key"""
+        return self.__class__.__name__
+
+
+    def _initialize_message( self ):
+        """
+        Empties the message property so can hold a message
+        for the most recently graded item
+        :return:
+        """
+        self.message = ''
+

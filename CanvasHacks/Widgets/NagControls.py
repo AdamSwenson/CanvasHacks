@@ -6,6 +6,7 @@ __author__ = 'adam'
 from IPython.display import display
 from ipywidgets import Layout, VBox, widgets
 
+from CanvasHacks import environment
 from CanvasHacks.StudentNaggers.discussion import DiscussionNagger
 from CanvasHacks.StudentNaggers.discussion_review import DiscussionReviewNagger
 from CanvasHacks.StudentNaggers.essay import EssayNagger
@@ -58,19 +59,27 @@ def nag_button( label, nag_obj, return_button=False, width='auto', **kwargs ):
         display( b )
 
 
-def nag_button_area( control_store, **kwargs ):
+def nag_button_area( control_store, show_discussion=False, **kwargs ):
     # items_layout = Layout( width='auto' )  # override the default width of the button to 'auto' to let the button grow
+    controls = [ ]
 
-    controls = [ ('ESSAY', EssayNagger( control_store[ 'skaa_repo' ] )),
-                 ('SKAA REVIEW', SkaaReviewNagger( control_store[ 'skaa_repo' ] )),
-                 ('DISCUSSION', DiscussionNagger( control_store[ 'diss_repo' ] )),
-                 ('DISCUSSION REVIEW', DiscussionReviewNagger( control_store[ 'diss_repo' ] ))
-                 ]
+    essay_and_review = [ ('ESSAY', EssayNagger( control_store[ 'skaa_repo' ] )),
+                         ('SKAA REVIEW', SkaaReviewNagger( control_store[ 'skaa_repo' ] )),
+                         ]
 
-    box_layout = Layout(
-        border='solid',
-        **kwargs
-    )
+    controls += essay_and_review
+
+    if show_discussion:
+        discussion = [ ('DISCUSSION', DiscussionNagger( control_store[ 'diss_repo' ] )),
+            ('DISCUSSION REVIEW', DiscussionReviewNagger( control_store[ 'diss_repo' ]) )
+        ]
+        controls += discussion
+
+
+
+    box_layout = Layout(border='solid', **kwargs)
+
+
     buttons = [ widgets.Label( value="Nag students" ) ]
     buttons += [ nag_button( label, obj, return_button=True, **kwargs ) for label, obj in controls ]
     return VBox( buttons, layout=box_layout )

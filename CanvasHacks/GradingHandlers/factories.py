@@ -5,7 +5,7 @@ __author__ = 'adam'
 
 from CanvasHacks.Definitions.groups import ReviewType
 from CanvasHacks.Definitions.journal import Journal
-from CanvasHacks.GradingHandlers.assignment import AssignmentGrader
+from CanvasHacks.GradingHandlers.assignment import AssignmentGrader, AssignmentGraderPoints
 from CanvasHacks.GradingHandlers.journal import JournalGrader
 
 if __name__ == '__main__':
@@ -42,6 +42,10 @@ class GradingHandlerFactory:
                 return JournalGrader(*args, **kwargs)
 
             if not kwargs['activity'].is_quiz_type:
+
+                if kwargs['activity'].is_points_based:
+                    return AssignmentGraderPoints(*args, **kwargs)
+
                 return AssignmentGrader(*args, **kwargs)
 
             return QuizGrader( *args, **kwargs )

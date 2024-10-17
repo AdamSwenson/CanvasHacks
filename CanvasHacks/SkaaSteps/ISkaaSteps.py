@@ -3,6 +3,7 @@ Created by adam on 2/23/20
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Logging.display import DisplayManager
+from CanvasHacks.Models.model import StoreMixin
 from CanvasHacks.Repositories.reviewer_associations import AssociationRepository
 from CanvasHacks.Repositories.students import StudentRepository
 
@@ -14,27 +15,43 @@ if __name__ == '__main__':
     pass
 
 
-class IStep:
+class IStep(StoreMixin):
     """Parent of all steps in a Skaa"""
 
-    def __init__( self, course=None, unit=None, is_test=None, send=True ):
+    def __init__( self, course=None, unit=None, is_test=None, send=True, **kwargs ):
         """
         :param course:
         :param unit:
         :param is_test:
         :param send: Whether to actually send the messages
+
+        kwargs
+           studentRepo: StudentRepository object
+               Providing a shared student repo will keep the step
+               from creating its own repo and downloading students
         """
+
         self.course = env.CONFIG.course if course is None else course
         self.unit = env.CONFIG.unit if unit is None else unit
         self.is_test = env.CONFIG.is_test if is_test is None else is_test
         self.send = send
 
+        self.handle_kwargs(**kwargs)
+
 
 
     def _initialize( self ):
         """Creates and populates all relevant repositories and db access points"""
-        self.studentRepo = StudentRepository( self.course )
-        self.studentRepo.download()
+        try:
+            # This will have been set if a student repo was
+            # passed in on the kwarg studentRepo
+            self.studentRepo is not None
+        except AttributeError as e:
+            # This way we can pass in a repository to be shared and not
+            # have to download the entire roster several times
+            self.studentRepo = StudentRepository( self.course )
+            self.studentRepo.download()
+
         self._initialize_db()
         self.associationRepo = AssociationRepository( self.dao, self.activity_for_review_pairings)
 

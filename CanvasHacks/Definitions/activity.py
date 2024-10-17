@@ -6,6 +6,7 @@ __author__ = 'adam'
 from CanvasHacks import environment as env
 from CanvasHacks.Definitions.base import DiscussionType
 from CanvasHacks.Files.FileTools import read_text_block
+from CanvasHacks.GradingMethods.base import IGradingMethodPoints
 from CanvasHacks.Models.model import Model
 from CanvasHacks.TimeTools import utc_string_to_local_dt, check_is_date
 
@@ -26,19 +27,38 @@ class Activity( Model ):
         whether it is an instance of this unit type"""
         return cls.regex.search( assignment_name.strip().lower() )
 
+    @property
+    def is_points_based( self ):
+        """
+        whether the grading methods for the activity return point values
+        (rather than percentages of total possible score)
+        :return:
+        """
+        p = [m for m in self.grade_methods if isinstance(m, IGradingMethodPoints)]
+        return len(p) > 0
+
     def __init__( self, **kwargs ):
         # when the activity_inviting_to_complete is due
         # ": "2013-01-23T23:59:00-07:00"
         self.due_at = None
+
         # Set this date if want to give half credit for
         # assignments turned in after this.
         # Normally won't be used, unless manually set
         self.quarter_credit_deadline = None
+
         # when to lock the activity_inviting_to_complete
         self.lock_at = None
-        # // when to unlock the activity_inviting_to_complete
+
+        # when to unlock the activity_inviting_to_complete
         self.unlock_at = None
+
         self.points_possible = None
+
+        # reviewer assigned points
+        self.reviewer_assigned_points = None
+
+        # Holds data for prop
         self._unit_number = None
         self._description_text = ''
 
@@ -138,6 +158,18 @@ class Activity( Model ):
     @description.setter
     def description( self, text ):
         self._description_text = text
+
+    @property
+    def activity_name( self, include_unit_num=True ):
+        """
+        Returns the name that will be used to identify
+        the activity in things like statistical summaries
+        :return:
+        """
+        if include_unit_num:
+            return "Unit {} {}".format(self.unit_number, self.title_base)
+        else:
+            return self.title_base
 
     # def creation_dict( self ):
     #     """A dictionary of all the values needed to

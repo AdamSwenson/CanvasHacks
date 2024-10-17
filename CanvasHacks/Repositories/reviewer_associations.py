@@ -5,6 +5,7 @@ Created by adam on 12/28/19
 """
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Errors.review_pairings import NoAvailablePartner, AllAssigned
+from CanvasHacks.GradingMethods.errors import NoReviewerAssigned
 from CanvasHacks.Models.review_association import ReviewAssociation
 from CanvasHacks.Definitions.activity import Activity
 import pandas as pd
@@ -104,7 +105,7 @@ class AssociationRepository(ObjectHandlerMixin):
         if len(filtered_submitters) == 0:
             # We will return the original list because this likely
             # indicates people have done something wierd like resubmit late
-            raise AllAssigned(submitters)
+            raise AllAssigned([submitters, filtered_submitters])
 
         # Check whether we only have 1 new submitter
         # and thus will not be able to partner them up
@@ -236,10 +237,15 @@ class AssociationRepository(ObjectHandlerMixin):
         :return: ReviewAssociation or None
         """
         author_id = self._handle_id(author)
-        return self.session.query( ReviewAssociation )\
+        r = self.session.query( ReviewAssociation )\
             .filter( ReviewAssociation.activity_id == self.activity.id )\
             .filter( ReviewAssociation.assessee_id == author_id )\
             .one_or_none()
+
+        if r is None:
+            raise NoReviewerAssigned()
+
+        return r
 
     def get_by_reviewer( self, reviewer ):
         """

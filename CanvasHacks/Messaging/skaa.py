@@ -5,8 +5,8 @@ from CanvasHacks import environment as env
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Messaging.SendTools import send_message_to_student
 from CanvasHacks.Messaging.base import SkaaMessenger
-from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE, \
-    METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE
+from CanvasHacks.Messaging.templates import METAREVIEW_CONTENT_TEMPLATE,\
+    METAREVIEW_NOTICE_TEMPLATE, REVIEW_NOTICE_TEMPLATE, REVIEW_FEEDBACK_ONLY_TEMPLATE
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Repositories.status import StatusRepository, IStatusRepository
@@ -19,9 +19,12 @@ if __name__ == '__main__':
 
 
 class PeerReviewInvitationMessenger( SkaaMessenger ):
-    """Handles sending message containg student work from the initial content unit to the person who will conduct the peer review
+    """Handles sending message containg student work from the initial content unit
+    to the person who will conduct the peer review
     """
     message_template = REVIEW_NOTICE_TEMPLATE
+
+    email_subject_template = "Unit {}: Another student's essay to peer review "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: IStatusRepository ):
@@ -42,9 +45,16 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
 
             # The assessee did the work that we want to send
             # to the assessor
-            content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
+            #todo dev MASSIVE HOTFIX
+            if env.CONFIG.course.id == 79991 and env.CONFIG.unit.unit_number == 1:
+                print('In screwed up unit using Messaging/skaa line 48 hotfix')
+                content = self.content_repository.data.loc[review_assignment.assessee_id].body
+            else:
+                content = self.content_repository.get_formatted_work_by( review_assignment.assessee_id )
 
-            return self._make_message_data( receiving_student, content, other=None )
+            subject = self.email_subject_template.format(self.unit.unit_number)
+
+            return self._make_message_data( receiving_student, content, other=None, subject=subject )
 
         except Exception as e:
             # todo exception handling
@@ -52,11 +62,15 @@ class PeerReviewInvitationMessenger( SkaaMessenger ):
             raise MessageDataCreationError( review_assignment )
 
 
+
+
 class MetareviewInvitationMessenger( SkaaMessenger ):
     """Handles sending message containing feedback from the peer reviewer
     to the author of the content assignment with invite to do metareview
     """
     message_template = METAREVIEW_NOTICE_TEMPLATE
+
+    email_subject_template = "Unit {}: feedback on your essay and invitation to do the metareview"
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: StatusRepository ):
@@ -83,7 +97,9 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
             # to the assessee
             content = self.content_repository.get_formatted_work_by( review_assignment.assessor_id )
 
-            return self._make_message_data( receiving_student, content, other=None )
+            subject = self.email_subject_template.format(self.unit.unit_number )
+
+            return self._make_message_data( receiving_student, content, other=None, subject=subject )
 
         except Exception as e:
             # todo exception handling
@@ -91,13 +107,85 @@ class MetareviewInvitationMessenger( SkaaMessenger ):
             raise MessageDataCreationError( review_assignment )
 
 
+class FeedbackFromReviewMessenger(MetareviewInvitationMessenger):
+    """
+    FOR USE ONLY WHEN THERE IS NO METAREVIEW IN THE UNIT!!!!!!
+
+    We inherit from metareview invitation so can use the same prepare_messages
+    method while overwriting the methods on its parent which will require
+    a value in activity_inviting_to_complete
+
+    Sends the feedback to the original author with no request to complete
+    the metareview
+    """
+
+    message_template = REVIEW_FEEDBACK_ONLY_TEMPLATE
+
+    def __init__( self, unit: Unit, student_repository, content_repository,
+                  status_repositories: StatusRepository ):
+
+        super().__init__( unit, student_repository, content_repository, status_repositories )
+
+        # The activity we are notifying about
+        # Setting to None after the parent initializes so that can overwrite this value
+        self.activity_inviting_to_complete = None
+
+
+    def _make_message_data( self, receiving_student, content, other=None ):
+        """
+        Creates a dictionary with data to be passed to the
+        method which actually sends the info to the receiving student
+        """
+        message = self._make_message_content( content, other, receiving_student )
+
+        return {
+            'student_id': receiving_student.id,
+            'subject': "Feedback on your Unit {} Essay".format(self.unit.unit_number),
+            'body': message
+        }
+
+    def _make_template_input( self, content, other, receiving_student ):
+        """
+        There will be no next assignment with many of the values the
+        regular method uses
+
+        Creates the dictionary that will be used to format the message template
+        and create the message content
+        This is abstracted out to make testing easier
+        """
+
+        d = {
+
+            'intro': "Here is the feedback on your essay:",
+
+            'name': get_first_name( receiving_student ),
+
+            # Formatted work for sending
+            'responses': content,
+
+            # Add any materials from me
+            'other': other if other is not None else "",
+
+            # Add code and link to do reviewing unit
+        }
+        return d
+
+    def _make_access_code_message( self ):
+        """There will be no next assignment with an access code, so returns an empty string
+        """
+        return ""
+
+
+
 class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     """Sends the contents of the metareview to the student who r
     did the initial peer review
     """
     message_template = METAREVIEW_CONTENT_TEMPLATE
+
     subject = "Unit {}: Feedback on your peer review"
-    intro = "Here is the feedback the author gave on your peer review. "
+
+    intro = "Here is the feedback the author gave on your review of their essay. These are the answers they provided in filling out the metareview. "
 
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: IStatusRepository ):
@@ -214,7 +302,7 @@ def metareview_send_message_to_reviewers( review_assignments, studentRepo, conte
                 f.write( "\n=========\n {}".format( message ) )
 
                 if send:
-                    subject = activity.email_subject
+                    subject = activity.invitation_email_subject
                     m = send_message_to_student(
                         student_id=rev.assessee_id,
                         subject=subject,
@@ -262,7 +350,7 @@ def review_send_message_to_reviewers( review_assignments, studentRepo, contentRe
             message = make_notice( d )
 
             if send:
-                subject = activity.email_subject
+                subject = activity.invitation_email_subject
                 # fix this you fucking idiot
                 m = send_message_to_student( student_id=rev.assessor_id, subject=subject, body=message )
                 print( m )

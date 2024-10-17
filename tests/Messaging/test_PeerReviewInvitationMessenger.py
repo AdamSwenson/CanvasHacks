@@ -52,7 +52,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         # check
         self.assertEqual( self.obj.message_template, REVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Receiving student id" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.email_subject, "Email subject" )
+        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
@@ -84,7 +84,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.reviewer.id, "Sent to correct student" )
-        self.assertEqual(kwargs['subject'], self.activity.email_subject, "Sent with expected subject line")
+        self.assertEqual( kwargs['subject'], self.activity.invitation_email_subject, "Sent with expected subject line" )
         d = self.obj._make_template_input( self.work, None, self.reviewer )
         b = REVIEW_NOTICE_TEMPLATE.format(**d)
         self.assertEqual(kwargs['body'], b, "Sent with expected body")

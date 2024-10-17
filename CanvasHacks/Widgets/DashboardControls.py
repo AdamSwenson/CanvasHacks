@@ -81,6 +81,9 @@ def run_buttons( control_store, **kwargs ):
 
 
 def make_control_store():
+    """
+    deprecated
+    """
     # Initialize these but do not load until a unit is selected
     sr = SkaaOverviewRepository()
     dr =  DiscussionOverviewRepository()
@@ -88,7 +91,9 @@ def make_control_store():
         'skaa_repo': sr,
         'diss_repo': dr,
         'skaa_dash' : SkaaDashboard(sr),
-        'diss_dash' : DiscussionDashboard(dr)
+        'diss_dash' : DiscussionDashboard(dr),
+        # holds results from multiple_unit_control
+        'all_steps': []
     }
 
 

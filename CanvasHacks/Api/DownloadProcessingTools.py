@@ -75,29 +75,32 @@ def process_response( response_json, journal_folder=None ):
     submissions = [ ]
 
     for j in response_json:
-        result = { 'submission_id': j[ 'id' ], 'student_id': j[ 'user_id' ] }
-        if j[ 'body' ] is not None:
-            # The student used the online text box to submit
-            result[ 'body' ] = j[ 'body' ]
-
-        else:
-            # The student submitted the journal as a separate document
-            if 'attachments' in j.keys() and len( j[ 'attachments' ] ) > 0:
-                url = j[ 'attachments' ][ 0 ][ 'url' ]
-                filename = make_journal_filename( j )
-
-                # download and save submitted file
-                fpath = "%s/%s" % (journal_folder, filename)
-                download_submitted_file( url, fpath )
-
-                # open the file and extract text
-                result[ 'body' ] = getBody( fpath )
+        try:
+            result = { 'submission_id': j[ 'id' ], 'student_id': j[ 'user_id' ] }
+            if j[ 'body' ] is not None:
+                # The student used the online text box to submit
+                result[ 'body' ] = j[ 'body' ]
 
             else:
-                # NB., if a student never submitted (workflow_state = 'unsubmitted'),
-                # then they will have an entry which lacks a body key
-                result[ 'body' ] = None
-        submissions.append( result )
+                # The student submitted the journal as a separate document
+                if 'attachments' in j.keys() and len( j[ 'attachments' ] ) > 0:
+                    url = j[ 'attachments' ][ 0 ][ 'url' ]
+                    filename = make_journal_filename( j )
+
+                    # download and save submitted file
+                    fpath = "%s/%s" % (journal_folder, filename)
+                    download_submitted_file( url, fpath )
+
+                    # open the file and extract text
+                    result[ 'body' ] = getBody( fpath )
+
+                else:
+                    # NB., if a student never submitted (workflow_state = 'unsubmitted'),
+                    # then they will have an entry which lacks a body key
+                    result[ 'body' ] = None
+            submissions.append( result )
+        except Exception as e:
+            print(e)
 
     return submissions
 
@@ -257,7 +260,7 @@ def extract_body(submission):
 
     else:
         # The student submitted the journal as a separate document
-        if 'attachments' in submission.attributes.keys() and len( submission.attributes[ 'attachments' ] ) > 0:
+        if 'attachments' in submission.__dict__.keys() and len( submission.__dict__[ 'attachments' ] ) > 0:
             url = submission.attachments[ 0 ][ 'url' ]
             # download the submitted file
             # print( "Downloading: ", url )

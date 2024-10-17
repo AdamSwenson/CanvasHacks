@@ -3,8 +3,8 @@ Created by adam on 5/6/19
 """
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin, QuizDataMixin
 from CanvasHacks.Models.student import Student
-from CanvasHacks.Definitions.skaa import Review
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Definitions.skaa import MetaReview, Review
+from CanvasHacks.Text.cleaners import TextCleaner
 from CanvasHacks.Processors.quiz import process_work, remove_non_final_attempts
 from CanvasHacks.Files.QuizReportFileTools import retrieve_quiz_data, save_downloaded_report
 from CanvasHacks.Repositories.mixins import StudentWorkMixin, SelectableMixin, FrameStorageMixin
@@ -104,7 +104,10 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
         except (ValueError, KeyError):
             # The student id may not be set as the index, depending
             # on the source of the data
-            return self.data.set_index( 'student_id' ).loc[ student_id ]
+            if 'student_id' in self.data.columns:
+                return self.data.set_index( 'student_id' ).loc[ student_id ]
+
+
 
     def get_formatted_work_by( self, student_id ):
         """Returns all review entries by the student, formatted for
@@ -177,6 +180,11 @@ class ReviewRepository( QuizRepository ):
     """
 
     def __init__( self, activity, course=None ):
+        """
+
+        :param activity: The review (quiz type) to load
+        :param course:
+        """
         self.course = course
         self.activity = activity
         self.question_columns = [ ]
@@ -242,6 +250,25 @@ class ReviewRepository( QuizRepository ):
 
         content = "\n".join( content )
         return content
+
+    def add_review_assignments( self, associationRepo ):
+        """
+        Will use an association repository to add the id the person was assigned
+        to review to each row.
+
+        :param associationRepo:
+        :return:
+        """
+        self.data[ 'assessee_id' ] = self.data.apply(lambda x: associationRepo.get_assessee( self.activity, x.name ), axis=1 )
+
+
+class DiscussionReviewRepository(ReviewRepository):
+    """
+    Repository for handling reviews of discussion posts
+    """
+
+    def __init__( self, activity, course=None ):
+        super().__init__(activity=activity, course=course)
 
 
 if __name__ == '__main__':

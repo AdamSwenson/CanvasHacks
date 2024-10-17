@@ -119,7 +119,7 @@ def make_assignment_chooser(activity=None,  return_button=False, **kwargs):
     buttons = [ ]
     # Get list of all assignments for the courses
     for course_id in environment.CONFIG.course_ids:
-        assignments += get_assignments_with_submissions( course_id )
+        assignments += get_assignments_with_submissions( course_id, **kwargs )
     assignments = [ (a[ 'id' ], a[ 'name' ]) for a in assignments ]
 
     if activity is not None:
@@ -157,9 +157,8 @@ def make_unit_button( unit_number , **kwargs):
         """ This is used so that can also _initialize all the
         canvas objects on the configuration
         """
-        environment.CONFIG.set_unit_number(unit_number, name)
-        environment.CONFIG.initialize_canvas_objs()
-        environment.CONFIG.unit = Unit(environment.CONFIG.course, unit_number)
+        environment.CONFIG.set_unit(unit_number)
+
 
 
     return make_selection_button( unit_number,
@@ -172,7 +171,7 @@ def make_unit_button( unit_number , **kwargs):
                                   )
 
 
-def make_unit_chooser( num_units=6, return_button=False, **kwargs ):
+def make_unit_chooser( num_units=7, return_button=False, **kwargs ):
     """Display inputs for selecting assignments
     The selected assignments will be stored in the
     environment.CONFIG

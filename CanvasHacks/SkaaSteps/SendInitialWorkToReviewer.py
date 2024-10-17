@@ -26,7 +26,11 @@ class SendInitialWorkToReviewer( IStep ):
         :param unit:
         :param is_test:
         :param send: Whether to actually send the messages
+        :param studentRepo: Student repository passed in as a kwarg
+
         """
+        # super().__init__(  **kwargs )
+
         super().__init__( course, unit, is_test, send, **kwargs )
 
         # The activity whose results we are going to be doing something with
@@ -75,8 +79,8 @@ class SendInitialWorkToReviewer( IStep ):
             # Folks already assigned to review
             # have somehow gotten past the new submissions filter
             # This could be due to them resubmitting late
-            print( "New submitters but everyone already assigned" )
-            # print( e.submitters )
+            print( "New submitters but everyone already assigned\n" )
+            print( e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise AllAssigned( e.submitters )
@@ -87,6 +91,7 @@ class SendInitialWorkToReviewer( IStep ):
             # a partner
             # todo Notify student that they are waiting
             print( "1 student has submitted and has no partner ") #, e.submitters )
+            print( e.submitters )
             if CanvasHacks.testglobals.TEST:
                 # Reraise so can see what happened for tests
                 raise NoAvailablePartner( e.submitters )
@@ -98,6 +103,7 @@ class SendInitialWorkToReviewer( IStep ):
         self.messenger = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.work_repo, self.statusRepos )
         # NB, we don't use associationRepo.data because we only
         # want to send to people who are newly assigned
+
         self.messenger.notify( self.associations, self.send )
         # self.messenger.notify( self.associationRepo.data, self.send )
         #  todo Want some way of tracking if messages fail to send so can resend
@@ -119,8 +125,15 @@ class SendInitialWorkToReviewer( IStep ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         self.display_manager.initially_loaded = self.work_repo.data
 
-        # hotfix needed to filter unsubmitted for non quiz ca
-        self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
+        # hotfix to filter unsubmitted for non quiz essays (from s20); updated in f20u1hotfixes
+        if isinstance( self.work_repo.data, pd.DataFrame ):
+            if 'workflow_state' in self.work_repo.data.columns:
+                self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
+
+        # dev
+        # print(self.work_repo.data)
+
+        # self.work_repo.data = self.work_repo.data[ self.work_repo.data.workflow_state != 'unsubmitted' ]
         if isinstance( self.work_repo.data, pd.DataFrame ):
             self.work_repo.data = self.work_repo.data[ ~pd.isnull( self.work_repo.data.body ) ]
 

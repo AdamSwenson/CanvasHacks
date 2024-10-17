@@ -135,9 +135,11 @@ class SendForumPostsToReviewer( IStep ):
     def _load_step( self, **kwargs ):
         self.work_repo = WorkRepositoryLoaderFactory.make( self.activity, self.course, **kwargs )
         if self.post_threshold is not None:
+            print("{} students before filtering on post count".format(len(self.work_repo.data)))
             # If a minimum post count has been set, we toss out students
             # who have not reached that count
             self.work_repo.data = self.work_repo.filter_by_count(self.post_threshold)
+            print("{} students after filtering on post count".format(len(self.work_repo.data)))
 
         self.display_manager.initially_loaded = self.work_repo.data
 

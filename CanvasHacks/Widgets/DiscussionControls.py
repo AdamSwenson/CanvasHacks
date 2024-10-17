@@ -3,7 +3,7 @@ Created by adam on 3/14/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.SkaaSteps.SendDiscussionReviewToPoster import SendDiscussionReviewToPoster
+from CanvasHacks.executables.run_discussion_on_single_unit import run_discussion_steps
 
 if __name__ == '__main__':
     pass
@@ -11,26 +11,9 @@ if __name__ == '__main__':
 from IPython.display import display
 from ipywidgets import widgets
 
-from CanvasHacks import environment
-from CanvasHacks.SkaaSteps.SendForumPostsToReviewer import SendForumPostsToReviewer
 
 
-def run_discussion_steps( SEND=True, download=True, **kwargs ):
-    print( "\n====================== DISTRIBUTE DISCUSSION POSTS ======================" )
-    step1 = SendForumPostsToReviewer( course=environment.CONFIG.course,
-                                      unit=environment.CONFIG.unit,
-                                      send=SEND )
-    step1.run( rest_timeout=5 )
-
-    print( "\n====================== DISTRIBUTE DISCUSSION REVIEWS ======================" )
-    step2 = SendDiscussionReviewToPoster( environment.CONFIG.course, environment.CONFIG.unit, send=SEND )
-    step2.run( rest_timeout=5, download=download )
-
-    # Return in case need to check values on them
-    return (step1, step2)
-
-
-def discussion_run_button(control_store, return_button=False, width='auto', **kwargs):
+def discussion_run_button( control_store, return_button=False, width='auto', **kwargs ):
     RUNNING = False
 
     def get_style( is_running=False ):
@@ -42,8 +25,8 @@ def discussion_run_button(control_store, return_button=False, width='auto', **kw
     # Create the button
     layout = widgets.Layout( width=width )
     b = widgets.Button( description=get_name( RUNNING ),
-                    layout=layout,
-                    button_style=get_style( RUNNING ) )
+                        layout=layout,
+                        button_style=get_style( RUNNING ) )
 
     def callback( change ):
         RUNNING = True
@@ -57,7 +40,7 @@ def discussion_run_button(control_store, return_button=False, width='auto', **kw
         b.description = get_name( RUNNING )
         b.button_style = get_style( RUNNING )
 
-        control_store['discussion_steps'] = steps
+        control_store[ 'discussion_steps' ] = steps
 
     b.on_click( callback )
 
@@ -67,4 +50,3 @@ def discussion_run_button(control_store, return_button=False, width='auto', **kw
         return b
     else:
         display( b )
-

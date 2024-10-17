@@ -24,7 +24,7 @@ REVIEW_NOTICE_TEMPLATE = """
              {review_url}
     {access_code_message}
     
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on {due_date}. 
     
     You may open and look at the peer review assignment as many times as you like.
     
@@ -34,6 +34,28 @@ REVIEW_NOTICE_TEMPLATE = """
     /a
    
     """
+
+# Used to send feedback without invite to metareview
+REVIEW_FEEDBACK_ONLY_TEMPLATE = """
+    Hi {name},
+
+    The peer-review responses from the student who read your work are below. Please read them carefully and re-read your original assignment :
+    =======================
+
+    {responses}
+
+    =======================
+    {other}
+
+    Personally, whenever I get critical feedback on something I've written, my first impression is always wrong ---I either think the problems mentioned are more trivial than they are or go in the opposite direction and overinflate every minor thing into something huge. Please take the opportunity to really get your head around your reviewers' feedback.
+    
+    Please note that there is no metareview assignment (the review of the review) for this unit.
+
+    Enjoy,
+    /a
+
+    """
+
 
 # Used to notify the author that it is time to do the metareview
 METAREVIEW_NOTICE_TEMPLATE = """
@@ -58,14 +80,13 @@ METAREVIEW_NOTICE_TEMPLATE = """
              {review_url}
      {access_code_message}
     
-    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you must submit your review before 11.59PM on {due_date}. 
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on {due_date}. 
     
     You may open and look at the metareview assignment as many times as you like.
         
     Enjoy,
     /a
     
-    PS, Please let me know if anything seems strange about the review I've sent you. I've tested my software as best I can, but....
    
     """
 

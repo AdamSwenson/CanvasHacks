@@ -115,10 +115,12 @@ class Review( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin, Rev
         self.email_intro = "Here is another student's assignment for you to review:"
 
     @property
-    def email_subject( self ):
-        """Since unit number will be set after initialization
+    def invitation_email_subject( self ):
+        """
+        The subject line to be used in inviting someone to do the review
+        Since unit number will be set after initialization
         we need to do this as a property"""
-        return "Unit {} peer-review of content unit".format( self.unit_number )
+        return "Unit {}: Another student's essay to peer review ".format( self.unit_number )
 
 
 class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, StoredDataFileMixin, ReviewType ):
@@ -159,10 +161,15 @@ class MetaReview( SkaaReviewGroup, Activity, BlockableActivity, QuizDataMixin, S
             print(e)
 
     @property
-    def email_subject( self ):
-        """Since unit number will be set after initialization
-        we need to do this as a property"""
-        return "Unit {} metareview of peer-review".format( self.unit_number )
+    def invitation_email_subject( self ):
+        """
+        Invitation email subject
+        Since unit number will be set after initialization
+        we need to do this as a property
+        This is deprecated. Moving away from setting on definition and towards
+        being determined by the method creating the message
+        """
+        return "Unit {}: feedback on your essay and invitation to do the metareview".format( self.unit_number )
 
 # class Assignment( StoreMixin ):
 #     """Defines all constant values for the unit"""

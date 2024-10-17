@@ -3,6 +3,8 @@ Created by adam on 3/16/20
 """
 __author__ = 'adam'
 
+from canvasapi.exceptions import CanvasException
+
 from CanvasHacks import environment
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Definitions.base import BlockableActivity
@@ -45,6 +47,10 @@ class GradeQuiz( StoreMixin ):
             self.activity.due_at = self.activity.lock_at
 
         self.graded = [ ]
+        """Holds submission, score tuples for use in uploading"""
+
+        self.grade_records = []
+        """List of PointsRecord objects. Each holds details of a student's points and the methods which assigned them. [Added CAN-72]"""
 
         self.handle_kwargs( **kwargs )
 
@@ -90,13 +96,20 @@ class GradeQuiz( StoreMixin ):
         grader = GradingHandlerFactory.make( activity=self.activity,
                                              work_repo=self.workRepo,
                                              submission_repo=self.subRepo,
-                                             association_repo=self.association_repo )
+                                             association_repo=self.association_repo,
+                                             no_late_penalty=self.no_late_penalty)
 
         # grader = QuizGrader( work_repo=self.workRepo,
         #                      submission_repo=self.subRepo,
         #                      association_repo=self.association_repo )
-        g = grader.grade( on_empty=0 )
+
+        # Grader returns tuple of lists ( [(submission, points/pct credit)], [PointsRecord]
+        # If the grader is non-points-based, it will return an empty list for grade_records
+        # todo configure on_empty. was set to 0; maybe this caused the giving everyone who hadn't completed it 0's?
+        g, grade_records = grader.grade( on_empty=None )
         self.graded += g
+        self.grade_records += grade_records
+
         print( "Graded: ", len( self.graded ) )
 
         if self.upload_grades:
@@ -109,9 +122,12 @@ class GradeQuiz( StoreMixin ):
         self.uploaded = 0
         # Upload grades
         for g in self.graded:
-            sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )[ 0 ]
-            sub.update_score_and_comments( quiz_submissions=g[ 'data' ][ 'quiz_submissions' ] )
-            self.uploaded += 1
+            try:
+                sub = self.get_submission_object( g[ 'student_id' ], g[ 'attempt' ] )[ 0 ]
+                sub.update_score_and_comments( quiz_submissions=g[ 'data' ][ 'quiz_submissions' ] )
+                self.uploaded += 1
+            except CanvasException as e:
+                print(e)
 
 
         self._log_uploaded()

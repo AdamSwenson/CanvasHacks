@@ -494,7 +494,7 @@ class TestFunctionalTests( TestingBase ):
     #
     #         # Check that all messages have the correct subject
     #         for sid, subj, body in messenger_args:
-    #             self.assertEqual( FeedbackFromDiscussionReviewMessenger.email_subject, subj, "Correct subject line" )
+    #             self.assertEqual( FeedbackFromDiscussionReviewMessenger.invitation_email_subject, subj, "Correct subject line" )
     #
     #         # Status repo calls on messenger
     #         obj.messenger.status_repositories.record.assert_called()

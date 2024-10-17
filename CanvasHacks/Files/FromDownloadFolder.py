@@ -11,7 +11,8 @@ import re
 import shutil
 from functools import wraps
 from CanvasHacks import environment as env
-from CanvasHacks.PeerReviewed.Definitions import Unit
+from CanvasHacks.Definitions.unit import Unit
+from CanvasHacks.Files.FileTools import create_folder
 from CanvasHacks.TimeTools import current_utc_timestamp, timestamp_for_unique_filenames
 
 
@@ -91,17 +92,34 @@ def file_reports(download_folder_path, unit_start=1, unit_stop=6):
     :param download_folder_path:
     :return:
     """
+    print("Checking for reports in: ", download_folder_path)
 
-    units = { u:  Unit( env.CONFIG.course, u ) for u in range(unit_start, unit_stop + 1) }
+    # As of CAN-68 we use the method which will check if the object
+    # is already stored to save calls to the api
+    units = { u: env.CONFIG.set_unit(u) for u in range( unit_start, unit_stop + 1 ) }
+    # units = { u:  Unit( env.CONFIG.course, u ) for u in range(unit_start, unit_stop + 1) }
+
     fiter = report_file_iterator( download_folder_path )
     moved_files = []
     try:
         while True:
             f = next(fiter)
+            # print( "Working on: ", f )
+
             if f['activity'] is not None:
+                if f['unit_number'] < unit_start or f['unit_number'] > unit_stop:
+
+                    # We shouldn't process files that aren't in the range
+                    # of units that we're working on. So we skip this iteration.
+                    continue
+
                 unit = units.get(f['unit_number'])
                 activity = unit.get_by_class(f['activity'])
                 src = f['path']
+
+                # There may not be a destination folder, so try
+                # creating it
+                create_folder(activity.folder_path)
 
                 # Rename with timestamp so no collisions
                 # THIS DOES NOT GUARANTEE THAT THE NEWEST FILE CAN BE DETERMINED BY

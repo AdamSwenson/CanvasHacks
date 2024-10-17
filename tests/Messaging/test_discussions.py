@@ -53,7 +53,7 @@ class TestDiscussionReviewInvitationMessenger( TestingBase ):
         # check
         self.assertEqual( obj.message_template, DISCUSSION_REVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Message is going to reviewer" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.email_subject, "Email subject" )
+        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
 
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
@@ -86,7 +86,7 @@ class TestDiscussionReviewInvitationMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[ 1 ]
         self.assertEqual( kwargs[ 'student_id' ], self.reviewer.id, "Sent to reviewer" )
-        self.assertEqual( kwargs[ 'subject' ], self.activity.email_subject, "Sent with expected subject line" )
+        self.assertEqual( kwargs[ 'subject' ], self.activity.invitation_email_subject, "Sent with expected subject line" )
 
         d = self.obj._make_template_input( self.work, None, self.reviewer )
         b = DISCUSSION_REVIEW_NOTICE_TEMPLATE.format( **d )

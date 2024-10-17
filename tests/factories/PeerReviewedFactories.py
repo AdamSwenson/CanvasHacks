@@ -27,13 +27,18 @@ def activity_data_factory( name=None ):
         'name': fake.word() if name is None else name,
         'access_code': fake.word(),
         'email_intro': fake.text(),
-        'email_subject': fake.text(),
+        'invitation_email_subject': fake.text(),
         'html_url': fake.url(),
         'open_at': pd.to_datetime( fake.date_time_this_century( before_now=True, after_now=False, tzinfo=pytz.utc ) ),
         'due_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
         'lock_at': pd.to_datetime( fake.date_time_this_century( before_now=False, after_now=True, tzinfo=pytz.utc ) ),
         'completion_points': random.randint( 0, 1000 ),
         'max_points': random.randint( 0, 1000 ),
+
+        # # need to explicitly add empty lists since not using specs
+        # 'corrections' : [],
+        # 'penalizers' : [],
+        # 'grade_methods': []
     }
 
 

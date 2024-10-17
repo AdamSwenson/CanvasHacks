@@ -5,7 +5,7 @@ __author__ = 'adam'
 
 from CanvasHacks.Errors.grading import NonStringInContentField
 from CanvasHacks.GradingAnalyzers.nonempty import NonEmpty
-from CanvasHacks.GradingMethods.base import IGradingMethod
+from CanvasHacks.GradingMethods.base import IGradingMethod, IGradingMethodPoints
 from CanvasHacks.Text.process import make_wordbag
 from nltk.corpus import stopwords
 import string
@@ -24,7 +24,7 @@ class CreditForNonEmptyOLD( IGradingMethod ):
 
         # The object which will handle the actual processing and computation
         self.analyzer = NonEmpty
-        # self.analyzer = WordCount(count_stopwords=count_stopwords)
+        # self.analyzer = WordCount(keep_stopwords=keep_stopwords)
 
     def grade( self, content, **kwargs ):
         """Returns the pct credit as an integer"""
@@ -53,7 +53,7 @@ class CreditForNonEmptyOLD( IGradingMethod ):
         # word_count = self.analyzer.analyze(content)
         # credit = word_count >= self.min_words
         #
-        # # credit = receives_credit(content, self.min_words, self.count_stopwords)
+        # # credit = receives_credit(content, self.min_words, self.keep_stopwords)
         # if credit:
         #     return on_credit
         # elif on_no_credit is not None:
@@ -72,7 +72,7 @@ class CreditForNonEmpty( IGradingMethod ):
 
         # The object which will handle the actual processing and computation
         self.analyzer = NonEmpty
-        # self.analyzer = WordCount(count_stopwords=count_stopwords)
+        # self.analyzer = WordCount(keep_stopwords=keep_stopwords)
 
     def grade( self, content, **kwargs ):
         """Returns the pct creditr"""
@@ -89,6 +89,35 @@ class CreditForNonEmpty( IGradingMethod ):
         by the value in on_no_credit
         """
         return on_credit if self.analyzer.analyze(content) else on_no_credit
+
+
+
+class CreditForNonEmptyPoints( IGradingMethodPoints ):
+    """Returns full credit for a literally non-empty answer"""
+
+    # METHOD_NAME = 'completion'
+
+    def __init__(self, max_possible_points):
+
+        super().__init__()
+
+        # self.score = 100
+        # params
+        self.max_possible_points = max_possible_points
+
+        # The object which will handle the actual processing and computation
+        self.analyzer = NonEmpty
+        # self.analyzer = WordCount(keep_stopwords=keep_stopwords)
+
+    def grade( self, content, **kwargs ):
+        """Returns a float representing number of points """
+        return self.max_possible_points if self.analyzer.analyze(content) else 0
+
+        # Aliasing the pct int to leave room for
+        # alternative output could go here
+
+        # return self.grade_pct_int(content, **kwargs)
+
 
 
 # --------------------------- old

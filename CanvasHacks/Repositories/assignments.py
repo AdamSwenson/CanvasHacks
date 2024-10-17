@@ -6,7 +6,7 @@ __author__ = 'adam'
 from CanvasHacks.Messaging.skaa import make_prompt_and_response
 from CanvasHacks.Models.QuizModels import StoredDataFileMixin
 from CanvasHacks.Models.student import Student
-from CanvasHacks.Processors.cleaners import TextCleaner
+from CanvasHacks.Text.cleaners import TextCleaner
 from CanvasHacks.Repositories.interfaces import IContentRepository
 from CanvasHacks.Repositories.mixins import SelectableMixin, StudentWorkMixin, FrameStorageMixin
 from CanvasHacks.Repositories.submissions import AssignmentSubmissionRepository
@@ -43,21 +43,31 @@ class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWork
         self.data = student_work_frame
         self._cleanup_data()
 
+    def remove_previously_graded( self ):
+        """Removes any records which have already been graded from self.data"""
+        prev_len = len( self.data )
+
+        if 'workflow_state' in self.data.columns:
+            self.data = self.data[ self.data.workflow_state != 'graded' ].copy( deep=True )
+
+        if 'grade' in self.data.columns:
+            # todo this could probably just check that grade is not None. Though unsure how will work for every assignment type so keeping this for now
+            self.data = self.data[ self.data.grade != 'complete' ].copy( deep=True )
+
+            # self.data = [j for j in self.data if j[0].grade != 'complete']
+
+        print( "Removed {} rows which have already been graded".format( prev_len - len( self.data ) ) )
+
     def _cleanup_data( self ):
         """This is abstracted out so it can be
         called independently for use with test data
         """
-        prev_len = len( self.data )
-        # todo copy dataframe or run on original data?
-        self.data = self.data[ self.data.grade != 'complete' ].copy( deep=True )
-        # self.data = [j for j in self.data if j[0].grade != 'complete']
-        print( "Removed {} rows which have already been graded".format( prev_len - len( self.data ) ) )
+        self.remove_previously_graded()
 
         # Remove html and other artifacts from student answers
         # DO NOT UNCOMMENT UNTIL CAN-59 HAS BEEN FULLY TESTED
         for c in self.question_columns:
             self.data[c] = self.data.apply(lambda x: self.text_cleaner.clean(x[c]), axis=1)
-
 
         # We set to student id to make look ups easier
         self.data.set_index( 'student_id', inplace=True )
