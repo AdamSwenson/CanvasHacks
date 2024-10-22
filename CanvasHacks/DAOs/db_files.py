@@ -10,7 +10,7 @@ import CanvasHacks.environment as env
 
 ESSAY_REVIEW_TEMPLATE = "{folder_path}/{test_string}{semester_name}-Unit-{unit_number}-review-assigns.db"
 DISCUSSION_REVIEW_TEMPLATE = "{folder_path}/{test_string}{semester_name}-Unit-{unit_number}-discussion-review.db"
-
+MESSAGE_QUEUE_TEMPLATE = "{folder_path}/{test_string}{semester_name}-message-queue.db"
 
 class DBFilePathHandler:
 
@@ -68,6 +68,12 @@ class DBFilePathHandler:
         """
         s = DBFilePathHandler._handle_defaults( unit_number, **kwargs )
         return DISCUSSION_REVIEW_TEMPLATE.format( **s )
+
+    @staticmethod
+    def message_queue( **kwargs):
+        s = DBFilePathHandler._handle_defaults(0, **kwargs)
+        return MESSAGE_QUEUE_TEMPLATE.format(**s)
+
 
 if __name__ == '__main__':
     pass
