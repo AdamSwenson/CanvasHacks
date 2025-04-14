@@ -1,4 +1,6 @@
-from unittest import TestCase
+import CanvasHacks.testglobals
+CanvasHacks.testglobals.TEST = True
+CanvasHacks.testglobals.use_api = False
 
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from CanvasHacks.Repositories.messaging import MessageRepository
