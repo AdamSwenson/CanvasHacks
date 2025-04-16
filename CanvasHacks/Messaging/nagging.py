@@ -3,7 +3,7 @@ Created by adam on 3/11/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Messaging.SendTools import ConversationMessageSender
+from CanvasHacks.Messaging.SendTools import ConversationMessageSender, ExchangeMessageSender
 from canvasapi.user import User
 
 from CanvasHacks.Messaging.mixins import DateFormatterMixin
@@ -53,7 +53,11 @@ class EssayNonSubmittersMessaging(DateFormatterMixin):
         self.send = send
         self.unit = unit
         self.activity = self.unit.initial_work
-        self.messenger = ConversationMessageSender()
+
+        # Changed to use email in CAN-78
+        # self.messenger = ConversationMessageSender()
+        self.messenger = ExchangeMessageSender()
+
         self.subject = "Missing Unit {} Essay".format( self.unit.unit_number )
         self.sent = [ ]
 
@@ -103,7 +107,10 @@ class ReviewNonSubmittersMessaging(DateFormatterMixin):
         self.unit = unit
         self.activity = self.unit.review
 
-        self.messenger = ConversationMessageSender()
+        # Changed to use email in CAN-78
+        # self.messenger = ConversationMessageSender()
+        self.messenger = ExchangeMessageSender()
+
         self.subject = self.SUBJECT_TEMPLATE.format( self.unit.unit_number )
         self.sent = [ ]
 
