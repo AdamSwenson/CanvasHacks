@@ -131,10 +131,12 @@ class FeedbackFromReviewMessenger(MetareviewInvitationMessenger):
         self.activity_inviting_to_complete = None
 
 
-    def _make_message_data( self, receiving_student, content, other=None ):
+    def _make_message_data( self, receiving_student, content, subject=None, other=None ):
         """
         Creates a dictionary with data to be passed to the
         method which actually sends the info to the receiving student
+        CAN-82: Added subject to params even though gets ignored so that will be
+        consistent with parent, which hopefully fixes an error.
         """
         message = self._make_message_content( content, other, receiving_student )
 
