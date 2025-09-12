@@ -63,7 +63,8 @@ class SkaaMessenger:
         return {
             'student_id': receiving_student.id,
             'subject': email_subject,
-            'body': message
+            'body': message,
+            #dev 'email': ''
         }
 
     def _make_message_content( self, content, other, receiving_student ):
