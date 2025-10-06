@@ -32,7 +32,7 @@ class SkaaMessenger:
         # Object responsible for actually sending message
         # Changed in CAN-77 to deal with problem sending via canvas
         # self.sender = ConversationMessageSender()
-        self.sender = ExchangeMessageSender()
+        self.sender = ExchangeMessageSender(student_repository=student_repository)
         # self.sender = DummyEmailSender()
 
         # Objects in charge of storing change in status

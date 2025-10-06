@@ -225,10 +225,13 @@ class AssociationRepository(ObjectHandlerMixin):
         :param author_id:
         :return:
         """
-        return self.session.query( ReviewAssociation ) \
-            .filter( ReviewAssociation.activity_id == activity.id ) \
-            .filter( ReviewAssociation.assessee_id == author_id ) \
-            .one_or_none()
+        try:
+            return self.session.query( ReviewAssociation ) \
+                .filter( ReviewAssociation.activity_id == activity.id ) \
+                .filter( ReviewAssociation.assessee_id == author_id ) \
+                .one_or_none()
+        except MultipleResultsFound:
+            print(f"Multiple results found. Author {author_id} ")
 
     def get_by_author( self, author ):
         """
