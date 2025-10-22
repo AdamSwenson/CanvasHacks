@@ -23,7 +23,7 @@ executing==1.0.0
 Faker==30.0.0
 fastjsonschema==2.16.1
 fonttools==4.43.0
-idna==3.3
+idna==3.7
 ipykernel==6.15.3
 ipython==8.10.0
 ipython-genutils==0.2.0
