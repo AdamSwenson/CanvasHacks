@@ -24,14 +24,18 @@ class ExchangeMessageSender(ISender, ExchangeEmailer):
     Doing via class allows easier mocking
     """
 
-    def __init__(self, test=False, text_subtype='plain'):
+    def __init__(self, test=False, text_subtype='plain', student_repository=None):
         """
+        :type student_repository: StudentRepository
         :param text_subtype Needs to be plain because if send html will hose the formatting
         """
         super().__init__(env.CONFIG.email_password, test=test, text_subtype=text_subtype)
 
+        # Added student repo in CAN-86 so can use email address from canvas
+        # instead of separate file
+        self.student_repository = student_repository
+        # dev This can be deprecated once CAN-86 is working
         emails_path = env.EMAIL_LIST_FILE
-        # self.emails = pd.read_excel(emails_path).set_index('ID')
         self.emails = pd.read_excel(emails_path).set_index('canvas_id')
 
         self.url = 'https://canvas.csun.edu/api/v1/conversations'
@@ -44,7 +48,15 @@ class ExchangeMessageSender(ISender, ExchangeEmailer):
 
     def lookup_email(self, canvas_id):
         """Finds the student's email from their canvas id"""
-        return self.emails.loc[canvas_id].email
+        if self.student_repository is None:
+            return self.emails.loc[canvas_id].email
+        try:
+            return self.student_repository.get_student_email(canvas_id)
+        except Exception as e:
+            # dev This needs to be removed after F25 since there will be no sheet
+            print(f"Error retrieving student email from canvas for canvas id {canvas_id}. "
+                  f"Attempting to use internal spreadsheet ")
+            return self.emails.loc[canvas_id].email
 
     @log_message
     def send(self, student_id, subject, body):
