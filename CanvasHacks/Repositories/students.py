@@ -60,6 +60,22 @@ class StudentRepository( IRepo ):
             print('No student found for id: {}'.format(canvas_id))
             return ''
 
+    def get_student_email(self, canvas_id ):
+        """
+        Retrieves the email address downloaded from Canvas
+        :param canvas_id:
+        :return: str
+        """
+        try:
+            s = self.get_student( canvas_id )
+            return s.email
+        except KeyError:
+            print('No student found for id: {}'.format(canvas_id))
+            return ''
+        except AttributeError:
+            print('No student found for id: {}'.format(canvas_id))
+            return ''
+
     def get_student_first_name( self, canvas_id ):
         full_name = self.get_student_name(canvas_id)
 
