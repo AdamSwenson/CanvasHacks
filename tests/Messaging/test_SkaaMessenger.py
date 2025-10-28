@@ -110,6 +110,8 @@ class TestSkaaMessenger(TestingBase):
         for k in result.keys():
             self.assertIn(k, expected_keys, "Result contains expected keys")
 
+
+
     # @patch('CanvasHacks.PeerReviewed.Notifications.ConversationMessageSender')
     # def test_notify( self, senderMock ):
     #     self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.work)

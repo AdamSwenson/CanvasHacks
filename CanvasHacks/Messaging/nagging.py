@@ -3,7 +3,7 @@ Created by adam on 3/11/20
 """
 __author__ = 'adam'
 
-from CanvasHacks.Messaging.SendTools import ConversationMessageSender
+from CanvasHacks.Messaging.SendTools import ConversationMessageSender, ExchangeMessageSender
 from canvasapi.user import User
 
 from CanvasHacks.Messaging.mixins import DateFormatterMixin
@@ -45,15 +45,20 @@ PS, If we've already spoken about this, apologies for this semi-automated remind
 
 class EssayNonSubmittersMessaging(DateFormatterMixin):
 
-    def __init__( self, unit, send=True, **kwargs ):
+    def __init__( self, unit, send=True, student_repository=None, **kwargs ):
         """
+        :type student_repository: StudentRepository As of CAN-86, allows to use email from canvas
         :param unit: The Unit object for the unit in question
         :param send: Whether to actually send the message to the student
         """
         self.send = send
         self.unit = unit
         self.activity = self.unit.initial_work
-        self.messenger = ConversationMessageSender()
+
+        # Changed to use email in CAN-78
+        # self.messenger = ConversationMessageSender()
+        self.messenger = ExchangeMessageSender(student_repository=student_repository)
+
         self.subject = "Missing Unit {} Essay".format( self.unit.unit_number )
         self.sent = [ ]
 
@@ -92,8 +97,10 @@ class EssayNonSubmittersMessaging(DateFormatterMixin):
 class ReviewNonSubmittersMessaging(DateFormatterMixin):
     SUBJECT_TEMPLATE = "Missing Unit {} Peer Review"
 
-    def __init__( self, unit, send=True, dao=None ):
+    def __init__( self, unit, send=True, dao=None, student_repository=None, **kwargs ):
         """
+
+        :type student_repository: StudentRepository As of CAN-86, allows to use email from canvas
         :param unit: The Unit object for the unit in question
         :param send: Whether to actually send the message to the student
         :param dao: The status repository object to use. If none, InvitationStatusRepository will be used
@@ -103,7 +110,10 @@ class ReviewNonSubmittersMessaging(DateFormatterMixin):
         self.unit = unit
         self.activity = self.unit.review
 
-        self.messenger = ConversationMessageSender()
+        # Changed to use email in CAN-78
+        # self.messenger = ConversationMessageSender()
+        self.messenger = ExchangeMessageSender(student_repository=student_repository)
+
         self.subject = self.SUBJECT_TEMPLATE.format( self.unit.unit_number )
         self.sent = [ ]
 

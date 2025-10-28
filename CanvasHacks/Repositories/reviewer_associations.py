@@ -3,6 +3,8 @@ Tools for handling and maintaining who is assigned to review whom
 
 Created by adam on 12/28/19
 """
+from sqlalchemy.exc import MultipleResultsFound
+
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Errors.review_pairings import NoAvailablePartner, AllAssigned
 from CanvasHacks.GradingMethods.errors import NoReviewerAssigned
@@ -223,10 +225,13 @@ class AssociationRepository(ObjectHandlerMixin):
         :param author_id:
         :return:
         """
-        return self.session.query( ReviewAssociation ) \
-            .filter( ReviewAssociation.activity_id == activity.id ) \
-            .filter( ReviewAssociation.assessee_id == author_id ) \
-            .one_or_none()
+        try:
+            return self.session.query( ReviewAssociation ) \
+                .filter( ReviewAssociation.activity_id == activity.id ) \
+                .filter( ReviewAssociation.assessee_id == author_id ) \
+                .one_or_none()
+        except MultipleResultsFound:
+            print(f"Multiple results found. Author {author_id} ")
 
     def get_by_author( self, author ):
         """
@@ -236,14 +241,22 @@ class AssociationRepository(ObjectHandlerMixin):
         :param author: Student or student id
         :return: ReviewAssociation or None
         """
-        author_id = self._handle_id(author)
-        r = self.session.query( ReviewAssociation )\
-            .filter( ReviewAssociation.activity_id == self.activity.id )\
-            .filter( ReviewAssociation.assessee_id == author_id )\
-            .one_or_none()
+
+        r = None
+        try:
+            author_id = self._handle_id(author)
+            r = self.session.query( ReviewAssociation )\
+                .filter( ReviewAssociation.activity_id == self.activity.id )\
+                .filter( ReviewAssociation.assessee_id == author_id )\
+                .one_or_none()
+        # dev added while dealing with corrupted db in F25
+        except MultipleResultsFound:
+            print(f"Multiple results found. Author {author} ")
 
         if r is None:
-            raise NoReviewerAssigned()
+            # dev added while dealing with corrupted db in F25
+            pass
+            # raise NoReviewerAssigned(author)
 
         return r
 
