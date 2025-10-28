@@ -101,8 +101,10 @@ class TestSkaaMessenger(TestingBase):
         self.obj.message_template = testing_template
         self.obj.activity_inviting_to_complete = self.activity
 
+        subject = fake.text()
+
         # Call
-        result = self.obj._make_message_data( self.receiving_student, self.reviewed_student_work )
+        result = self.obj._make_message_data( self.receiving_student, self.reviewed_student_work, subject=subject )
 
         # Check
         self.assertIsInstance(self.obj.student_repository, StudentRepository)
