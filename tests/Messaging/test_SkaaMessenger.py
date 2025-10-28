@@ -96,7 +96,7 @@ class TestSkaaMessenger(TestingBase):
         {review_assignment_name} {access_code_message} {review_url} {due_date}
         """
 
-        self.obj = SkaaMessenger(self.activity, self.studentRepo, self.contentRepo, self.statusRepo)
+        self.obj = SkaaMessenger(self.unit, self.studentRepo, self.contentRepo, self.statusRepo)
 
         self.obj.message_template = testing_template
         self.obj.activity_inviting_to_complete = self.activity
