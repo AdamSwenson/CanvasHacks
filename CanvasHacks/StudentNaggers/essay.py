@@ -17,8 +17,9 @@ class EssayNagger(IStep):
 
     def __init__( self, overview_repo, is_test=None, send=True, **kwargs ):
         """
-        :param course:
-        :param unit:
+        :type overview_repo: ControlStore
+        :param overview_repo The ControlStore object will hold an instance of SkaaOverviewRepository
+        and StudentRepo which we will use
         :param is_test:
         :param send: Whether to actually send the messages
         """
