@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, create_autospec
 
 from faker import Faker
 
+from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from tests.TestingBase import TestingBase
 
 fake = Faker()
@@ -78,7 +79,7 @@ class TestSkaaMessenger(TestingBase):
         self.unit = unit_factory()
         self.activity_data = activity_data_factory()
         self.activity = Activity(**self.activity_data)
-        # student recieiving the message
+        # student receiving the message
         self.receiving_student = student_factory()
         self.reviewed_student_work = fake.text()
 
@@ -86,6 +87,9 @@ class TestSkaaMessenger(TestingBase):
         self.studentRepo.get_student = MagicMock( return_value=self.receiving_student )
         self.contentRepo = ContentRepositoryMock()
         self.statusRepo = create_autospec( StatusRepository )
+
+        self.dao = SqliteDAO()
+        self.session = self.dao.session
 
     def test__make_message_data(self):
         self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.reviewed_student_work)

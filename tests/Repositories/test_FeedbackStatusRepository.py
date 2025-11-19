@@ -36,6 +36,20 @@ class TestFeedbackStatusRepository( TestingBase ):
 
         self.obj = FeedbackStatusRepository( self.dao, self.activity )
 
+    def test_record_with_int_id(self):
+        # Using id as input
+        self.obj = FeedbackStatusRepository( self.dao, self.activity_id )
+
+        result = self.obj.record(self.student_ids[0])
+        self.assertIsInstance(result, FeedbackReceivedRecord, "Correct type returned")
+        self.assertEqual(self.student_ids[0], result.student_id, "Correct id set")
+        self.assertIsNotNone(result.sent_at, "Timestamp automatically added")
+
+        # Using student object as input
+        result = self.obj.record(self.students[1])
+        self.assertIsInstance(result, FeedbackReceivedRecord, "Correct type returned")
+        self.assertEqual(self.students[1].id, result.student_id, "Correct id set")
+        self.assertIsNotNone(result.sent_at, "Timestamp automatically added")
 
     def test_record( self ):
         # Using id as input

@@ -6,10 +6,12 @@ __author__ = 'adam'
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import ConversationMessageSender, DummyEmailSender
+from CanvasHacks.Messaging.queue import QueuedMessageSender
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
 
 from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
+from CanvasHacks.Repositories.messaging import MessageRepository
 
 if __name__ == '__main__':
     pass
@@ -18,22 +20,30 @@ if __name__ == '__main__':
 class SkaaMessenger:
 
     def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repositories: list ):
+                  status_repositories: list, dao=None, **kwargs ):
         """
         :param unit:
         :param student_repository:
         :param content_repository:
         :param status_repositories: List of status repos to call once sent
+        :param dao: Optional sqlite dao to use with message repo. Mostly for testing
         """
         self.unit = unit
         self.student_repository = student_repository
         self.content_repository = content_repository
+
+        self.message_repository = MessageRepository(dao=dao)
 
         # Object responsible for actually sending message
         # Changed in CAN-77 to deal with problem sending via canvas
         # self.sender = ConversationMessageSender()
         self.sender = ExchangeMessageSender(student_repository=student_repository)
         # self.sender = DummyEmailSender()
+
+        self.queued_message_sender = QueuedMessageSender(student_repository=self.student_repository,
+                                                         message_repository=self.message_repository,
+                                                         sender=self.sender,
+                                                         dao=dao)
 
         # Objects in charge of storing change in status
         # after sent. Should be a list of InvitationStatusRepository
@@ -64,7 +74,6 @@ class SkaaMessenger:
             'student_id': receiving_student.id,
             'subject': email_subject,
             'body': message,
-            #dev 'email': ''
         }
 
     def _make_message_content( self, content, other, receiving_student ):
@@ -123,15 +132,18 @@ class SkaaMessenger:
             try:
                 # print( rev )
                 message_data = self.prepare_message( rev, other )
-                # messages.append( message_data )
+                message_data['status_repos'] = self.status_repositories
 
                 if send:
-                    m = self.sender.send( **message_data )
+                    # dev CAN-81 This is where we inject the queue
+                    self.message_repository.add_to_queue(self.activity_inviting_to_complete, **message_data)
+
+                    # m = self.sender.send( **message_data )
                     # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
                     # self.logger.write(m)
 
                     messages.append( m )
-                    self.update_status( message_data )
+                    # self.update_status( message_data )
 
                 else:
                     # For test runs
@@ -154,6 +166,14 @@ class SkaaMessenger:
                 XXXXXXXXXXXXXXXXXXXXXXXXXXX
                 """
                 print(p.format(e))
+
+        # CAN-81 Now that everything is happily queued handle sending
+        # dev this still isn’t granular enough. The message queuing
+        # should happen immediately after each review association is created
+        self.queued_message_sender.send_all(send=send)
+
+
+
         print(devstuff)
         # Returns for testing / auditing
         return messages

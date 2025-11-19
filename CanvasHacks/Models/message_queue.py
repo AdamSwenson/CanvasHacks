@@ -1,6 +1,7 @@
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.sqlite import DATETIME
+from sqlalchemy.dialects.sqlite import JSON
 
 # from sqlalchemy.ext.declarative import declarative_base
 
@@ -28,6 +29,9 @@ class MessageQueueItem(Base, Model):
 
     body = Column(String)
     """The body of the message to send"""
+
+    status_repos = Column(JSON, nullable=True)
+    """The type and activity id of each status repository to call when message is sent"""
 
     created_at = Column(DATETIME, nullable=True)
     """Timestamp of when the item was queued"""

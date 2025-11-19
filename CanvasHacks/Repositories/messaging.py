@@ -1,20 +1,37 @@
+from CanvasHacks.DAOs.db_files import DBFilePathHandler
+from CanvasHacks.DAOs.mixins import DaoMixin
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from sqlalchemy import delete
 from CanvasHacks.Definitions.activity import Activity
 
 
-class MessageRepository(object):
+class MessageRepository(DaoMixin):
     """
     Handles interaction with the messaging queue
     """
 
-    def __init__(self, dao: SqliteDAO):
-        self.session = dao.session
+    def __init__(self, dao: SqliteDAO = None, use_file_db=True):
+        """
+        :param dao: An existing dao instance to use. If None, will create a new one following the use_file_db parameter.
+        :param use_file_db: Whether to use the file database. False uses in-memory for testing.
+        """
+        if dao is not None:
+            self.dao = dao
+        else:
+            self.db_filepath = DBFilePathHandler.message_queue()
+            if use_file_db:
+                self._initialize_file_db()
+            else:
+                self._initialize_memory_db()
+
+        self.session = self.dao.session
         self.message_queue_address = ''
 
-    def add_to_queue(self, activity, student_id, subject, body):
+
+    def add_to_queue(self, activity, student_id, subject, body, status_repos=[]):
         """Pushes a message onto the sending queue
+        :param status_repos: List containing status repo objects which should be called once the message is sent
         :param activity: The assignment this message is related to
         :type activity: Activity
         :param student_id: The canvas id of the student who should receive the message
@@ -23,9 +40,14 @@ class MessageRepository(object):
         :type subject: str
         :param body: Message body to send
         :type body: str
-        """
 
-        m = MessageQueueItem(activity_id=activity.id, student_id=student_id, subject=subject, body=body)
+        """
+        status_repos = self._make_status_repos_entry(status_repos)
+        m = MessageQueueItem(activity_id=activity.id,
+                             student_id=student_id,
+                             subject=subject,
+                             body=body,
+                             status_repos=status_repos)
         self.session.add(m)
         self.session.commit()
 
@@ -38,16 +60,38 @@ class MessageRepository(object):
         self.session.delete(message_item)
         self.session.commit()
 
-    # def message_iterator(self, activity):
-    #     """generator which returns a message iterator"""
-    #     messages = self._load_message_queue(activity_id=activity.id)
-    #     for m in messages:
-    #         yield m
+    @property
+    def all_to_send(self):
+        """A list of messages to send """
+        return self.get_message_queue()
+
+    @property
+    def to_send_count(self):
+        """Count of messages in the queue"""
+        return len(self.get_message_queue())
 
     def get_message_queue(self, activity_id=None):
+        """Returns an iterable of all messages on the queue"""
         if activity_id is None:
             return self.session.query(MessageQueueItem).all()
 
         return self.session.query(MessageQueueItem) \
             .filter(MessageQueueItem.activity_id == activity_id) \
             .all()
+
+    def _make_status_repos_entry(self, status_repos: list):
+        """
+        Creates the information necessary for recreating the status repositories in the relevant field
+        :return: list
+        """
+        entries = []
+        for s in status_repos:
+            if s.__class__.__name__ == 'InvitationStatusRepository':
+                entries.append({'type' : s.__class__.__name__, 'activity_id': s.activity_id})
+
+            elif s.__class__.__name__ == 'FeedbackStatusRepository':
+                entries.append({'type': s.__class__.__name__,
+                                'activity_id': s.activity_id,
+                               'review_pairings_activity_id': s.review_pairings_activity_id})
+
+        return entries
