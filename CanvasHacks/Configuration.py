@@ -103,6 +103,14 @@ class Configuration( object ):
         cls.excluded_users = list(set(cls.excluded_users))
 
     @classmethod
+    def add_oauth_tenant(cls, tenant_name):
+        cls.tenant_name = tenant_name
+
+    @classmethod
+    def add_oauth_client_id(cls, client_id):
+        cls.oauth_client_id = client_id
+
+    @classmethod
     def get_assignment_ids( cls ):
         return [ i[ 0 ] for i in cls.assignments ]
 
@@ -328,6 +336,7 @@ class FileBasedConfiguration( Configuration ):
         cls.semester_name = cls.configuration['names'].get('SEMESTER')
         cls.load_token()
         cls.load_email_password()
+        cls.load_oauth_tenant_name()
         cls.load_url_base()
         cls.load_local_filepaths()
         cls.load_section_ids()
@@ -371,6 +380,14 @@ class FileBasedConfiguration( Configuration ):
             print("Will ignore work by users: ", cls.excluded_users)
         except:
             pass
+
+    @classmethod
+    def load_oauth_tenant_name(cls):
+        cls.add_oauth_tenant(cls.configuration['credentials'].get( 'OAUTH_TENANT_NAME' ))
+
+    @classmethod
+    def load_oauth_client_id( cls ):
+        cls.add_oauth_client_id(cls.configuration['credentials'].get( 'OAUTH_CLIENT_ID' ))
 
 
 class TestingConfiguration( Configuration ):
