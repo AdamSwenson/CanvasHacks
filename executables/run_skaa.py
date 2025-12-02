@@ -27,12 +27,13 @@ def main(start_unit=START_UNIT, stop_unit=STOP_UNIT, minutes_rest=MINUTES_REST):
 
     print(f"Running for unit {start_unit} to {stop_unit}...")
 
-    try:
-        run_multiple_units(control_store, start_unit, stop_unit, minutes_rest, rest_timeout=REPORT_GEN_TIMEOUT,
+    # Exception catching makes it hard to shut down using cntrl + c
+    # try:
+    run_multiple_units(control_store, start_unit, stop_unit, minutes_rest, rest_timeout=REPORT_GEN_TIMEOUT,
                            max_id_attempts=REPORT_ID_ATTEMPTS)
-    except:
-        run_multiple_units(control_store, start_unit, stop_unit, minutes_rest, rest_timeout=REPORT_GEN_TIMEOUT,
-                           max_id_attempts=REPORT_ID_ATTEMPTS)
+    # except:
+    #     run_multiple_units(control_store, start_unit, stop_unit, minutes_rest, rest_timeout=REPORT_GEN_TIMEOUT,
+    #                        max_id_attempts=REPORT_ID_ATTEMPTS)
 
 
 if __name__ == '__main__':
