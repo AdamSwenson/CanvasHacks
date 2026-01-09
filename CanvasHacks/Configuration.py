@@ -15,6 +15,9 @@ from CanvasHacks.Definitions.unit import Unit
 CREDENTIALS_FOLDER_PATH = "{}/private"
 LIVE_CREDENTIALS = "{}/canvas-credentials.ini"
 TEST_CREDENTIALS = "{}/test-credentials.ini"
+# oauth for email
+# dev remove once oauthhandler is working
+OAUTH_TOKEN_FILENAME = "{}/o365_token.txt"
 
 
 class Configuration( object ):
@@ -109,6 +112,10 @@ class Configuration( object ):
     @classmethod
     def add_oauth_client_id(cls, client_id):
         cls.oauth_client_id = client_id
+
+    @classmethod
+    def add_oauth_client_secret(cls, client_secret):
+        cls.oauth_client_secret = client_secret
 
     @classmethod
     def get_assignment_ids( cls ):
@@ -307,6 +314,9 @@ class InteractiveConfiguration( Configuration ):
 class FileBasedConfiguration( Configuration ):
     configuration = False
     file_path = False
+    # All login credentials are defined in files here. Also contains tokens for various access needs
+    # THIS CONTENTS OF THIS FOLDER MUST NOT BE COMMITTED TO VERSION CONTROL!
+    private_folder_path = False
 
     def __init__( self, configuration_file_path ):
         super().__init__()
@@ -321,9 +331,9 @@ class FileBasedConfiguration( Configuration ):
             cls.proj_base = os.path.abspath( os.path.dirname( os.path.dirname( __file__ ) ) )
             # All login credentials are defined in files here.
             # THIS CONTENTS OF THIS FOLDER MUST NOT BE COMMITTED TO VERSION CONTROL!
-            folder_path = CREDENTIALS_FOLDER_PATH.format(cls.proj_base)
+            cls.private_folder_path = CREDENTIALS_FOLDER_PATH.format(cls.proj_base)
             creds = TEST_CREDENTIALS if cls.is_test else LIVE_CREDENTIALS
-            cls.file_path = creds.format(folder_path )
+            cls.file_path = creds.format(cls.private_folder_path )
 
         cls.configuration = configparser.ConfigParser()
         cls.configuration.read( cls.file_path )
@@ -336,12 +346,15 @@ class FileBasedConfiguration( Configuration ):
         cls.semester_name = cls.configuration['names'].get('SEMESTER')
         cls.load_token()
         cls.load_email_password()
-        cls.load_oauth_tenant_name()
         cls.load_url_base()
         cls.load_local_filepaths()
         cls.load_section_ids()
         cls.load_excluded_users()
         cls.initialize_canvas_objs()
+        # Oauth
+        cls.load_oauth_tenant_name()
+        cls.load_oauth_client_id()
+
 
 
     @classmethod
@@ -388,6 +401,11 @@ class FileBasedConfiguration( Configuration ):
     @classmethod
     def load_oauth_client_id( cls ):
         cls.add_oauth_client_id(cls.configuration['credentials'].get( 'OAUTH_CLIENT_ID' ))
+        cls.add_oauth_client_secret(cls.configuration['credentials'].get( 'OAUTH_CLIENT_SECRET' ))
+
+    # @classmethod
+    # def load_oauth_token_filename( cls ):
+    #     cls.
 
 
 class TestingConfiguration( Configuration ):
