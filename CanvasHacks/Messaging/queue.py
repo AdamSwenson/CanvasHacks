@@ -2,7 +2,7 @@ from CanvasHacks import environment
 from CanvasHacks.DAOs.db_files import DBFilePathHandler
 
 from CanvasHacks.DAOs.mixins import DaoMixin
-from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
+from CanvasHacks.Messaging.SendTools import ExchangeMessageSender, DummyEmailSender
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from CanvasHacks.Repositories.messaging import MessageRepository
 from CanvasHacks.Repositories.status import StatusRepository, InvitationStatusRepository, FeedbackStatusRepository
@@ -40,6 +40,7 @@ class QueuedMessageSender(object):
         self.student_repository = student_repository
 
         if sender is None:
+            sender =
             sender = ExchangeMessageSender(student_repository=self.student_repository)
         self.sender = sender
 

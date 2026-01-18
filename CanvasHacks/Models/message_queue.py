@@ -14,7 +14,9 @@ class MessageQueueItem(Base, Model):
     """
     A message that needs to be sent to a student
     """
+
     __tablename__ = env.MESSAGE_QUEUE_TABLE_NAME
+
     id = Column(Integer, primary_key=True)
     """Id of the queue item"""
 

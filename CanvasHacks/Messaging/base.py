@@ -10,7 +10,7 @@ from CanvasHacks.Messaging.queue import QueuedMessageSender
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Definitions.unit import Unit
 
-from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
+from CanvasHacks.Messaging.SendTools import ExchangeMessageSender, DummyEmailSender
 from CanvasHacks.Repositories.messaging import MessageRepository
 
 if __name__ == '__main__':
@@ -37,8 +37,10 @@ class SkaaMessenger:
         # Object responsible for actually sending message
         # Changed in CAN-77 to deal with problem sending via canvas
         # self.sender = ConversationMessageSender()
+
+        # dev
         self.sender = ExchangeMessageSender(student_repository=student_repository)
-        # self.sender = DummyEmailSender()
+        self.sender = DummyEmailSender()
 
         self.queued_message_sender = QueuedMessageSender(student_repository=self.student_repository,
                                                          message_repository=self.message_repository,
@@ -125,6 +127,8 @@ class SkaaMessenger:
         """Given a list of review unit objects, sends the
         appropriate notification message to the correct person
         for the unit
+
+        CAN-81 This is where messages get added to queue.
         """
         devstuff = []
         messages = [ ]
@@ -137,12 +141,12 @@ class SkaaMessenger:
                 if send:
                     # dev CAN-81 This is where we inject the queue
                     self.message_repository.add_to_queue(self.activity_inviting_to_complete, **message_data)
-
                     # m = self.sender.send( **message_data )
+
                     # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
                     # self.logger.write(m)
 
-                    messages.append( m )
+                    # messages.append( m )
                     # self.update_status( message_data )
 
                 else:
@@ -167,6 +171,7 @@ class SkaaMessenger:
                 """
                 print(p.format(e))
 
+        print(f"{self.queued_message_sender.cnt} messages queued")
         # CAN-81 Now that everything is happily queued handle sending
         # dev this still isn’t granular enough. The message queuing
         # should happen immediately after each review association is created
