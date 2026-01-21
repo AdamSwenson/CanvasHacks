@@ -1,3 +1,4 @@
+import base64
 import sys
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -5,11 +6,14 @@ from email.mime.text import MIMEText
 
 import smtplib
 
+from CanvasHacks.Errors.oauth import ExpiredTokenError
 # from email.MIMEMultipart import MIMEMultipart
 # from email.MIMEBase import MIMEBase
 # from email import Encoders
 # from email.MIMEText import MIMEText
 from CanvasHacks.Logging.messages import MessageLogger
+from CanvasHacks.Messaging.oauth import OauthHandler
+from CanvasHacks import environment
 
 
 class EmailerBase( object ):
@@ -36,6 +40,9 @@ class EmailerBase( object ):
             print( "LIVE MODE" )
 
     def _connect( self ):
+        """This will work for stmp servers using basic username and password
+        authentication. This method should be overridden in child classes where
+        a different system is needed"""
         try:
             self.conn = smtplib.SMTP( self.URL, self.PORT )
             self.conn.set_debuglevel( self.show_debug )
@@ -64,29 +71,46 @@ class ExchangeEmailer( EmailerBase ):
     Base class for sending email via exchange
     """
 
-    def __init__( self, password, test=False, text_subtype='html', show_debug=False):
+    def __init__( self, password=None, test=False, text_subtype='html', show_debug=False):
         self.sender = 'adam.swenson@csun.edu'
         self.bcc_address = 'adamswenson@gmail.com'
 
-        if test:
-            self.SMTPserver = 'mailtrap.io'
-            self.URL = 'sandbox.smtp.mailtrap.io'
-            self.PORT = 2525
-            self.sender = 'adam.swenson@csun.edu'
-            self.USERNAME = '64b2254587cb48'
-            self.PASSWORD = password
-            self.USER = self.USERNAME
-            # self.EXCHANGE_PASSWORD = self.PASSWORD
-
-        else:
-            self.SMTPserver = 'smtp.office365.com'
-            self.USERNAME = "ars62917"
-            self.URL = "smtp.office365.com"
-            self.PORT = 587
-            self.USER = "adam.swenson@csun.edu"
-            # self.EXCHANGE_PASSWORD = password
+        self.SMTPserver = 'smtp.office365.com'
+        self.USERNAME = "ars62917"
+        self.URL = "smtp.office365.com"
+        self.PORT = 587
+        self.USER = "adam.swenson@csun.edu"
 
         super().__init__( password, test, text_subtype, show_debug )
+
+        self.token_handler = OauthHandler(environment.CONFIG)
+
+        # Get the access token upon instantiation.
+        # If the class persists for too long a period, the token
+        # will expire. This will be handled in sendMail
+        self.token_handler.request_access_token()
+
+    def _make_auth_bytes(self, fromAddr, access_token):
+        auth_string = f"user={fromAddr}\x01auth=Bearer {access_token}\x01\x01"
+        return base64.b64encode(auth_string.encode()).decode()
+
+    def _connect( self ):
+        """Overwrites the base connection process to use oauth
+        Raises ExpiredTokenError if the access token has expired"""
+
+        auth_bytes = self._make_auth_bytes(self.USER, self.token_handler.access_token)
+
+        self.conn = smtplib.SMTP(self.SMTPserver, self.PORT)
+        self.conn.set_debuglevel(self.show_debug)
+        self.conn.ehlo()
+        self.conn.starttls()
+        self.conn.ehlo()
+
+        code, resp = self.conn.docmd("AUTH", "XOAUTH2 " + auth_bytes)
+        if code > 400:
+            raise ExpiredTokenError( code, resp )
+
+
 
     def sendMail( self, destination, message_content: str, subject: str, print_status=False ):
         """
@@ -106,9 +130,14 @@ class ExchangeEmailer( EmailerBase ):
             msg[ 'Subject' ] = self.subject
             msg[ 'From' ] = self.sender  # some SMTP servers will do this automatically, not all
 
-            # msg['CC'] = self.sender
+            try:
+                self._connect()
+            except ExpiredTokenError:
+                print("Getting new access token...")
+                # If the token has expired, get a new one and try again
+                self.token_handler.request_access_token()
+                self._connect()
 
-            self._connect()
             try:
                 self.conn.sendmail( self.sender, self.destination, msg.as_string() )
                 # This was the problem that caused CAN-77
@@ -140,11 +169,19 @@ class ExchangeEmailer( EmailerBase ):
             Encoders.encode_base64( part )
             part.add_header( 'Content-Disposition', 'attachment; filename="%s"' % attachment )
             msg.attach( part )
-            conn = self.connect()
+
             try:
-                conn.sendmail( self.sender, self.destination, msg.as_string() )
+                self._connect()
+            except ExpiredTokenError:
+                print("Getting new access token...")
+                # If the token has expired, get a new one and try again
+                self.token_handler.request_access_token()
+                self._connect()
+
+            try:
+                self.conn.sendmail( self.sender, self.destination, msg.as_string() )
             finally:
-                conn.close()
+                self.conn.close()
         except Exception as exc:
             sys.exit( "mail failed; %s" % str( exc ) )  # give a error message
 

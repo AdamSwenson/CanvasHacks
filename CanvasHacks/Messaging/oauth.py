@@ -1,36 +1,35 @@
-"""Tools for authenticating for email via oauth2"""
+"""Tools for authenticating for email via oauth2."""
+import json
 
-from msal import PublicClientApplication, ConfidentialClientApplication
+from msal import ConfidentialClientApplication
 
-from CanvasHacks.Configuration import Configuration
+from CanvasHacks.Configuration import FileBasedConfiguration
 from CanvasHacks.Errors.oauth import OauthError
 
-
-# https://pypi.org/project/msal/
-
 # oauth for email
-OAUTH_TOKEN_FILENAME = "{}/o365_token.txt"
+OAUTH_TOKEN_FILENAME = "{}/o365_token.json"
 
 
 class OauthHandler(object):
-    """Manages the access token used for authentication """
+    """Manages the access token used for authentication
+    This includes retrieving it from the server, storing it in a file, and loading from a file
+    https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/how-to-authenticate-an-imap-pop-smtp-application-by-using-oauth
+    """
 
-    def __init__(self, configuration):
-        """Should receive FileBasedConfig class """
-        self.result = None  # It is just an initial value. Please follow instructions below.
-
-        self.client_id = configuration.oauth_client_id
+    def __init__(self, configuration: FileBasedConfiguration):
+        """Should receive FileBasedConfig class. Usually this is by passing it environment.CONFIG """
 
         self.authority = f"https://login.microsoftonline.com/{configuration.tenant_name}"
+        self.scopes = ["https://outlook.office365.com/.default"]
+
         self.client_credential = configuration.oauth_client_secret
-
-        # scopes = ['/.default']
-        # scopes = ['SMTP.Send',  '/.default']
-        self.scopes = ['api://6eb9fab9-78fa-48bf-bce2-4e6f1ccb4bb0/.default']
-
+        self.client_id = configuration.oauth_client_id
         self.token_path = OAUTH_TOKEN_FILENAME.format(configuration.private_folder_path)
 
         self.access_token = None
+        self.result ={}
+
+        self._set_up_app()
 
     def _set_up_app(self):
         """
@@ -42,67 +41,33 @@ class OauthHandler(object):
                                                  authority=self.authority)
 
     def load_oauth_token(self):
-        """Attempts to load the OAuth token from a file"""
+        """Attempts to load the OAuth token from a file
+        This is unlikely to be needed given how often tokens expire
+        """
         with open(self.token_path, 'r') as f:
-            self.access_token = f.read()
+            self.result = json.load(f)
+            self.access_token = self.result["access_token"]
 
     def request_access_token(self):
         """Uses the ConfidentialClientApplication instance to request an access token"""
-        self._set_up_app()
-        result = self.app.acquire_token_for_client(self.scopes)
-        self.access_token = result['access_token']
+        try:
+            # Store response in result so can use in writing
+            self.result = self.app.acquire_token_for_client(self.scopes)
+        # Catch unexpected catastrophic errors
+        except Exception as e:
+            raise OauthError(**self.result)
+
+        # Raise error if the access token was not returned
+        if 'access_token' not in self.result:
+            raise OauthError(f"Failed to obtain an access token \n{self.result}")
+
+        # Successfully retrieved, so set token
+        self.access_token = self.result['access_token']
 
     def save_oauth_token(self):
-        """Writes the OAuth token to a file"""
+        """Writes the OAuth token and accompanying information to a file.
+        Not usually needed but sometimes useful for testing"""
         with open(self.token_path, 'w') as f:
-            f.write(self.access_token)
+            json.dump(self.result, f)
+            print("Token saved to {}".format(self.token_path))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # result = None  # It is just an initial value. Please follow instructions below.
-        #
-        # # We now check the cache to see
-        # # whether we already have some accounts that the end user already used to sign in before.
-        # self.accounts = self.app.get_accounts()
-        # if self.accounts:
-        #     # If so, you could then somehow display these accounts and let end user choose
-        #     print("Pick the account you want to use to proceed:")
-        #     for a in self.accounts:
-        #         print(a["username"])
-        #     # Assuming the end user chose this one
-        #     chosen = self.accounts[0]
-        #     # Now let's try to find a token in cache for this account
-        #     # result = self.app.acquire_token_silent(["your_scope"], account=chosen)
-        #     result = self.app.acquire_token_silent([self.scope], account=chosen)
-        #
-        #
-        # if not result:
-        #     # So no suitable token exists in cache. Let's get a new one from AAD.
-        #     result = self.app.acquire_token_by_one_of_the_actual_method(..., scopes=["User.Read"])
-        # if "access_token" in result:
-        #     self.access_token = result["access_token"]
-        #     print(result["access_token"])  # Yay!
-        # else:
-        #     print(result.get("error"))
-        #     print(result.get("error_description"))
-        #     print(result.get("error_description"))  # You may need this when reporting a bug
-        #
-        #     raise OauthError(**result)
-        #     # raise OauthError(result.get("error"), result.get("error_description"), result.get("error_description"))
