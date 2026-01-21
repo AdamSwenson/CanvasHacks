@@ -131,12 +131,16 @@ class ConversationMessageSender(ISender):
             raise MessageSendError(e)
 
 
-class DummyEmailSender(ExchangeMessageSender):
+class DummyEmailSender(ISender):
     """
     Mock for testing sending emails.
     """
     def init(self):
         self.outputs = []
+
+    def lookup_email(self, student_id):
+        return 'email@email.borp'
+
 
     def send(self, student_id, subject, body):
         """Prints out what would've been sent.

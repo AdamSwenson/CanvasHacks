@@ -5,8 +5,16 @@ Notebooks/personal/.ipynb_checkpoints
 venv
 
 private
-.pypirc
 
+# Testing log files (nb, the filepaths need to be included)
+tests/testing_filepath/Logs/TEST
+tests/testing_filepath/Logs/message-log.txt
+tests/testing_filepath/Logs/TEST-F25-message-queue.db
+tests/testing_filepath/Logs/TEST-message-log.txt
+tests/testing_filepath/Logs/TEST-run-log.txt
+
+
+.pypirc
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

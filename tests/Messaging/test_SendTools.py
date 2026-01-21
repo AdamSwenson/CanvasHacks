@@ -24,6 +24,7 @@ class TestDummyEmailSender(TestingBase):
         """
 
         object = DummyEmailSender()
+        object.init()
 
         def fakelookup(p):
             return email_address

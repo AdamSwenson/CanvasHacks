@@ -3,7 +3,7 @@ Created by adam on 2/22/20
 """
 from unittest.mock import MagicMock, patch, create_autospec
 
-from CanvasHacks.Repositories.status import InvitationStatusRepository
+# from CanvasHacks.Repositories.status import InvitationStatusRepository
 from tests.TestingBase import TestingBase
 
 from faker import Faker
@@ -19,9 +19,6 @@ from CanvasHacks.Messaging.skaa import MetareviewInvitationMessenger
 fake = Faker()
 
 __author__ = 'adam'
-
-if __name__ == '__main__':
-    pass
 
 
 class TestMetareviewInvitationMessenger( TestingBase ):
@@ -45,7 +42,7 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         self.studentRepo.get_student = MagicMock( return_value=self.author )
         self.contentRepo = ContentRepositoryMock()
         self.contentRepo.get_formatted_work_by = MagicMock( return_value=self.work )
-        self.statusRepo = create_autospec(InvitationStatusRepository)
+        self.statusRepo = MagicMock() #create_autospec(InvitationStatusRepository)
 
         self.review_assign = MagicMock( assessor_id=self.reviewer.id, assessee_id=self.author.id )
 
@@ -58,7 +55,9 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         # check
         self.assertEqual( obj.message_template, METAREVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.author.id, "Message is going to author of the ca (inviting to review the reviewer)" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Expected subject" )
+        # self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Expected subject" )
+        self.assertEqual(message_data['subject'], obj.email_subject_template.format(self.unit.unit_number), "Email subject")
+
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
@@ -69,8 +68,9 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         # This is for the request to do the metareview, so the recipient should be the AUTHOR
         self.studentRepo.get_student.assert_called_with(self.author.id )
 
-    @patch( 'CanvasHacks.Messaging.SendTools.ConversationMessageSender.send' )
-    def test_notify( self, sendMock ):
+    @patch('CanvasHacks.Messaging.base.MessageLogger')
+    @patch('CanvasHacks.Messaging.SendTools.ExchangeMessageSender.send')
+    def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'taco'
         self.obj = MetareviewInvitationMessenger( self.unit, self.studentRepo, self.contentRepo, self.statusRepo )
 
@@ -88,7 +88,8 @@ class TestMetareviewInvitationMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.author.id,  "Message is going to author of the ca (inviting to review the reviewer)"  )
-        self.assertEqual( kwargs['subject'], self.unit.metareview.invitation_email_subject, "Sent with expected subject line " )
+        # self.assertEqual( kwargs['subject'], self.unit.metareview.invitation_email_subject, "Sent with expected subject line " )
+        self.assertEqual(kwargs['subject'], self.obj.email_subject_template.format(self.unit.unit_number), "Email subject")
 
         # self.assertEqual(kwargs['subject'], self.FeedbackFromMetareviewMessenger.subject, "Sent with expected subject line -- remember this one is different")
         d = self.obj._make_template_input( self.work, None, self.author )

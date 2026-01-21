@@ -22,6 +22,21 @@ if __name__ == '__main__':
 
 class IStatusRepository( StudentWorkMixin, IRepo ):
 
+    def __init__(self, dao: SqliteDAO, activity_or_id: Activity):
+        """
+        Create a repository to handle events for a
+        particular activity
+
+        Note: updated to potentially use just the id in CAN-81 to avoid having to get whole activity
+        """
+        if isinstance(activity_or_id, int):
+            self.activity_id = activity_or_id
+        else:
+            self.activity = activity_or_id
+            self.activity_id = self.activity.id
+
+        self.session = dao.session
+
     def record( self, student, time_to_record=None ):
         """
         Main method called.
@@ -104,13 +119,20 @@ class InvitationStatusRepository( IStatusRepository ):
     count_column_name = 'num invites'
 
 
-    def __init__( self, dao: SqliteDAO, activity: Activity ):
+    def __init__( self, dao: SqliteDAO, activity_or_id: Activity ):
         """
         Create a repository to handle events for a
         particular activity_inviting_to_complete
         """
-        self.activity = activity
-        self.session = dao.session
+        super().__init__(dao, activity_or_id)
+        #
+        # if isinstance( activity_or_id, Activity ):
+        #     self.activity = activity_or_id
+        #     self.activity_id = self.activity
+        # elif isinstance( activity_or_id, int ):
+        #     self.activity_id = activity_or_id
+        #
+        # self.session = dao.session
 
     def get( self, student ):
         """
@@ -121,7 +143,7 @@ class InvitationStatusRepository( IStatusRepository ):
         """
         student_id = self._handle_id( student )
         return self.session.query( InvitationReceivedRecord )\
-            .filter( InvitationReceivedRecord.activity_id == self.activity.id )\
+            .filter( InvitationReceivedRecord.activity_id == self.activity_id )\
             .filter( InvitationReceivedRecord.student_id == student_id )\
             .one_or_none()
 
@@ -153,7 +175,7 @@ class InvitationStatusRepository( IStatusRepository ):
         """
         return self.session\
             .query( InvitationReceivedRecord )\
-            .filter( InvitationReceivedRecord.activity_id == self.activity.id )\
+            .filter( InvitationReceivedRecord.activity_id == self.activity_id )\
             .all()
 
     @property
@@ -181,7 +203,7 @@ class InvitationStatusRepository( IStatusRepository ):
         if time_to_record is None:
             time_to_record = current_utc_timestamp()
 
-        rec = InvitationReceivedRecord( student_id=student_id, activity_id=self.activity.id, sent_at=time_to_record )
+        rec = InvitationReceivedRecord( student_id=student_id, activity_id=self.activity_id, sent_at=time_to_record )
 
         self.session.add( rec )
         self.session.commit()
@@ -194,7 +216,7 @@ class InvitationStatusRepository( IStatusRepository ):
         :return:
         """
         rs = self.session.query( InvitationReceivedRecord )\
-            .filter( InvitationReceivedRecord.activity_id == self.activity.id )\
+            .filter( InvitationReceivedRecord.activity_id == self.activity_id )\
             .all()
         return pd.DataFrame( [ r.__dict__ for r in rs ] ).drop( [ '_sa_instance_state' ], axis=1 )
 
@@ -218,7 +240,7 @@ class FeedbackStatusRepository( IStatusRepository ):
     """
     count_column_name = 'num feedback'
 
-    def __init__( self, dao: SqliteDAO, activity: Activity, review_pairings_activity=None ):
+    def __init__( self, dao: SqliteDAO, activity_or_id: Activity, review_pairings_activity=None ):
         """
          Create a repository to handle events for a
         particular activity
@@ -227,12 +249,22 @@ class FeedbackStatusRepository( IStatusRepository ):
         :param activity: The activity feedback is sent on
         :param review_pairings_activity: Activity which the review associations are based upon
         """
-        self.activity = activity
-        self.session = dao.session
+        super().__init__(dao, activity_or_id)
+        #
+        # self.activity = activity
+        # self.session = dao.session
 
         # if None, that means there's no difference between the activities
         # so we can just use the activity
-        self.review_pairings_activity = review_pairings_activity if review_pairings_activity is not None else self.activity
+        if review_pairings_activity is None:
+            self.review_pairings_activity_id = self.activity_id
+        else:
+            # We need to check if it is an object or int
+            if isinstance( review_pairings_activity, int ):
+                self.review_pairings_activity_id = review_pairings_activity
+            else:
+                self.review_pairings_activity_id = review_pairings_activity.id
+            # self.review_pairings_activity_id = review_pairings_activity.id if review_pairings_activity is not None else self.activity_id
 
     def get( self, student ):
         """
@@ -244,7 +276,7 @@ class FeedbackStatusRepository( IStatusRepository ):
         student_id = self._handle_id( student )
         return self.session\
             .query( FeedbackReceivedRecord )\
-            .filter( FeedbackReceivedRecord.activity_id == self.activity.id )\
+            .filter( FeedbackReceivedRecord.activity_id == self.activity_id )\
             .filter( FeedbackReceivedRecord.student_id == student_id )\
             .one_or_none()
 
@@ -266,7 +298,7 @@ class FeedbackStatusRepository( IStatusRepository ):
         :return: list
         """
         return self.session.query( FeedbackReceivedRecord ).filter(
-            FeedbackReceivedRecord.activity_id == self.activity.id ).all()
+            FeedbackReceivedRecord.activity_id == self.activity_id ).all()
 
     @property
     def previously_received_ids( self ):
@@ -295,7 +327,7 @@ class FeedbackStatusRepository( IStatusRepository ):
         if time_to_record is None:
             time_to_record = current_utc_timestamp()
 
-        rec = FeedbackReceivedRecord( student_id=student_id, activity_id=self.activity.id, sent_at=time_to_record )
+        rec = FeedbackReceivedRecord( student_id=student_id, activity_id=self.activity_id, sent_at=time_to_record )
 
         self.session.add( rec )
         self.session.commit()
@@ -325,8 +357,8 @@ class FeedbackStatusRepository( IStatusRepository ):
         notified = self.session\
             .query( ReviewAssociation )\
             .outerjoin( FeedbackReceivedRecord, FeedbackReceivedRecord.student_id == ReviewAssociation.assessee_id )\
-            .filter( ReviewAssociation.activity_id == self.review_pairings_activity.id )\
-            .filter( FeedbackReceivedRecord.activity_id == self.activity.id )\
+            .filter( ReviewAssociation.activity_id == self.review_pairings_activity_id )\
+            .filter( FeedbackReceivedRecord.activity_id == self.activity_id )\
             .filter( FeedbackReceivedRecord.student_id.isnot( None ) )\
             .all()
         # ids of reviewers whose authors have been notified
@@ -371,7 +403,7 @@ class FeedbackStatusRepository( IStatusRepository ):
         """
         try:
             rs = self.session.query( FeedbackReceivedRecord )\
-                .filter( FeedbackReceivedRecord.activity_id == self.activity.id )\
+                .filter( FeedbackReceivedRecord.activity_id == self.activity_id )\
                 .all()
             return pd.DataFrame( [ r.__dict__ for r in rs ] ).drop( [ '_sa_instance_state' ], axis=1 )
         except KeyError:

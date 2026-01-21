@@ -79,6 +79,7 @@ INVITATION_RECEIVED_STATUS_TABLE_NAME = 'invitation_received'
 SUBMISSION_TABLE_NAME = 'submissions'
 
 STUDENT_TABLE_NAME = 'students'
+MESSAGE_QUEUE_TABLE_NAME = 'message_queue'
 
 # Logging
 t = "TEST-" if CONFIG.is_test else ""

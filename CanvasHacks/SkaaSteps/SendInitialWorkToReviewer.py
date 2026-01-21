@@ -109,6 +109,8 @@ class SendInitialWorkToReviewer( IStep ):
         #  todo Want some way of tracking if messages fail to send so can resend
         # Log the run
         msg = "Created {} peer review assignments \n {}".format( len( self.associations ), self.associations )
+
+        # dev CAN-81 This needs to be hooked by the queuing system
         RunLogger.log_reviews_assigned( self.activity_notifying_about, msg )
 
     def _assign_step( self ):

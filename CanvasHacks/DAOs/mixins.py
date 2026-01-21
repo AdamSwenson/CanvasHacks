@@ -14,7 +14,7 @@ if __name__ == '__main__':
 class DaoMixin:
     """
     Provides database access initialization.
-    Requires that self.unit be set
+    Requires that self.unit be set if use _initialize_db
     """
 
     def _initialize_db( self ):

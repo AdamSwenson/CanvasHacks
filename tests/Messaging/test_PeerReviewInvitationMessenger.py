@@ -26,7 +26,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         # self.activity_data = activity_data_factory()
         self.activity = self.unit.review #InitialWork( **self.activity_data )
 
-        # student recieiving the message
+        # student receiving the message
         self.author = student_factory()
         self.reviewer = student_factory()
 
@@ -41,7 +41,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         self.statusRepo = MagicMock() #create_autospec(StatusRepository)
 
     def test_prepare_message( self ):
-        # student recieiving the message
+        # student receiving the message
         self.obj = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.contentRepo, self.statusRepo )
 
         # call
@@ -52,7 +52,9 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         # check
         self.assertEqual( self.obj.message_template, REVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Receiving student id" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
+        self.assertEqual(message_data['subject'], self.obj.email_subject_template.format(self.unit.unit_number), "Email subject")
+
+        # self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 
         # todo This relies on another method of the class, would be good to do this independently
@@ -65,7 +67,7 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
     @patch('CanvasHacks.Messaging.base.MessageLogger')
-    @patch( 'CanvasHacks.Messaging.SendTools.ConversationMessageSender.send' )
+    @patch( 'CanvasHacks.Messaging.SendTools.ExchangeMessageSender.send' )
     def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'this would be the result of sending'
         self.obj = PeerReviewInvitationMessenger( self.unit, self.studentRepo, self.contentRepo,  self.statusRepo )
@@ -84,7 +86,9 @@ class TestStudentWorkForPeerReviewMessenger( TestingBase ):
         sendMock.assert_called()
         kwargs = sendMock.call_args[1 ]
         self.assertEqual( kwargs['student_id'], self.reviewer.id, "Sent to correct student" )
-        self.assertEqual( kwargs['subject'], self.activity.invitation_email_subject, "Sent with expected subject line" )
+        # self.assertEqual( kwargs['subject'], self.activity.invitation_email_subject, "Sent with expected subject line" )
+        self.assertEqual(kwargs['subject'], self.obj.email_subject_template.format(self.unit.unit_number), "Email subject")
+
         d = self.obj._make_template_input( self.work, None, self.reviewer )
         b = REVIEW_NOTICE_TEMPLATE.format(**d)
         self.assertEqual(kwargs['body'], b, "Sent with expected body")
