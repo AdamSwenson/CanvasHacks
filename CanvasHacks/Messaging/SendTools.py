@@ -19,7 +19,9 @@ if __name__ == '__main__':
 
 
 class ExchangeMessageSender(ISender, ExchangeEmailer):
-    """Handles sending messages through ms exchange email
+    """Handles sending messages through ms exchange email.
+
+    This handles looking up the student email and then sending to them
 .
     Doing via class allows easier mocking
     """
@@ -34,9 +36,6 @@ class ExchangeMessageSender(ISender, ExchangeEmailer):
         # Added student repo in CAN-86 so can use email address from canvas
         # instead of separate file
         self.student_repository = student_repository
-        # dev This can be deprecated once CAN-86 is working
-        emails_path = env.EMAIL_LIST_FILE
-        self.emails = pd.read_excel(emails_path).set_index('canvas_id')
 
         self.url = 'https://canvas.csun.edu/api/v1/conversations'
         self.sent_count = 0
@@ -56,6 +55,9 @@ class ExchangeMessageSender(ISender, ExchangeEmailer):
             # dev This needs to be removed after F25 since there will be no sheet
             print(f"Error retrieving student email from canvas for canvas id {canvas_id}. "
                   f"Attempting to use internal spreadsheet ")
+            # dev This can be deprecated once CAN-86 is working
+            emails_path = env.EMAIL_LIST_FILE
+            self.emails = pd.read_excel(emails_path).set_index('canvas_id')
             return self.emails.loc[canvas_id].email
 
     @log_message
@@ -129,12 +131,16 @@ class ConversationMessageSender(ISender):
             raise MessageSendError(e)
 
 
-class DummyEmailSender(ExchangeMessageSender):
+class DummyEmailSender(ISender):
     """
     Mock for testing sending emails.
     """
     def init(self):
         self.outputs = []
+
+    def lookup_email(self, student_id):
+        return 'email@email.borp'
+
 
     def send(self, student_id, subject, body):
         """Prints out what would've been sent.

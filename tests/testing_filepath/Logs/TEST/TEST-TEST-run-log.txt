@@ -1,0 +1,37 @@
+
+ --------------------------------- 2026-01-12 16:42:50.645581 --------------------------- 
+ 
+        
+ --------- 2026-01-13 00:42:50.645448+00:00 --------- 
+
+        Checked for new submissions on activity_inviting_to_complete: Unit 1: Peer review
+        Created 2 peer review assignments 
+ [<ReviewAssociation(id=1, activity_id=2590427, assessor_id=169957, assessee_id=169908, <ReviewAssociation(id=2, activity_id=2590427, assessor_id=169908, assessee_id=169957]
+        
+ -------------------------- 
+
+        
+ --------------------------------- 2026-01-12 17:15:27.351974 --------------------------- 
+ 
+        
+ --------- 2026-01-13 01:15:27.351877+00:00 --------- 
+
+        Checked for new submissions on activity_inviting_to_complete: Unit 1: Peer review
+        Created 2 peer review assignments 
+ [<ReviewAssociation(id=1, activity_id=2590427, assessor_id=169908, assessee_id=169957, <ReviewAssociation(id=2, activity_id=2590427, assessor_id=169957, assessee_id=169908]
+        
+ -------------------------- 
+
+        
+ --------------------------------- 2026-01-12 17:47:47.624427 --------------------------- 
+ 
+        
+ --------- 2026-01-13 01:47:47.624124+00:00 --------- 
+
+        Checked for new submissions on activity_inviting_to_complete: Unit 1: Peer review
+        Created 2 peer review assignments 
+ [<ReviewAssociation(id=1, activity_id=2590427, assessor_id=169957, assessee_id=169908, <ReviewAssociation(id=2, activity_id=2590427, assessor_id=169908, assessee_id=169957]
+        
+ -------------------------- 
+
+        

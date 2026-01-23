@@ -7,9 +7,6 @@ __author__ = 'adam'
 from CanvasHacks.Models.student import get_first_name
 from CanvasHacks.Repositories.status import FeedbackStatusRepository
 
-if __name__ == '__main__':
-    pass
-
 """
 Created by adam on 2/22/20
 """
@@ -30,9 +27,6 @@ from CanvasHacks.Messaging.skaa import FeedbackFromMetareviewMessenger
 fake = Faker()
 
 __author__ = 'adam'
-
-if __name__ == '__main__':
-    pass
 
 
 class TestFeedbackFromMetareviewMessenger( TestingBase ):
@@ -91,8 +85,9 @@ class TestFeedbackFromMetareviewMessenger( TestingBase ):
         # This is for the metareview, so the receipient should be the REVIEWER
         self.studentRepo.get_student.assert_called_with(self.reviewer.id )
 
-    @patch( 'CanvasHacks.Messaging.SendTools.ConversationMessageSender.send' )
-    def test_notify( self, sendMock ):
+    @patch('CanvasHacks.Messaging.base.MessageLogger')
+    @patch('CanvasHacks.Messaging.SendTools.ExchangeMessageSender.send')
+    def test_notify( self, sendMock, loggerMock ):
         sendMock.return_value = 'taco'
         self.obj = FeedbackFromMetareviewMessenger( self.unit, self.studentRepo, self.contentRepo, self.statusRepo )
 

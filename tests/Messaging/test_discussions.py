@@ -53,7 +53,9 @@ class TestDiscussionReviewInvitationMessenger( TestingBase ):
         # check
         self.assertEqual( obj.message_template, DISCUSSION_REVIEW_NOTICE_TEMPLATE, "Working off expected template" )
         self.assertEqual( message_data[ 'student_id' ], self.reviewer.id, "Message is going to reviewer" )
-        self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
+        # self.assertEqual( message_data[ 'subject' ], self.activity.invitation_email_subject, "Email subject" )
+        self.assertEqual(message_data['subject'], obj.email_subject_template.format(self.unit.unit_number),
+                         "Email subject")
 
         self.assertTrue( len( message_data[ 'body' ] ) > 0 )
 

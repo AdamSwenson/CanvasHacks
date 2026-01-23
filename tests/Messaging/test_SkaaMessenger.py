@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, create_autospec
 
 from faker import Faker
 
+from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from tests.TestingBase import TestingBase
 
 fake = Faker()
@@ -78,7 +79,7 @@ class TestSkaaMessenger(TestingBase):
         self.unit = unit_factory()
         self.activity_data = activity_data_factory()
         self.activity = Activity(**self.activity_data)
-        # student recieiving the message
+        # student receiving the message
         self.receiving_student = student_factory()
         self.reviewed_student_work = fake.text()
 
@@ -86,6 +87,9 @@ class TestSkaaMessenger(TestingBase):
         self.studentRepo.get_student = MagicMock( return_value=self.receiving_student )
         self.contentRepo = ContentRepositoryMock()
         self.statusRepo = create_autospec( StatusRepository )
+
+        self.dao = SqliteDAO()
+        self.session = self.dao.session
 
     def test__make_message_data(self):
         self.contentRepo.get_formatted_work_by = MagicMock(return_value=self.reviewed_student_work)
@@ -96,19 +100,23 @@ class TestSkaaMessenger(TestingBase):
         {review_assignment_name} {access_code_message} {review_url} {due_date}
         """
 
-        self.obj = SkaaMessenger(self.activity, self.studentRepo, self.contentRepo, self.statusRepo)
+        self.obj = SkaaMessenger(self.unit, self.studentRepo, self.contentRepo, self.statusRepo)
 
         self.obj.message_template = testing_template
         self.obj.activity_inviting_to_complete = self.activity
 
+        subject = fake.text()
+
         # Call
-        result = self.obj._make_message_data( self.receiving_student, self.reviewed_student_work )
+        result = self.obj._make_message_data( self.receiving_student, self.reviewed_student_work, subject=subject )
 
         # Check
         self.assertIsInstance(self.obj.student_repository, StudentRepository)
         expected_keys = ['student_id', 'subject', 'body']
         for k in result.keys():
             self.assertIn(k, expected_keys, "Result contains expected keys")
+
+
 
     # @patch('CanvasHacks.PeerReviewed.Notifications.ConversationMessageSender')
     # def test_notify( self, senderMock ):
