@@ -37,10 +37,9 @@ class SkaaMessenger:
         # Object responsible for actually sending message
         # Changed in CAN-77 to deal with problem sending via canvas
         # self.sender = ConversationMessageSender()
-
-        # dev
+        # Updated to use oauth in CAN-88
         self.sender = ExchangeMessageSender(student_repository=student_repository)
-        self.sender = DummyEmailSender()
+        # self.sender = DummyEmailSender()
 
         self.queued_message_sender = QueuedMessageSender(student_repository=self.student_repository,
                                                          message_repository=self.message_repository,
