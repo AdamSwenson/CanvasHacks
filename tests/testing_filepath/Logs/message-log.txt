@@ -1,3 +1,434 @@
 
  ===================== ERROR ===== 2025-10-29 12:17:14.337454 ===== ERROR ===================== 
 mail failed; {'': (501, b'5.1.3 Invalid address')}
+ --------------------------------- 2026-01-23 14:38:08.983440 --------------------------- 
+<CanvasHacks.Messaging.SendTools.ExchangeMessageSender object at 0x128496650>
+169908
+Unit 1: Another student's essay to peer review 
+
+    Hi  Student Test Account,
+    
+    Here is another student's assignment for you to review:
+    =======================
+    
+    
+            ------
+    Prompt: body
+
+    Their response:
+    DRAFT 
+ASCSU 2025 Priorities 
+The following priorities are a synthesis of data from the 2025 November plenary Committee of the Whole, the ASCSU priorities survey (circulated the following day and following the meeting), and the BiPOC notes on priorities from their November meeting. Labor-related priorities were not included as those are the purview of our CFA partners. Please review these priorities in committees on Dec 5. 
+
+Strengthen Shared Governance and Protect Academic Freedom 
+
+Reaffirm faculty leadership and uphold core academic values. Reassert faculty authority over curriculum and academic standards; ensure early, substantive consultation on all systemwide initiatives; and defend academic freedom, shared governance, and equity-centered academic values amid political and legislative pressures. 
+ 
+→ Outcomes 
+
+Establish clear shared-governance procedures, track consultation commitments, and ensure accountability for follow-through. 
+
+
+Operationalize JEDI survey results 
+
+
+Use JEDI survey results to highlight which campuses need support 
+
+
+Strategic Plan and Roadmap for Expanding ASCSU Democratic/Shared Governance Autonomy & Authority 
+
+
+Advance Financial Transparency and Resource Stewardship 
+
+Promote clarity, accountability, and alignment between funding and academic priorities. Ensure open, comprehensible financial reporting and data sharing; advocate for sustainable state funding that supports instruction and student success; and align system and campus resource allocations with academic—not administrative—priorities. 
+ 
+→ Outcomes: Develop public-facing budget transparency tools and faculty-informed financial oversight mechanisms. 
+
+Focus and Align ASCSU Work for Strategic Impact 
+
+Move from resolutions to results. Identify 3–5 systemwide priorities that serve as ASCSU’s “North Star” and align committee agendas, metrics, and plenary actions accordingly. Shift from reactive resolutions to proactive, outcomes-based initiatives with clear ownership, timelines, and visible progress tracking. 
+ 
+→ Outcomes: Launch a tracker for ASCSU priorities and progress toward implementation. 
+
+Enhance Relationships and Influence Inside and Outside the CSU 
+
+Strengthen the ASCSU’s voice and authority through strategic engagement. Build and leverage relationships with legislators, trustees, the Chancellor’s Office, campus senates, media, and alumni to amplify faculty perspectives and reinforce the CSU’s mission as the people’s university.  
+ 
+→ Outcomes:  
+
+Establish regular coordinated outreach, shared talking points, and communication channels with key partners. 
+
+
+Protect students, faculty, and staff 
+
+
+Limit access of information made available to campus police (and their law enforcement partners) 
+
+
+Build up our authority through communication and relationships 
+
+
+Build Legislative Relationships 
+
+
+Connect Women’s Caucus of ASCSU with Legislative Women’s Caucus 
+
+
+Connect w/ CSU Caucus 
+
+
+Connect BIPoC Caucus of ASCSU with Legislative APIDA Caucus, Black Caucus, Latino Caucus, American Indian Caucus, and other relevant caucuses 
+
+
+Connect with Legislative Disability Caucus 
+
+
+Operationalize JEDI survey results 
+
+
+Use JEDI survey results to highlight which campuses need support 
+
+
+Safeguard Academic Quality and the CSU Mission Amid Change 
+
+Protect educational integrity and adapt responsibly to evolving contexts. Ensure faculty oversight of curriculum, transfer, and accreditation processes; maintain rigor and equity in new teaching modalities and technologies (including AI); and uphold the CSU’s public-serving mission in the face of external pressures and structural reforms. 
+ 
+→ Outcomes: Integrate faculty review into all major academic and intersegmental initiatives, with transparent reporting on impacts to quality and access. 
+            ------
+    
+    
+    =======================
+    
+    
+     Please make sure you read the instructions in Unit 1: Peer review before getting started.
+     
+     To complete your review, open the quiz named 
+             Unit 1: Peer review 
+             https://canvas.csun.edu/courses/85210/assignments/2590405
+    Here's the access code: mmmmmm-tacos
+    
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on 2020-01-19. 
+    
+    You may open and look at the peer review assignment as many times as you like.
+    
+    Please remember that the person you are reviewing is not the person reviewing you.
+        
+    Enjoy,
+    /a
+   
+    
+
+ --------------------------------- 2026-01-23 14:38:09.972439 --------------------------- 
+<CanvasHacks.Messaging.SendTools.ExchangeMessageSender object at 0x128496650>
+169957
+Unit 1: Another student's essay to peer review 
+
+    Hi  Student Test,
+    
+    Here is another student's assignment for you to review:
+    =======================
+    
+    
+            ------
+    Prompt: body
+
+    Their response:
+    Strategic Plan and Roadmap for Expanding ASCSU Democratic/Shared Governance Autonomy & Authority 
+Contrasting ASCSU vs. UC Academic Senate Authority and Autonomy 
+Currently, the UC Academic Senate’s authority comes from the California Constitution (Article IX, Section 9), which grants the University of California a unique constitutional status and gives its Academic Senate “direct participation in the governance of the University.” The Academic Senate of the California State University (ASCSU), by contrast, derives its authority from statute and the CSU Board of Trustees, not the Constitution. This difference is why the UC Senate has true autonomous power, while the ASCSU operates in a more advisory and consultative capacity. 
+That said, there are several realistic pathways the ASCSU could pursue to expand its autonomy and strengthen its governance authority: 
+
+ Pursue statutory change in the California Education Code
+
+The CSU’s powers are defined by the Education Code (Sections 89000–90000). The ASCSU could advocate for amendments that codify faculty primacy in core academic areas—curriculum, admissions, degree requirements, and faculty governance—mirroring UC’s constitutional autonomy within the CSU’s statutory framework. 
+
+This would require legislative advocacy and partnership with the California Faculty Association (CFA) and student/faculty coalitions.  
+
+
+It could establish ASCSU as the final authority (rather than advisory) on specific academic matters. 
+
+
+ Strengthen the Standing Orders of the CSU Board of Trustees
+
+Like the UC Regents, the CSU Trustees can delegate authority through their Standing Orders. 
+
+The ASCSU could propose amendments granting formal delegated authority over curriculum approval, degree standards, and faculty governance policies.  
+
+
+This approach does not require legislation—only Board action—but depends on political will and negotiation. 
+
+
+ Build a unified governance front across constituencies
+
+The ASCSU could partner with: 
+
+Campus senates, to pass coordinated resolutions asserting faculty primacy in academic matters.  
+
+
+CFA and California Faculty Council, to create political momentum and public framing around “academic freedom and governance integrity.”  
+
+
+Student and staff organizations, to frame the issue as protecting educational quality, not faculty privilege. 
+
+
+ Engage in a constitutional strategy (long-term)
+
+Although very difficult, the CSU could seek constitutional status similar to UC—via a constitutional amendment (requiring a statewide ballot initiative). 
+
+This would enshrine CSU’s academic governance autonomy and make ASCSU a constitutional body.  
+
+
+It’s a high-bar, long-term strategy, but framing it around public trust and depoliticizing higher education could gain traction over time. 
+
+
+ Institutionalize shared governance mechanisms
+
+In the near term, ASCSU can: 
+
+Negotiate binding memoranda of understanding (MOUs) with the Chancellor’s Office on decision-making procedures.  
+
+
+Push for policy codification (e.g., revisions to Executive Orders or coded memoranda) that require joint decision-making authority rather than consultation.  
+
+
+Establish faculty review boards that have binding input on academic policy, similar to UC’s Senate committees. 
+
+
+ Leverage moral and public authority
+
+Even without formal autonomy, ASCSU can strengthen its de facto power by: 
+
+Demonstrating scholarly legitimacy and policy expertise.  
+
+
+Building transparent and inclusive processes that command respect from campus presidents, trustees, and legislators.  
+
+
+Publishing policy briefs and public statements positioning ASCSU as the guardian of academic integrity across CSU. 
+
+Strategic Roadmap for Expanding ASCSU Autonomy 
+
+ Background and Rationale
+
+The Academic Senate of the California State University (ASCSU) plays a central role in shared governance, but its authority is largely consultative under current CSU policy and statutory frameworks. By contrast, the University of California Academic Senate exercises constitutionally protected authority over core academic matters, as granted by Article IX, Section 9 of the California Constitution and the Standing Orders of the Regents. 
+To preserve academic integrity, faculty voice, and educational quality in the CSU, the ASCSU should pursue a phased strategy to increase its de jure and de facto autonomy. 
+ 
+
+ Short-Term (1–2 Years): Strengthening De Facto Authority
+
+Goals: 
+
+Build institutional legitimacy and leverage within existing governance structures.  
+
+
+Expand influence through formalized partnerships and procedural safeguards.  
+
+Actions: 
+
+Negotiate Standing Agreements with the Chancellor’s Office  
+
+
+Develop and adopt MOUs specifying areas of joint decision-making (e.g., curriculum, academic standards, degree programs).  
+
+
+Create timelines and accountability mechanisms ensuring faculty input before policy issuance.  
+
+
+Codify Shared Governance in CSU Executive Orders  
+
+
+Propose revisions to key Executive Orders (EOs) to require “joint approval” or “concurrence” from ASCSU on all academic matters.  
+
+
+Example: “Changes to general education requirements shall require concurrence by the ASCSU.”  
+
+
+Coordinate with Campus Senates  
+
+
+Establish a Systemwide Governance Council of campus senate chairs and ASCSU leadership.  
+
+
+Pass parallel resolutions asserting faculty primacy in academic policy across all campuses.  
+
+
+Enhance Public Visibility and Moral Authority  
+
+
+Publish annual State of Academic Governance reports.  
+
+
+Issue policy briefs and op-eds positioning ASCSU as the guardian of academic integrity and quality in public higher education. 
+
+
+ Medium-Term (3–5 Years): Building Formal Delegation of Authority
+
+Goals: 
+
+Secure legal and policy recognition of ASCSU’s decision-making role.  
+
+
+Embed autonomy into CSU governance documents.  
+
+Actions: 
+
+Amend the CSU Board of Trustees’ Standing Orders  
+
+
+Advocate for inclusion of a clause paralleling UC’s:   “The Academic Senate shall determine academic policy, subject to approval by the Board.”   
+
+
+Establish a Joint Committee on Academic Policy (Board + ASCSU) to oversee delegation transitions.  
+
+
+Legislative Engagement  
+
+
+Collaborate with the California Faculty Association (CFA) and legislative allies to propose amendments to the California Education Code:  
+
+
+Codify faculty primacy in curriculum and degree requirements.  
+
+
+Define the ASCSU as the official policy body on academic affairs within CSU.  
+
+
+Example statutory addition:   “The Academic Senate of the California State University shall have primary responsibility for the formulation and review of academic policy, subject to the authority of the Board of Trustees.”  
+
+
+Develop a CSU Academic Freedom and Governance Policy  
+
+
+Model after the UC Academic Personnel Manual (APM-010) and AAUP principles.  
+
+
+Embed the concept of faculty autonomy in academic judgment.  
+
+
+ Long-Term (5–10+ Years): Pursuing Structural or Constitutional Autonomy
+
+Goals: 
+
+Achieve constitutional or quasi-constitutional protection for CSU academic governance.  
+
+
+Align CSU governance authority with the UC model.  
+
+Actions: 
+
+Constitutional Amendment Initiative  
+
+
+Advocate for a California Constitutional amendment granting the CSU limited constitutional autonomy for academic governance, while maintaining public accountability.  
+
+
+Potential wording:   “The California State University shall constitute a public trust, with the Academic Senate exercising authority over academic standards, subject to the general oversight of the Board of Trustees.”  
+
+
+Coalition-Building for Public Advocacy  
+
+
+Form an alliance of ASCSU, CFA, CSSA (student association), and alumni groups.  
+
+
+Frame the movement as protecting educational quality and depoliticized academic governance.  
+
+
+Develop a Vision Document  
+
+
+Publish “Autonomy for Academic Integrity: A 2035 Vision for CSU Shared Governance,” outlining principles, benefits, and models.  
+
+ 
+
+ Metrics of Progress
+
+
+
+
+
+Domain 
+
+
+Metric 
+
+
+Indicator of Success 
+
+
+
+
+Policy Influence 
+
+
+% of CSU academic policies requiring ASCSU concurrence 
+
+
+Target: 75% by 2027 
+
+
+
+
+Legislative Standing 
+
+
+References to ASCSU authority in the Ed Code 
+
+
+Target: Inclusion by 2029 
+
+
+
+
+Institutional Perception 
+
+
+Chancellor’s Office & Trustee acknowledgment of ASCSU as co-governing body 
+
+
+Target: Formal recognition 
+
+
+
+
+Faculty Engagement 
+
+
+Campus resolutions supporting autonomy 
+
+
+Target: 23 campuses by 2026 
+
+
+
+
+ 
+
+ Conclusion
+
+The ASCSU cannot immediately replicate UC’s constitutionally grounded autonomy. However, through incremental statutory, policy, and coalition strategies, it can progressively transform its advisory role into one of shared authority. This evolution will not only strengthen faculty governance but also uphold the CSU’s public mission to deliver high-quality, equitable education through academic independence and professional expertise. 
+ 
+ 
+            ------
+    
+    
+    =======================
+    
+    
+     Please make sure you read the instructions in Unit 1: Peer review before getting started.
+     
+     To complete your review, open the quiz named 
+             Unit 1: Peer review 
+             https://canvas.csun.edu/courses/85210/assignments/2590405
+    Here's the access code: mmmmmm-tacos
+    
+    As always, canvas will lie to you about time limits by displaying an ominous, but meaningless in this course, 'Time Elapsed' timer. There is no time-limit other than you should try to submit your review before 11.59PM on 2020-01-19. 
+    
+    You may open and look at the peer review assignment as many times as you like.
+    
+    Please remember that the person you are reviewing is not the person reviewing you.
+        
+    Enjoy,
+    /a
+   
+    

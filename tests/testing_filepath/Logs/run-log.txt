@@ -1,0 +1,13 @@
+
+ --------------------------------- 2026-01-23 11:59:59.731685 --------------------------- 
+ 
+        
+ --------- 2026-01-23 19:59:59.731469+00:00 --------- 
+
+        Checked for new submissions on activity_inviting_to_complete: Unit 1: Peer review
+        Created 2 peer review assignments 
+ [<ReviewAssociation(id=1, activity_id=2590427, assessor_id=169908, assessee_id=169957, <ReviewAssociation(id=2, activity_id=2590427, assessor_id=169957, assessee_id=169908]
+        
+ -------------------------- 
+
+        

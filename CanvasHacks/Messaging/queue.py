@@ -40,7 +40,6 @@ class QueuedMessageSender(object):
         self.student_repository = student_repository
 
         if sender is None:
-            sender =
             sender = ExchangeMessageSender(student_repository=self.student_repository)
         self.sender = sender
 
