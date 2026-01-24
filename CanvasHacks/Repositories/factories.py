@@ -46,13 +46,15 @@ class WorkRepositoryLoaderFactory:
     """
 
     @classmethod
-    def make( cls, activity, course=None, only_new=False, **kwargs ):
+    def make( cls, activity, course=None, filter_graded=False, only_new=False, **kwargs ):
         """
         Returns a IContentRepository of the appropriate sort with all the
         relevant data loaded, processed, and stored as a dataframe on data
         kwags may contain
             download=True
 
+        :param filter_graded: If true, removes any assignments that have already
+        been graded. Added CAN-93
         :param activity:
         :param course:
         :param only_new:
@@ -67,17 +69,17 @@ class WorkRepositoryLoaderFactory:
                                      **kwargs)
 
         if activity.is_discussion_type:
-            return cls._for_discussion_type_activity(activity, course, loader, **kwargs)
+            return cls._for_discussion_type_activity(activity, course, loader, filter_graded, **kwargs)
 
         if activity.is_quiz_type:
             # If uses a quiz report, downloads report and populates the
             # appropriate repository (QuizRepository or ReviewRepository)
-            return cls._for_quiz_type_activity(activity, course, loader, **kwargs)
+            return cls._for_quiz_type_activity(activity, course, loader, filter_graded, **kwargs)
 
-        return cls._for_assignment_type_activity(activity, course, loader, **kwargs)
+        return cls._for_assignment_type_activity(activity, course, loader, filter_graded, **kwargs)
 
     @classmethod
-    def _for_quiz_type_activity(cls, activity, course, loader, **kwargs):
+    def _for_quiz_type_activity(cls, activity, course, loader, filter_graded=False, **kwargs):
         """
         Handles the loading if the activity_inviting_to_complete uses a quiz report
         :param activity:
@@ -112,12 +114,12 @@ class WorkRepositoryLoaderFactory:
 
         # Doing the combination with submissions after saving to avoid
         # mismatches of new and old data
-        repo.process( student_work_frame, subRepo.frame )
+        repo.process( student_work_frame, subRepo.frame, filter_graded )
 
         return repo
 
     @classmethod
-    def _for_assignment_type_activity(cls, activity, course, loader, **kwargs):
+    def _for_assignment_type_activity(cls, activity, course, loader, filter_graded=False, **kwargs):
         """
         Handles the loading if the activity_inviting_to_complete uses an unit (with no report)
         :param activity:
@@ -133,12 +135,12 @@ class WorkRepositoryLoaderFactory:
         if student_work_frame is None or len(student_work_frame) == 0:
             raise NoStudentWorkDataLoaded
 
-        repo.process( student_work_frame )
+        repo.process( student_work_frame, filter_graded )
 
         return repo
 
     @classmethod
-    def _for_discussion_type_activity( cls, activity, course, loader=None, **kwargs ):
+    def _for_discussion_type_activity( cls, activity, course, loader=None, filter_graded=False, **kwargs ):
         """
         Handles Discussion and DiscussionReview activities
         NB, we don't use loader since will need to make a special one for the review

@@ -39,9 +39,9 @@ class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWork
         self.analyzer = WordCount()
 
 
-    def process( self, student_work_frame ):
+    def process( self, student_work_frame, filter_graded=False ):
         self.data = student_work_frame
-        self._cleanup_data()
+        self._cleanup_data(filter_graded)
 
     def remove_previously_graded( self ):
         """Removes any records which have already been graded from self.data"""
@@ -58,11 +58,12 @@ class AssignmentRepository( IContentRepository, StoredDataFileMixin, StudentWork
 
         print( "Removed {} rows which have already been graded".format( prev_len - len( self.data ) ) )
 
-    def _cleanup_data( self ):
+    def _cleanup_data( self, filter_graded ):
         """This is abstracted out so it can be
         called independently for use with test data
         """
-        self.remove_previously_graded()
+        if filter_graded:
+            self.remove_previously_graded()
 
         # Remove html and other artifacts from student answers
         # DO NOT UNCOMMENT UNTIL CAN-59 HAS BEEN FULLY TESTED
