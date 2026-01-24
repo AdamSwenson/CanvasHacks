@@ -1,6 +1,6 @@
 
 # Testing log files (nb, the filepaths need to be included)
-Logs/TEST
+Logs/
 Logs/message-log.txt
 Logs/TEST-F25-message-queue.db
 Logs/TEST-message-log.txt
