@@ -62,7 +62,7 @@ class QuizRepository( IContentRepository, QuizDataMixin, StoredDataFileMixin, St
 
         self.analyzer = WordCount()
 
-    def process( self, work_frame, submissions ):
+    def process( self, work_frame, submissions, *args, **kwargs ):
         self.submissions = submissions
         if not isinstance( submissions, pd.DataFrame ):
             submissions_frame = pd.DataFrame( submissions )
