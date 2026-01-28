@@ -2,6 +2,7 @@ from CanvasHacks import environment
 from CanvasHacks.DAOs.db_files import DBFilePathHandler
 
 from CanvasHacks.DAOs.mixins import DaoMixin
+from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Messaging.SendTools import ExchangeMessageSender, DummyEmailSender
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from CanvasHacks.Repositories.messaging import MessageRepository
@@ -15,13 +16,16 @@ class QueuedMessageSender(object):
     updating the queue.
     """
 
-    def __init__( self, student_repository=None, message_repository=None, sender=None, dao=None, use_file_db=True ):
+    def __init__(self, student_repository=None, message_repository=None, sender=None, dao=None, use_file_db=True,
+                 queue_dao: QueueSqliteDAO = None, ):
         """
         NB, since this is a job class which could be called to run independently it
         has a lot of options for whether it is passed repositories or whether it creates them
+        :param queue_dao: Optional message sending dao.
+        :type queue_dao: QueueSqliteDAO
         :type student_repository: StudentRepository
         :param student_repository: Optionally accepts an existing repo object so won't have to download again
-        :param dao: Optional sqlite dao to use instead of internally created instance
+        :param dao: Non optional sqlite dao for the main unit dao
         :type dao: SqliteDAO
         :param use_file_db: Whether to use the file database. False tells MessageRepo to use in-memory for testing.
         """
@@ -29,10 +33,15 @@ class QueuedMessageSender(object):
         """Will have keys (activity_id, repo_name)"""
 
         if message_repository is None:
-            message_repository = MessageRepository(dao=dao, use_file_db=use_file_db)
+            # dev CAN-99 This needs to use the queue dao
+            message_repository = MessageRepository(dao=queue_dao, use_file_db=use_file_db)
         self.message_repository = message_repository
+
+        # dev CAN-99 This cannot be the case. Changed to make the dao mandatory
         # Ensure using same dao as message repo to help with testing
-        self.dao = message_repository.dao
+        # self.dao = message_repository.dao
+        self.dao = dao
+        """This is the dao that accesses the main db with invites etc for the current unit"""
 
         if student_repository is None:
             student_repository = StudentRepository(environment.CONFIG.course)
@@ -76,6 +85,10 @@ class QueuedMessageSender(object):
             # for the same activity, but just in case we check type too
             if (sr['activity_id'], sr['type']) not in self.status_repositories.keys():
                 if sr['type'] == 'InvitationStatusRepository':
+
+                    # dev CAN-99
+                    # These need to be the reqular dao
+
                     r = InvitationStatusRepository(self.dao, sr['activity_id'])
                     # self.status_repositories[(sr['activity_id'], sr['type'])] = InvitationStatusRepository(self.dao, sr['activity_id'])
                 elif sr['type'] == 'FeedbackStatusRepository':

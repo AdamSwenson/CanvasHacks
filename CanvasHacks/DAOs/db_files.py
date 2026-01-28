@@ -71,6 +71,13 @@ class DBFilePathHandler:
 
     @staticmethod
     def message_queue( **kwargs):
+        """
+        Creates a standard filepath to the database holding the message queue. This is
+        independent from the database which holds associations. It is relative to the
+        entire semester:
+        :param kwargs:
+        :return:
+        """
         s = DBFilePathHandler._handle_defaults(0, **kwargs)
         return MESSAGE_QUEUE_TEMPLATE.format(**s)
 

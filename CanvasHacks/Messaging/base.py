@@ -3,6 +3,7 @@ Created by adam on 2/28/20
 """
 __author__ = 'adam'
 
+from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Errors.messaging import MessageDataCreationError
 from CanvasHacks.Logging.messages import MessageLogger
 from CanvasHacks.Messaging.SendTools import ConversationMessageSender, DummyEmailSender
@@ -18,15 +19,19 @@ if __name__ == '__main__':
 
 
 class SkaaMessenger:
+    """
+    Parent for anything which sends messages
+    """
 
-    def __init__( self, unit: Unit, student_repository, content_repository,
-                  status_repositories: list, dao=None, **kwargs ):
+    def __init__(self, unit: Unit, student_repository, content_repository,
+                 status_repositories: list, dao: QueueSqliteDAO = None, **kwargs):
         """
+        :type dao: QueueSqliteDAO
         :param unit:
         :param student_repository:
         :param content_repository:
         :param status_repositories: List of status repos to call once sent
-        :param dao: Optional sqlite dao to use with message repo. Mostly for testing
+        :param dao: Optional messaging sqlite dao to use with message repo. Mostly for testing
         """
         self.unit = unit
         self.student_repository = student_repository

@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from dao_parent import DAO
 
-Base = declarative_base()
+QueueBase = declarative_base()
 
 __author__ = 'adam'
 
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     pass
 
 
-class SqliteDAO( DAO ):
+class QueueSqliteDAO( DAO ):
     """
     Makes a connection to sqlite database.
     [following is from import from twitter tools]
@@ -24,7 +24,11 @@ class SqliteDAO( DAO ):
 
     def __init__( self, db_filepath=None ):
 
+        # Parent init will call make_file_engine if provided
+        # a filepath. It will call _create_memory_engine if no path provided.
+        # It will then call _connect
         super().__init__(db_filepath)
+
         #
         # if db_filepath:
         #     self._make_file_engine( db_filepath )
@@ -49,7 +53,7 @@ class SqliteDAO( DAO ):
         print( "creating connection: %s " % connection_string )
         self.engine = create_engine( connection_string, echo=False )
 
-        Base.metadata.create_all( self.engine )
+        QueueBase.metadata.create_all( self.engine )
         # print( "creating connection: %s " % conn )
         # self.engine = create_engine( conn, echo=False )
 
@@ -58,7 +62,7 @@ class SqliteDAO( DAO ):
         Creates tables in the database
         :return:
         """
-        Base.metadata.create_all( self.engine )
+        QueueBase.metadata.create_all( self.engine )
 
 
     def _make_file_engine( self, filepath ):

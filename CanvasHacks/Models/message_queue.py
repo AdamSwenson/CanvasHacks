@@ -8,9 +8,9 @@ from sqlalchemy.dialects.sqlite import JSON
 from CanvasHacks import environment as env
 from CanvasHacks.Models.model import Model
 
-from CanvasHacks.DAOs.sqlite_dao import Base
+from CanvasHacks.DAOs.sqlite_message_dao import QueueBase
 
-class MessageQueueItem(Base, Model):
+class MessageQueueItem(QueueBase, Model):
     """
     A message that needs to be sent to a student
     """

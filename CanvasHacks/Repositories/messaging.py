@@ -1,6 +1,8 @@
+import datetime
+
 from CanvasHacks.DAOs.db_files import DBFilePathHandler
 from CanvasHacks.DAOs.mixins import DaoMixin
-from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from sqlalchemy import delete
 from CanvasHacks.Definitions.activity import Activity
@@ -11,7 +13,7 @@ class MessageRepository(DaoMixin):
     Handles interaction with the messaging queue
     """
 
-    def __init__(self, dao: SqliteDAO = None, use_file_db=True):
+    def __init__(self, dao: QueueSqliteDAO = None, use_file_db=True):
         """
         :param dao: An existing dao instance to use. If None, will create a new one following the use_file_db parameter.
         :param use_file_db: Whether to use the file database. False uses in-memory for testing.
@@ -21,9 +23,11 @@ class MessageRepository(DaoMixin):
         else:
             self.db_filepath = DBFilePathHandler.message_queue()
             if use_file_db:
-                self._initialize_file_db()
+                # CAN-99 hotfix
+                # original
+                self._initialize_queue_file_db()
             else:
-                self._initialize_memory_db()
+                self._initialize_queue_memory_db()
 
         self.session = self.dao.session
         self.message_queue_address = ''
@@ -47,7 +51,8 @@ class MessageRepository(DaoMixin):
                              student_id=student_id,
                              subject=subject,
                              body=body,
-                             status_repos=status_repos)
+                             status_repos=status_repos,
+                             created_at=datetime.datetime.now())
         self.session.add(m)
         self.session.commit()
 

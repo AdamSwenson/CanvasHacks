@@ -113,7 +113,8 @@ class SendInitialWorkToReviewer(IStep):
         self.sender = ExchangeMessageSender(student_repository=self.studentRepo)
         self.queued_message_sender = QueuedMessageSender(student_repository=self.studentRepo,
                                                          message_repository=self.message_repository,
-                                                         sender=self.sender)
+                                                         sender=self.sender,
+                                                         dao=self.dao,)
         print(f"{self.queued_message_sender.cnt} messages queued")
         self.queued_message_sender.send_all(send=self.send)
 
