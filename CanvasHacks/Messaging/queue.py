@@ -1,11 +1,13 @@
 from CanvasHacks import environment
+from CanvasHacks.DAOs.dao_access_point import DAOHolder
 from CanvasHacks.DAOs.db_files import DBFilePathHandler
 
-from CanvasHacks.DAOs.mixins import DaoMixin
+from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Messaging.SendTools import ExchangeMessageSender, DummyEmailSender
+from CanvasHacks.Messaging.interfaces import ISender
 from CanvasHacks.Models.message_queue import MessageQueueItem
-from CanvasHacks.Repositories.messaging import MessageRepository
+from CanvasHacks.Repositories.messaging import MessageQueueRepository
 from CanvasHacks.Repositories.status import StatusRepository, InvitationStatusRepository, FeedbackStatusRepository
 from CanvasHacks.Repositories.students import StudentRepository
 
@@ -16,32 +18,29 @@ class QueuedMessageSender(object):
     updating the queue.
     """
 
-    def __init__(self, student_repository=None, message_repository=None, sender=None, dao=None, use_file_db=True,
-                 queue_dao: QueueSqliteDAO = None, ):
+    def __init__(self, student_repository=None, message_repository=None, sender: ISender = None, **kwargs):
         """
         NB, since this is a job class which could be called to run independently it
-        has a lot of options for whether it is passed repositories or whether it creates them
-        :param queue_dao: Optional message sending dao.
-        :type queue_dao: QueueSqliteDAO
+        has a lot of options for whether it is passed repositories or whether it creates them.
+        However, message_repository will always be what holds the message queue dao (QueueSqliteDAO)
+        dev Nope. Not after CAN-99
+
         :type student_repository: StudentRepository
         :param student_repository: Optionally accepts an existing repo object so won't have to download again
-        :param dao: Non optional sqlite dao for the main unit dao
-        :type dao: SqliteDAO
-        :param use_file_db: Whether to use the file database. False tells MessageRepo to use in-memory for testing.
         """
         self.status_repositories = {}
         """Will have keys (activity_id, repo_name)"""
 
         if message_repository is None:
-            # dev CAN-99 This needs to use the queue dao
-            message_repository = MessageRepository(dao=queue_dao, use_file_db=use_file_db)
+            # dev CAN-99 This will create the queue dao internally
+            message_repository = MessageQueueRepository()#use_file_db=use_file_db)
         self.message_repository = message_repository
 
         # dev CAN-99 This cannot be the case. Changed to make the dao mandatory
         # Ensure using same dao as message repo to help with testing
         # self.dao = message_repository.dao
-        self.dao = dao
-        """This is the dao that accesses the main db with invites etc for the current unit"""
+        # self.dao = SqliteDAO(unit_number)
+        # """This is the dao that accesses the main db with invites etc for the current unit"""
 
         if student_repository is None:
             student_repository = StudentRepository(environment.CONFIG.course)
@@ -51,6 +50,9 @@ class QueuedMessageSender(object):
         if sender is None:
             sender = ExchangeMessageSender(student_repository=self.student_repository)
         self.sender = sender
+
+        self.unit_daos = {}
+        """This will hold sqliteDAO objects as they are created in rehydrating repositories"""
 
     @property
     def cnt(self):
@@ -79,20 +81,34 @@ class QueuedMessageSender(object):
             print(f"Failed to send message \n {m}\n{e}")
 
     def rehydrate_status_repos(self, message_queue_item):
+        """Instantiates the correct status repositories, with correct daos for the
+        status repositories stored in the db"""
+        dao = self.unit_daos.get(message_queue_item.unit_number, None)
+        if dao is None:
+            # Instantiate the required dao and store in unit_daos
+            # It has to work this way because we could have messages
+            # from different units stored on the queue
+            dao = DAOHolder.get_unit_dao( message_queue_item.unit_number )
+            # dao = SqliteDAO(message_queue_item.unit_number)
+            # self.unit_daos[message_queue_item.unit_number] = dao
+
         # dev This should really use a factory pattern to be more extensible
         for sr in message_queue_item.status_repos:
             # Not sure if there are cases where there would be 2 different repos
             # for the same activity, but just in case we check type too
             if (sr['activity_id'], sr['type']) not in self.status_repositories.keys():
                 if sr['type'] == 'InvitationStatusRepository':
+                    print('invite status repo rehydrated')
+                    print(dao)
 
                     # dev CAN-99
                     # These need to be the reqular dao
 
-                    r = InvitationStatusRepository(self.dao, sr['activity_id'])
+                    r = InvitationStatusRepository(dao, sr['activity_id'])
                     # self.status_repositories[(sr['activity_id'], sr['type'])] = InvitationStatusRepository(self.dao, sr['activity_id'])
                 elif sr['type'] == 'FeedbackStatusRepository':
-                    r = FeedbackStatusRepository(self.dao, sr['activity_id'], sr['review_pairings_activity_id'])
+                    r = FeedbackStatusRepository(dao, sr['activity_id'], sr['review_pairings_activity_id'])
+                    print('feedback status repo rehydrated')
 
                 self.status_repositories[(sr['activity_id'], sr['type'])] = r
 

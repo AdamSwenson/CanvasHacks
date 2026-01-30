@@ -26,7 +26,8 @@ __author__ = 'adam'
 #
 #     def setUp(self):
 #         self.config_for_test()
-#         self.dao = SqliteDAO()
+#         self.unit_number = fake.random_int()
+
 #
 #     def test_sends_correctly( self ):
 #         """Check that each student receives the expected message

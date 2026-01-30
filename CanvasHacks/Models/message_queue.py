@@ -23,6 +23,10 @@ class MessageQueueItem(QueueBase, Model):
     activity_id = Column(Integer)
     """Id of the activity this message is related to"""
 
+    unit_number = Column(Integer)
+    """The unit number of the activity. This is needed to load the correct main db dao when
+    rehydrating repositories"""
+
     student_id = Column(Integer)
     """The canvas id of the student who will receive the message"""
 
@@ -40,7 +44,7 @@ class MessageQueueItem(QueueBase, Model):
 
 
     def __repr__( self ):
-        return f"<Message to send(id={self.id}, activity_id={self.activity_id}, student_id={self.student_id}, created_at={self.created_at}, subject={self.subject}, body={self.body}"
+        return f"<Message to send(id={self.id}, activity_id={self.activity_id}, unit_number={self.unit_number}, student_id={self.student_id}, created_at={self.created_at}, subject={self.subject}, body={self.body}"
 
 
 

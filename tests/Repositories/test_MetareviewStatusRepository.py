@@ -22,7 +22,9 @@
 #         self.activity = self.unit.discussion_forum
 #         self.activity_id = self.activity.id
 #
-#         self.dao = SqliteDAO()
+#         self.unit_number = fake.random_int()
+self.dao = SqliteDAO(self.unit_number)
+        
 #         self.session = self.dao.session
 #         self.create_new_and_preexisting_students()
 #

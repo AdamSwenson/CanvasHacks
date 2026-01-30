@@ -37,7 +37,8 @@ class TestUnitTests( TestingBase ):
         self.work = fake.text()
         # Set to none so that loader thinks not a quiz
         self.activity_id = self.unit.discussion_forum.id
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
         self.session = self.dao.session
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects
@@ -103,7 +104,8 @@ class TestFunctionalTests( TestingBase ):
         self.work = fake.text()
         # Set to none so that loader thinks not a quiz
         self.activity_id = self.unit.discussion_forum.id
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
         self.session = self.dao.session
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects

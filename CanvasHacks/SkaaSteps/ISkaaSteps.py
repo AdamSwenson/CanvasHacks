@@ -1,6 +1,7 @@
 """
 Created by adam on 2/23/20
 """
+from CanvasHacks.DAOs.mixins import DaoMixin
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Logging.display import DisplayManager
 from CanvasHacks.Models.model import StoreMixin
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     pass
 
 
-class IStep(StoreMixin):
+class IStep(StoreMixin, DaoMixin):
     """Parent of all steps in a Skaa"""
 
     def __init__( self, course=None, unit=None, is_test=None, send=True, **kwargs ):
@@ -73,41 +74,46 @@ class IStep(StoreMixin):
         # else:
         #     self.statusRepos = StatusRepository( self.dao, self.activity_notifying_about )
 
-    def _initialize_db( self ):
-        try:
-            t = 'TEST-' if env.CONFIG.is_test else ""
-            self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
-        except AttributeError as e:
-            # This is likely to happen during testing
-            print(e)
+    # def _initialize_db( self ):
+    #     self.dao
+    #     self.dao = SqliteDAO( self.unit.unit_number )
 
-        if env.CONFIG.is_test:
-            try:
-                if CanvasHacks.testglobals.TEST_WITH_FILE_DB:
-                    # testing: file db
-                    self._initialize_file_db()
-                    print( "Connected to TEST db file. {}".format( self.db_filepath ) )
-                else:
-                    # testing: in memory db
-                    self._initialize_memory_db()
-            except (NameError, AttributeError) as e:
-                print(e)
-                # The variable might not be defined under in any
-                # number of circumstances. So default to the in-memory db
-                self._initialize_memory_db()
-
-        else:
-            # real: file db
-            self._initialize_file_db()
-            print( "Connected to REAL db. {}".format( self.db_filepath ) )
-
-    def _initialize_file_db( self ):
-        self.dao = SqliteDAO( self.db_filepath )
-        self.dao.initialize_db_file()
-
-    def _initialize_memory_db( self ):
-        self.dao = SqliteDAO()
-        print( "Connected to in-memory testing db" )
+    # dev removed in CAN-99
+    #
+    #     try:
+    #         t = 'TEST-' if env.CONFIG.is_test else ""
+    #         self.db_filepath = "{}/{}{}-Unit-{}-review-assigns.db".format( env.LOG_FOLDER, t, env.CONFIG.semester_name, self.unit.unit_number )
+    #     except AttributeError as e:
+    #         # This is likely to happen during testing
+    #         print(e)
+    #
+    #     if env.CONFIG.is_test:
+    #         try:
+    #             if CanvasHacks.testglobals.TEST_WITH_FILE_DB:
+    #                 # testing: file db
+    #                 self._initialize_file_db()
+    #                 print( "Connected to TEST db file. {}".format( self.db_filepath ) )
+    #             else:
+    #                 # testing: in memory db
+    #                 self._initialize_memory_db()
+    #         except (NameError, AttributeError) as e:
+    #             print(e)
+    #             # The variable might not be defined under in any
+    #             # number of circumstances. So default to the in-memory db
+    #             self._initialize_memory_db()
+    #
+    #     else:
+    #         # real: file db
+    #         self._initialize_file_db()
+    #         print( "Connected to REAL db. {}".format( self.db_filepath ) )
+    #
+    # def _initialize_file_db( self ):
+    #     self.dao = SqliteDAO( self.db_filepath )
+    #     self.dao.initialize_db_file()
+    #
+    # def _initialize_memory_db( self ):
+    #     self.dao = SqliteDAO()
+    #     print( "Connected to in-memory testing db" )
 
     def run( self ):
         raise NotImplementedError

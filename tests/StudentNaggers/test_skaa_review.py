@@ -34,7 +34,8 @@ class TestSkaaReviewNagger( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
 
         self.course = MagicMock()
         # review = Review(**activity_data_factory())

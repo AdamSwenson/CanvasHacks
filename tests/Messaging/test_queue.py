@@ -5,6 +5,7 @@ Created by adam on 10/28/25
 from unittest.mock import MagicMock, patch
 
 from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
+from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Messaging.queue import QueuedMessageSender
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from CanvasHacks.Repositories.students import StudentRepository
@@ -19,7 +20,9 @@ fake = Faker()
 class TestQueuedMessageSender(TestingBase):
 
     def setUp(self):
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = QueueSqliteDAO()
+        # self.dao = SqliteDAO(self.unit_number)
         self.session = self.dao.session
 
         self.students = [student_factory() for i in range(0, 5)]
@@ -44,7 +47,7 @@ class TestQueuedMessageSender(TestingBase):
         self.assertFalse(mockSend.called, "Sender not called on empty queue")
 
 
-    @patch('CanvasHacks.Repositories.messaging.MessageRepository')
+    @patch('CanvasHacks.Repositories.messaging.MessageQueueRepository')
     @patch( 'CanvasHacks.Messaging.SendTools.ExchangeMessageSender' )
     def test_send_all_stubbed(self, mockSend, mockMessageRepo): #, mockSend, loggerMock, mockDao):
         """nb, patches applied from bottom up"""

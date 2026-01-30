@@ -12,7 +12,7 @@ from CanvasHacks.Logging.run_data import RunLogger
 from CanvasHacks.Messaging.SendTools import ExchangeMessageSender
 from CanvasHacks.Messaging.queue import QueuedMessageSender
 from CanvasHacks.Messaging.skaa import PeerReviewInvitationMessenger
-from CanvasHacks.Repositories.messaging import MessageRepository
+from CanvasHacks.Repositories.messaging import MessageQueueRepository
 from CanvasHacks.Repositories.status import InvitationStatusRepository
 from CanvasHacks.SkaaSteps.ISkaaSteps import IStep
 
@@ -109,12 +109,12 @@ class SendInitialWorkToReviewer(IStep):
         send any queued review or metareview messages
         :return:
         """
-        self.message_repository = MessageRepository()
+        self.message_repository = MessageQueueRepository()
         self.sender = ExchangeMessageSender(student_repository=self.studentRepo)
         self.queued_message_sender = QueuedMessageSender(student_repository=self.studentRepo,
                                                          message_repository=self.message_repository,
-                                                         sender=self.sender,
-                                                         dao=self.dao,)
+                                                         sender=self.sender)
+                                                         # dao=self.dao,)
         print(f"{self.queued_message_sender.cnt} messages queued")
         self.queued_message_sender.send_all(send=self.send)
 

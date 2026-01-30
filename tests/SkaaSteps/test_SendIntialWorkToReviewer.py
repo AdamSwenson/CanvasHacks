@@ -31,7 +31,8 @@ class TestCallsAllExpected( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
 
         self.course = MagicMock()
         # review = Review(**activity_data_factory())
@@ -94,7 +95,9 @@ class TestUnitTests(TestingBase):
         self.unit = unit_factory()
         self.course = MagicMock()
         self.activity_id = self.unit.review.id
-        # self.dao = SqliteDAO()
+        # self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit.unit_number)
+        
         # self.create_new_and_preexisting_students()
         # # Prepare fake work repo to give values to calling  objects
         # self.workRepo = ContentRepositoryMock()
@@ -127,7 +130,9 @@ class TestFunctionalTestWhenQuizType( TestingBase ):
         self.course = MagicMock()
 
         self.activity_id = self.unit.initial_work.id
-        # self.dao = SqliteDAO()
+        # self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit.unit_number)
+        
         # self.session = self.dao.session
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects
@@ -309,7 +314,9 @@ class TestFunctionalTestWhenNonQuizType( TestingBase ):
         # Set to none so that loader thinks not a quiz
         self.unit.initial_work.quiz_id = None
         self.activity_id = self.unit.initial_work.id
-        self.dao = SqliteDAO()
+
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
         self.session = self.dao.session
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects
@@ -481,7 +488,9 @@ class TestRefactorToUseKwargs( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
-        self.dao = SqliteDAO()
+
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
 
         self.course = MagicMock()
         # review = Review(**activity_data_factory())

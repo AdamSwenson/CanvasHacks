@@ -30,7 +30,8 @@
 #
 #     def setUp(self):
 #         self.config_for_test()
-#         self.dao = SqliteDAO()
+#         self.unit_number = fake.random_int()
+
 #
 #         self.course = MagicMock()
 #         # review = Review(**activity_data_factory())

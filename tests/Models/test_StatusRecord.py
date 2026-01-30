@@ -25,7 +25,9 @@ class TestStatusRecord( TestingBase ):
 
     def setUp(self):
         self.config_for_test()
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
+
         print("Connected to testing db")
         self.session = self.dao.session
 

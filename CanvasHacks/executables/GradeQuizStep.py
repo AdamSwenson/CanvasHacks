@@ -85,7 +85,7 @@ class GradeQuiz( StoreMixin ):
         # blocked or graded by another student
         self.association_repo = None
         if isinstance( self.activity, BlockableActivity ):
-            dao = SqliteDAO()
+            dao = SqliteDAO(self.activity.unit_number)
             self.association_repo = AssociationRepository( dao, self.activity )
 
     def run( self, **kwargs ):

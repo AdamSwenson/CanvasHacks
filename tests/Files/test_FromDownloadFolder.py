@@ -1,9 +1,12 @@
 import unittest
 import datetime
 
+from CanvasHacks.Definitions.discussion import DiscussionReview
+from CanvasHacks.Definitions.other import TopicalAssignment
+from CanvasHacks.Definitions.skaa import MetaReview, Review
 from CanvasHacks.Files.FromDownloadFolder import get_unit_number, is_csv, is_report, get_activity_type,\
     report_file_iterator, DOWNLOAD_FOLDER, file_reports
-from CanvasHacks.PeerReviewed.Definitions import TopicalAssignment, Review, MetaReview, DiscussionReview
+# from CanvasHacks.PeerReviewed.Definitions import TopicalAssignment, Review, MetaReview, DiscussionReview
 
 
 class TestUtilities( unittest.TestCase ):

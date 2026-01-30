@@ -94,7 +94,7 @@ class GradeAssignment( StoreMixin ):
         # blocked or graded by another student
         self.association_repo = None
         if isinstance( self.activity, BlockableActivity ):
-            dao = SqliteDAO()
+            dao = SqliteDAO(self.activity.unit_number)
             self.association_repo = AssociationRepository( dao, self.activity )
 
         # Create a student repository that will mainly be used for logging

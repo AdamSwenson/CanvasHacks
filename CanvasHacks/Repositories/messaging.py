@@ -1,40 +1,36 @@
 import datetime
 
 from CanvasHacks.DAOs.db_files import DBFilePathHandler
-from CanvasHacks.DAOs.mixins import DaoMixin
+from CanvasHacks.DAOs.mixins import DaoMixin, MessageDaoMixin
 from CanvasHacks.DAOs.sqlite_message_dao import QueueSqliteDAO
 from CanvasHacks.Models.message_queue import MessageQueueItem
 from sqlalchemy import delete
 from CanvasHacks.Definitions.activity import Activity
 
 
-class MessageRepository(DaoMixin):
+class MessageQueueRepository(MessageDaoMixin):
     """
-    Handles interaction with the messaging queue
+    Handles interaction with the messaging queue.
+    Always creates its own instance of QueueSqliteDAO.
+    Only operates on the message queue database. Does not
+    interact with the main database.
     """
 
-    def __init__(self, dao: QueueSqliteDAO = None, use_file_db=True):
+    def __init__(self, **kwargs):
         """
-        :param dao: An existing dao instance to use. If None, will create a new one following the use_file_db parameter.
-        :param use_file_db: Whether to use the file database. False uses in-memory for testing.
+
         """
-        if dao is not None:
-            self.dao = dao
-        else:
-            self.db_filepath = DBFilePathHandler.message_queue()
-            if use_file_db:
-                # CAN-99 hotfix
-                # original
-                self._initialize_queue_file_db()
-            else:
-                self._initialize_queue_memory_db()
+        # if dao is not None:
+        #     self.dao = dao
+        # else:
+        self._initialize_db()
 
         self.session = self.dao.session
-        self.message_queue_address = ''
 
 
-    def add_to_queue(self, activity, student_id, subject, body, status_repos=[]):
+    def add_to_queue(self, activity, unit_number, student_id, subject, body, status_repos=[]):
         """Pushes a message onto the sending queue
+        :param unit_number: The number of the unit. This will be used in rehydrating status repos
         :param status_repos: List containing status repo objects which should be called once the message is sent
         :param activity: The assignment this message is related to
         :type activity: Activity
@@ -48,6 +44,7 @@ class MessageRepository(DaoMixin):
         """
         status_repos = self._make_status_repos_entry(status_repos)
         m = MessageQueueItem(activity_id=activity.id,
+                             unit_number=unit_number,
                              student_id=student_id,
                              subject=subject,
                              body=body,
@@ -86,7 +83,10 @@ class MessageRepository(DaoMixin):
 
     def _make_status_repos_entry(self, status_repos: list):
         """
-        Creates the information necessary for recreating the status repositories in the relevant field
+        Creates the information necessary for recreating the status repositories
+        in the relevant field.
+        NB, when these repos are rehydrated by another process, that process will need to
+        pass them the main db SQLiteDAO.
         :return: list
         """
         entries = []

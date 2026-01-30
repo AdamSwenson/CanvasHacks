@@ -32,7 +32,9 @@ class TestCallsAllExpected( TestingBase ):
 
     def setUp( self ):
         self.config_for_test()
-        self.dao = SqliteDAO()
+
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
 
         self.course = MagicMock()
         self.unit = unit_factory()
@@ -78,7 +80,9 @@ class TestUnitTests(TestingBase):
         self.unit = unit_factory()
         self.course = MagicMock()
         self.activity_id = self.unit.review.id
-        # self.dao = SqliteDAO()
+        self.unit_number = self.unit.unit_number
+        self.dao = SqliteDAO(self.unit_number)
+        
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects
         self.workRepo = ContentRepositoryMock()
@@ -109,7 +113,9 @@ class TestFunctionalTests( TestingBase ):
         self.unit = unit_factory()
         self.course = MagicMock()
         self.activity_id = self.unit.review.id
-        # self.dao = SqliteDAO()
+        self.unit_number = self.unit.unit_number
+        self.dao = SqliteDAO(self.unit_number)
+
         self.create_new_and_preexisting_students()
         # Prepare fake work repo to give values to calling  objects
         self.workRepo = ContentRepositoryMock()

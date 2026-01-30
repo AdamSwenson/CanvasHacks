@@ -88,7 +88,9 @@ class TestSkaaMessenger(TestingBase):
         self.contentRepo = ContentRepositoryMock()
         self.statusRepo = create_autospec( StatusRepository )
 
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+        self.dao = SqliteDAO(self.unit_number)
+
         self.session = self.dao.session
 
     def test__make_message_data(self):

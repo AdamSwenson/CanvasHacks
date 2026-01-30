@@ -5,6 +5,6 @@ Logs/message-log.txt
 Logs/TEST-F25-message-queue.db
 Logs/TEST-message-log.txt
 Logs/TEST-run-log.txt
-
+Logs/*
 Student work
 

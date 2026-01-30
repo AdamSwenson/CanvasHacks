@@ -60,6 +60,8 @@ class Activity( Model ):
 
         # Holds data for prop
         self._unit_number = None
+
+
         self._description_text = ''
 
         self.creation_dict = { }
@@ -131,6 +133,9 @@ class Activity( Model ):
 
     @property
     def unit_number( self ):
+        """The integer representation of the unit number
+        Returns the value stored in _unit_number or if that is None,
+        the value from env.CONFIG.unit.unit_number"""
         try:
             # preference if has been set internally
             return self._unit_number

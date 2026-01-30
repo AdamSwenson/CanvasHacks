@@ -4,7 +4,7 @@ CanvasHacks.testglobals.TEST = True
 CanvasHacks.testglobals.use_api = False
 
 from CanvasHacks.Models.message_queue import MessageQueueItem
-from CanvasHacks.Repositories.messaging import MessageRepository
+from CanvasHacks.Repositories.messaging import MessageQueueRepository
 from TestingBase import TestingBase
 from factories.ModelFactories import student_factory, message_queue_item_factory
 from factories.PeerReviewedFactories import unit_factory
@@ -20,10 +20,12 @@ class TestMessageRepository(TestingBase):
         self.activity = self.unit.initial_work
         self.activity_id = self.activity.id
 
-        self.dao = SqliteDAO()
+        self.unit_number = fake.random_int()
+self.dao = SqliteDAO(self.unit_number)
+        
         self.session = self.dao.session
 
-        self.obj = MessageRepository( self.dao)
+        self.obj = MessageQueueRepository(self.dao)
 
 
     def test__make_status_repos_entry(self):

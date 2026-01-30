@@ -20,15 +20,16 @@ if __name__ == '__main__':
 
 class TestAssociationRepository( TestingBase ):
     def setUp(self):
-        dao = SqliteDAO()
-        self.session = dao.session
+        unit_number = fake.random_int()
+        self.dao = SqliteDAO(unit_number)
+        self.session = self.dao.session
         # self.student_ids = [i for i in range(0,5)]
         self.create_new_and_preexisting_students()
 
         self.unit = unit_factory()
         self.activity = self.unit.initial_work
         self.activity_id = self.activity.id
-        self.obj = AssociationRepository(dao, self.activity)
+        self.obj = AssociationRepository(self.dao, self.activity)
 
     def test__make_associations_single_submissions( self ):
         # Students only submit once

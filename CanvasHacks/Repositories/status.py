@@ -7,9 +7,12 @@ from CanvasHacks.DAOs.sqlite_dao import SqliteDAO
 from CanvasHacks.Definitions.activity import Activity
 from CanvasHacks.Definitions.unit import Unit
 from CanvasHacks.Models.review_association import ReviewAssociation
-from CanvasHacks.Models.status_record import ComplexStatusRecord, FeedbackReceivedRecord, InvitationReceivedRecord,\
-    StatusRecord
+from CanvasHacks.Models.status_record import FeedbackReceivedRecord, InvitationReceivedRecord
+# from CanvasHacks.Models.status_record import ComplexStatusRecord, FeedbackReceivedRecord, InvitationReceivedRecord,\
+#     StatusRecord
 from CanvasHacks.Repositories.interfaces import IRepo
+
+import CanvasHacks.environment as env
 
 __author__ = 'adam'
 
@@ -35,6 +38,7 @@ class IStatusRepository( StudentWorkMixin, IRepo ):
             self.activity = activity_or_id
             self.activity_id = self.activity.id
 
+        # self.session = env.main_daos[1]
         self.session = dao.session
 
     def record( self, student, time_to_record=None ):
@@ -202,11 +206,12 @@ class InvitationStatusRepository( IStatusRepository ):
         student_id = self._handle_id( student )
         if time_to_record is None:
             time_to_record = current_utc_timestamp()
-
+        print(f"recording {student_id}  {time_to_record}")
         rec = InvitationReceivedRecord( student_id=student_id, activity_id=self.activity_id, sent_at=time_to_record )
-
+        print(f"recording: {rec}")
         self.session.add( rec )
         self.session.commit()
+
         return rec
 
     def get_all_as_dataframe( self ):
