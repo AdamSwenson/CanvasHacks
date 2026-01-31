@@ -23,7 +23,6 @@ class QueuedMessageSender(object):
         NB, since this is a job class which could be called to run independently it
         has a lot of options for whether it is passed repositories or whether it creates them.
         However, message_repository will always be what holds the message queue dao (QueueSqliteDAO)
-        dev Nope. Not after CAN-99
 
         :type student_repository: StudentRepository
         :param student_repository: Optionally accepts an existing repo object so won't have to download again
@@ -35,12 +34,6 @@ class QueuedMessageSender(object):
             # dev CAN-99 This will create the queue dao internally
             message_repository = MessageQueueRepository()#use_file_db=use_file_db)
         self.message_repository = message_repository
-
-        # dev CAN-99 This cannot be the case. Changed to make the dao mandatory
-        # Ensure using same dao as message repo to help with testing
-        # self.dao = message_repository.dao
-        # self.dao = SqliteDAO(unit_number)
-        # """This is the dao that accesses the main db with invites etc for the current unit"""
 
         if student_repository is None:
             student_repository = StudentRepository(environment.CONFIG.course)
@@ -88,9 +81,10 @@ class QueuedMessageSender(object):
             # Instantiate the required dao and store in unit_daos
             # It has to work this way because we could have messages
             # from different units stored on the queue
+            # NB, this could be simplified since the DAOHolder handles
+            # instantiation of daos which aren't present. Leaving like this
+            # for now.
             dao = DAOHolder.get_unit_dao( message_queue_item.unit_number )
-            # dao = SqliteDAO(message_queue_item.unit_number)
-            # self.unit_daos[message_queue_item.unit_number] = dao
 
         # dev This should really use a factory pattern to be more extensible
         for sr in message_queue_item.status_repos:
@@ -98,17 +92,9 @@ class QueuedMessageSender(object):
             # for the same activity, but just in case we check type too
             if (sr['activity_id'], sr['type']) not in self.status_repositories.keys():
                 if sr['type'] == 'InvitationStatusRepository':
-                    print('invite status repo rehydrated')
-                    print(dao)
-
-                    # dev CAN-99
-                    # These need to be the reqular dao
-
                     r = InvitationStatusRepository(dao, sr['activity_id'])
-                    # self.status_repositories[(sr['activity_id'], sr['type'])] = InvitationStatusRepository(self.dao, sr['activity_id'])
                 elif sr['type'] == 'FeedbackStatusRepository':
                     r = FeedbackStatusRepository(dao, sr['activity_id'], sr['review_pairings_activity_id'])
-                    print('feedback status repo rehydrated')
 
                 self.status_repositories[(sr['activity_id'], sr['type'])] = r
 
@@ -117,8 +103,6 @@ class QueuedMessageSender(object):
         """
         Call the record method on all status repos
         :param message_queue_item: The item which has the status repos stored
-        :param message_data:
-        :return:
         """
         # Make sure the repos exist
         self.rehydrate_status_repos(message_queue_item)
