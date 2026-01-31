@@ -192,13 +192,15 @@ class FeedbackFromMetareviewMessenger( SkaaMessenger ):
     def __init__( self, unit: Unit, student_repository, content_repository,
                   status_repositories: IStatusRepository ):
 
-        # None because sending feedback
-        self.activity_inviting_to_complete = None
 
         super().__init__( unit, student_repository, content_repository, status_repositories )
 
         self.email_subject = self.subject.format(self.unit.unit_number)
 
+        # None because sending feedback
+        # self.activity_inviting_to_complete = None
+        # CAN-99
+        self.activity_inviting_to_complete = self.unit.metareview
 
     def prepare_message( self, review_assignment, other=None ):
         """This looks up the appropriate data for a review

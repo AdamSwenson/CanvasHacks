@@ -206,9 +206,7 @@ class InvitationStatusRepository( IStatusRepository ):
         student_id = self._handle_id( student )
         if time_to_record is None:
             time_to_record = current_utc_timestamp()
-        print(f"recording {student_id}  {time_to_record}")
         rec = InvitationReceivedRecord( student_id=student_id, activity_id=self.activity_id, sent_at=time_to_record )
-        print(f"recording: {rec}")
         self.session.add( rec )
         self.session.commit()
 
