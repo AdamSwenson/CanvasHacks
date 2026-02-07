@@ -28,7 +28,8 @@ class InitialWork( SkaaReviewGroup, Activity, QuizDataMixin, StoredDataFileMixin
     creation_type = 'assignment'
 
     # regex = re.compile( r"\bcontent assignment\b" )
-    regex = re.compile( r"\bessay\b|\bcontent assignment\b" )
+    # regex = re.compile( r"\bessay\b|\bcontent assignment\b" )
+    regex = re.compile(r"\bessay (?!walkthrough)\b|\bcontent assignment\b")
 
     def __init__( self, **kwargs ):
         self.question_columns = [ ]

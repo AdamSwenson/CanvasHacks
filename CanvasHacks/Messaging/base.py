@@ -27,12 +27,12 @@ class SkaaMessenger:
     def __init__(self, unit: Unit, student_repository, content_repository,
                  status_repositories: list, dao: SqliteDAO = None, **kwargs):
         """
+        :param dao: Main sql dao (not messaging) DEPRECATED not actually used
         :type dao: QueueSqliteDAO
         :param unit:
         :param student_repository:
         :param content_repository:
         :param status_repositories: List of status repos to call once sent
-        :param dao: Main sql dao (not messaging)
         """
         self.unit = unit
         self.student_repository = student_repository
@@ -41,16 +41,17 @@ class SkaaMessenger:
         # dev Need to give this the regular message
         self.message_repository = MessageQueueRepository()
 
-        # Object responsible for actually sending message
+        # self.sender = DummyEmailSender()
         # Changed in CAN-77 to deal with problem sending via canvas
         # self.sender = ConversationMessageSender()
         # Updated to use oauth in CAN-88
         self.sender = ExchangeMessageSender(student_repository=student_repository)
-        # self.sender = DummyEmailSender()
+        """Object responsible for actually sending message"""
 
         self.queued_message_sender = QueuedMessageSender(student_repository=self.student_repository,
                                                          message_repository=self.message_repository,
                                                          sender=self.sender)
+        """Accesses the message queue and uses sender to send messages"""
 
         # Objects in charge of storing change in status
         # after sent. Should be a list of InvitationStatusRepository
@@ -147,13 +148,6 @@ class SkaaMessenger:
                     # dev CAN-81 This is where we inject the queue
                     self.message_repository.add_to_queue(self.activity_inviting_to_complete, self.unit.unit_number, **message_data)
                     # m = self.sender.send( **message_data )
-
-                    # todo Decide whether to keep the logging on the sender.send method or add the following here so all outgoing messages are written to file. NB, if uncomment this, will need to change to use to call class method
-                    # self.logger.write(m)
-
-                    # messages.append( m )
-                    # self.update_status( message_data )
-
                 else:
                     # For test runs
                     messages.append( message_data )
@@ -183,6 +177,7 @@ class SkaaMessenger:
         self.queued_message_sender.send_all(send=send)
 
         # print(devstuff)
+
         # Returns for testing / auditing
         return messages
 
